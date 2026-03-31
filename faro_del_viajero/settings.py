@@ -13,9 +13,13 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import sys
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Cargar variables de entorno
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 #Buscar carpetas dentro de la carpeta de 'apps'
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -65,7 +69,7 @@ ROOT_URLCONF = 'faro_del_viajero.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -85,11 +89,14 @@ WSGI_APPLICATION = 'faro_del_viajero.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'faro_viajero_db'),
+        'USER': os.environ.get('DB_USER', 'faro_user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''), # Toma el password de tu .env
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -126,3 +133,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Le indicamos a Django que el CustomUser vive en la app "autenticado"
+AUTH_USER_MODEL = 'autenticado.CustomUser'
