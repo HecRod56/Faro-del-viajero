@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row g-0" style="min-height: calc(100-vh - 70px);">
+        <div class="col-md-6 position-relative d-none d-md-block" style="background: url('https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;">
+            <div class="position-absolute bottom-0 start-0 p-5 text-white bg-dark bg-opacity-25 w-100">
+                <h1 class="display-4 fw-bold">Descubre México.</h1>
+                <p class="lead">Tus itinerarios y compañeros de viaje te están esperando.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 d-flex align-items-center justify-content-center bg-white p-5">
+            <div class="w-100" style="max-width: 400px;">
+                <div class="text-center mb-4">
+                    <img src="{% static 'core/img/logo.png' %}" alt="Logo" width="60" class="mb-3" style="filter: brightness(1) invert(0); opacity: 0.8;">
+                    <h2 class="fw-bold" style="color: var(--faro-green);">¡Bienvenido de nuevo!</h2>
+                </div>
+                
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Correo electrónico *</label>
+                        <input type="email" class="form-control form-control-lg" placeholder="nombre@ejemplo.com">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Contraseña *</label>
+                        <input type="password" class="form-control form-control-lg" placeholder="••••••">
+                    </div>
+                    <button type="submit" class="btn btn-faro-auth w-100 py-3 mb-3">INICIAR SESIÓN</button>
+                    
+                    <div class="d-flex justify-content-between small">
+                        <a href="#" class="text-decoration-none text-muted">¿Sin cuenta?</a>
+                        <a href="#" class="text-decoration-none text-muted">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.http import HttpResponse # <-- Agrega esta importación
 
 from apps.autenticado.views import register_view, login_view, profile_view, forgot_password_view
@@ -28,7 +28,7 @@ def home_temporal(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_temporal, name='home'),  # <-- ¡ESTO SALVA AL base.html!
-    
+    path('', include('core.urls')), #CONEXIÓN DE RAIZ CON LA APP
     path('registro/', register_view, name='register'), # http://127.0.0.1:8000/registro/
     path('login/', login_view, name='login'),
     path('recuperar/', forgot_password_view, name='forgot_password'), 

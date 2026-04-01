@@ -3,12 +3,30 @@ venv/
 ENV/
 env/
 
-# Python
+# Archivos de Python
 *.pyc
 __pycache__/
+
+# Base de datos por defecto
 db.sqlite3
 
-# Archivos de sistema/IDE
+# Archivos de sistema / IDE
 .DS_Store
 .vscode/
 .idea/
+
+# Variables de entorno
+.env
+
+# Archivos de logs y migraciones locales (opcional)
+*.log
+*.pot
+*.py[cod]
+*.swp
+*.swo
+
+# Carpeta de media (si la usas para subir archivos localmente)
+media/
+
+# Carpeta estática generada (opcional si no quieres versionar staticfiles)
+staticfiles/
