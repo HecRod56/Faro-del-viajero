@@ -1,0 +1,197 @@
+/* ==========================================
+   :root - Variables globales
+   ========================================== */
+:root {
+    /* 🎯 Colores principales */
+    --color-primary: #0E9E8E;        /* Teal */
+    --color-primary-hover: #0c8779;
+
+    --color-heading: #1A2E35;        /* Dark navy */
+    --color-text: #2D2D2D;
+    --color-text-secondary: #666666;
+
+    --color-info: #1A3A5C;           /* Navy */
+    --color-success: #27AE60;
+    --color-danger: #C0392B;
+    --color-warning: #D4A017;
+
+    --color-bg: #F2F2F2;
+    --color-white: #FFFFFF;
+
+    --color-disabled-bg: #CCCCCC;
+    --color-disabled-text: #999999;
+
+    /* Tipografía */
+    --font-family-base: 'Montserrat', sans-serif;
+    --font-size-h1: 28px;
+    --font-size-h2: 22px;
+    --font-size-h3: 18px;
+    --font-size-body: 16px;
+    --font-size-small: 14px;
+
+    --font-weight-regular: 400;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Botones */
+    --btn-radius: 24px;
+    --transition: all 0.3s ease;
+
+    /* Navbar */
+    --navbar-bg: var(--color-primary);
+}
+
+/* ==========================================
+   Body
+   ========================================== */
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    margin: 0;
+}
+
+/* ==========================================
+   Encabezados
+   ========================================== */
+h1 {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+h2 {
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+}
+
+h3 {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+}
+
+/* ==========================================
+   Texto secundario
+   ========================================== */
+p, span, small {
+    font-size: var(--font-size-body);
+    color: var(--color-text);
+}
+
+.text-secondary-custom {
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   Navbar
+   ========================================== */
+.navbar-faro {
+    background-color: var(--navbar-bg);
+    padding: 0.8rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: var(--font-weight-semibold);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-link-faro {
+    color: var(--color-white) !important;
+    font-weight: var(--font-weight-semibold);
+    margin-right: 1.5rem;
+}
+
+.nav-link-faro:hover {
+    opacity: 0.8;
+}
+
+/* ==========================================
+   Footer
+   ========================================== */
+footer {
+    background-color: var(--color-white);
+    border-top: 1px solid #dee2e6;
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+/* ==========================================
+   Botones
+   ========================================== */
+/* Primario: Guardar, Crear, Confirmar */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--btn-radius);
+    padding: 8px 25px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family-base);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
+
+.btn-primary:disabled {
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+}
+
+/* Secundario: Cancelar, Volver, Editar */
+.btn-secondary {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--btn-radius);
+    padding: 8px 25px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family-base);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn-secondary:disabled {
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+}
+
+/* Destructivo: Eliminar, Abandonar */
+.btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--btn-radius);
+    padding: 8px 25px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family-base);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #a83227;
+}
+
+.btn-danger:disabled {
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+}
