@@ -16,20 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from apps.gestion_viajes.views import pagina_inicio
+from apps.gestion_viajes.views import pagina_inicio, pagina_crear_viaje, pagina_ver_mis_viajes, pagina_viajes_planeados
 from django.shortcuts import render
 from django.http import HttpResponse
 
 def home_temporal(request): #pantalla a conectar en el futuro
-    return render(request, 'gestion_viajes/pagina_inicio.html')
+    return render(request, 'gestion_viajes/inicio.html')
 
 def profile_temp(request): #pantalla a conectar en el futuro
-    return render(request, 'gestion_viajes/pagina_inicio.html')
+    return render(request, 'gestion_viajes/inicio.html')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_temporal, name='home'),
     path('',profile_temp, name='profile'),
     path('', include('core.urls')),
-    path('pagina_inicio/', pagina_inicio, name='pagina_inicio'),
+    path('inicio/', pagina_inicio, name='p_inicio'),
+    path('crear_viaje/', pagina_crear_viaje, name='p_crear_viaje'),
+    path('ver_mis_viajes/', pagina_ver_mis_viajes,name='p_ver_mis_viajes'), 
+    path('viajes_planeados/', pagina_viajes_planeados, name='p_viajes_planeados'),
 ]
