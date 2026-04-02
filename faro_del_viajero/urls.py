@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     #CONEXIÓN DE RAIZ CON LA APP
     path('', include('core.urls')),
+    path('', include('integrantes.urls')),
 ]
