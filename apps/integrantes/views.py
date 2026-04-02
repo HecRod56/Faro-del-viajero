@@ -26,7 +26,11 @@ def integrantes_viaje_mock(request, id_viaje):
         "imagen": "https://images.unsplash.com/photo-1582719508461-905c673771fd"
     }
 
-    return render(request, "viajes/revisar_lista.html", {
+    usuario = {
+        
+    }
+
+    return render(request, "integrantes/revisar_lista.html", {
         "viaje": viaje,
         "integrantes": integrantes
     })

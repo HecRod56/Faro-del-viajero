@@ -1,4 +1,9 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block %}
+<link rel="stylesheet" href="{% static 'integrantes/lista.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -9,7 +14,9 @@
 
     <span>{{ viaje.cupos_ocupados }}/{{ viaje.cupos_totales }}</span>
 
-    <img src="{{ viaje.imagen }}" ...>
+    <img src="{{ viaje.imagen }}"
+        class="img-fluid rounded-4 w-100"
+        style="height: 160px; object-fit: cover;">
 
     <span class="badge bg-light text-dark">
         {{ viaje.estado }}
