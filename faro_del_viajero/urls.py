@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse # <-- Agrega esta importación
 
-from apps.autenticado.views import register_view, login_view, profile_view, forgot_password_view
+from apps.autenticado.views import register, login_view, profile_view, forgot_password_view
 
 # Creamos una vista falsa rapidísima solo para que el base.html no se rompa
 def home_temporal(request):
@@ -29,7 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_temporal, name='home'),  # <-- ¡ESTO SALVA AL base.html!
     path('', include('core.urls')), #CONEXIÓN DE RAIZ CON LA APP
-    path('registro/', register_view, name='register'), # http://127.0.0.1:8000/registro/
+    path('registro/', register, name='register'), # http://127.0.0.1:8000/registro/
     path('login/', login_view, name='login'),
     path('recuperar/', forgot_password_view, name='forgot_password'), 
     path('perfil/', profile_view, name='profile'),

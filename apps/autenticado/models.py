@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
     profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = []
 
     # Solución al choque de nombres (Error E304)
     groups = models.ManyToManyField(

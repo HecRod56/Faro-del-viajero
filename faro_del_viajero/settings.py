@@ -50,11 +50,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #APPS PROYECTO FARO_DEL_VIAJERO
-    'core',
-    'autenticado',
+    'apps.core',
+    'apps.autenticado',
     'gestion_viajes',
     'integrantes',
-]
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
