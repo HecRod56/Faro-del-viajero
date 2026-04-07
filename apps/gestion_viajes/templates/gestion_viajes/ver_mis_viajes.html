@@ -1,212 +1,196 @@
-{%extends "core/base.html"%}
-{%block content%}
+{% extends "core/base.html" %}
+{% block content %}
 <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #E5E7EB;
-            padding-top: 80px;
-            color: #374151;
-        }
-        .card-gradient-1 { background: linear-gradient(180deg, #149B7E 0%, #D9DF5B 100%); }
-        .card-gradient-2 { background: linear-gradient(180deg, #5EEAD4 0%, #134E4A 100%); }
-        .card-gradient-3 { background: linear-gradient(180deg, #A855F7 0%, #FB923C 100%); }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #E5E7EB;
+        padding-top: 80px;
+        color: #374151;
+    }
+    /* Gradientes para las tarjetas */
+    .card-gradient-1 { background: linear-gradient(180deg, #149B7E 0%, #D9DF5B 100%); }
+    .card-gradient-2 { background: linear-gradient(180deg, #5EEAD4 0%, #134E4A 100%); }
+    .card-gradient-3 { background: linear-gradient(180deg, #A855F7 0%, #FB923C 100%); }
 
-        .trip-card {
-            background: white;
-            border-radius: 2rem;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-            transition: transform 0.2s ease;
-        }
-        .trip-card:hover {
-            transform: scale(1.02);
-        }
-        .trip-card.en-curso {
-            border: 2px solid #bbf7d0;
-        }
-        .trip-card.finalizado {
-            filter: grayscale(0.5);
-        }
+    .trip-card {
+        background: white;
+        border-radius: 2rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        transition: transform 0.2s ease;
+        height: 100%; /* Para que todas midan lo mismo */
+    }
+    .trip-card:hover {
+        transform: scale(1.02);
+    }
+    .trip-card.en-curso {
+        border: 2px solid #bbf7d0;
+    }
+    .trip-card.finalizado {
+        filter: grayscale(0.5);
+    }
 
-        .card-header-band {
-            height: 192px;
-            padding: 1.5rem;
-            position: relative;
-        }
-        .card-header-band h2 {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 1.5rem;
-            color: white;
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0;
-        }
+    .card-header-band {
+        height: 192px;
+        padding: 1.5rem;
+        position: relative;
+    }
+    .card-header-band h2 {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
 
-        .badge-status {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: white;
-            padding: 0.2rem 1rem;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        }
+    .badge-status {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: white;
+        padding: 0.2rem 1rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
 
-        .avatar-stack {
-            display: flex;
-        }
-        .avatar-stack .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            color: white;
-            margin-left: -8px;
-        }
-        .avatar-stack .avatar:first-child {
-            margin-left: 0;
-        }
+    .avatar-stack {
+        display: flex;
+    }
+    .avatar-stack .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: white;
+        margin-left: -8px;
+    }
+    .avatar-stack .avatar:first-child {
+        margin-left: 0;
+    }
 
-        .btn-teal {
-            background-color: #149B7E;
-            color: white;
-            border-radius: 999px;
-            font-weight: 700;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: background-color 0.2s;
-        }
-        .btn-teal:hover {
-            background-color: #0f7d65;
-            color: white;
-        }
+    .btn-teal {
+        background-color: #149B7E;
+        color: white;
+        border-radius: 999px;
+        font-weight: 700;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: background-color 0.2s;
+        text-decoration: none;
+    }
+    .btn-teal:hover {
+        background-color: #0f7d65;
+        color: white;
+    }
 
-        .filter-btn {
-            border-radius: 999px;
-            padding: 0.4rem 2rem;
-            font-weight: 500;
-            border: 1px solid #d1d5db;
-            background: white;
-            color: #374151;
-            transition: background-color 0.2s;
-            white-space: nowrap;
-        }
-        .filter-btn:hover {
-            background-color: #f9fafb;
-        }
-        .filter-btn.active {
-            background-color: #149B7E;
-            color: white;
-            border-color: #149B7E;
-        }
+    .filter-btn {
+        border-radius: 999px;
+        padding: 0.4rem 2rem;
+        font-weight: 500;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #374151;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+    }
+    .filter-btn:hover {
+        background-color: #f9fafb;
+    }
+    .filter-btn.active {
+        background-color: #149B7E;
+        color: white;
+        border-color: #149B7E;
+    }
 
-        .text-blue-900 { color: #1e3a8a; }
-        .text-yellow-600 { color: #ca8a04; }
-        .text-green-600 { color: #16a34a; }
-    </style>
+    .text-blue-900 { color: #1e3a8a; }
+    .text-yellow-600 { color: #ca8a04; }
+    .text-green-600 { color: #16a34a; }
+</style>
 
-    <div class="container py-4 px-3">
+<div class="container py-4 px-3">
 
-        <p class="text-muted mb-1" style="font-size: 0.875rem;">Mis viajes</p>
+    <p class="text-muted mb-1" style="font-size: 0.875rem;">Mis viajes</p>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold mb-0" style="font-size: 2.25rem; color: #374151;">Mis viajes</h1>
-            <button class="btn btn-teal">+ Crear nuevo viaje</button>
-        </div>
-
-        <!-- Filtros -->
-        <div class="d-flex gap-2 mb-5 overflow-auto pb-2 flex-nowrap">
-            <button class="filter-btn active">Todos</button>
-            <button class="filter-btn">Planeados</button>
-            <button class="filter-btn">En curso</button>
-            <button class="filter-btn">Finalizados</button>
-        </div>
-
-        <!-- Cards -->
-        <div class="row g-4">
-
-            <!-- Cancún -->
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="trip-card">
-                    <div class="card-header-band card-gradient-1">
-                        <span class="badge-status" style="color: #ca8a04;">● Planeado</span>
-                        <h2>Cancún, Q. Roo</h2>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="fw-bold text-blue-900 mb-1" style="font-size: 1.1rem;">Viaje a Cancún</h3>
-                        <p class="text-muted mb-3" style="font-size: 0.875rem;">📅 15-20 Mar 2026</p>
-                        <hr class="mb-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-stack">
-                                <div class="avatar" style="background:#14b8a6;">J</div>
-                                <div class="avatar" style="background:#f97316;">A</div>
-                                <div class="avatar" style="background:#a855f7;">C</div>
-                                <div class="avatar" style="background:#1e3a8a;">+</div>
-                            </div>
-                            <span class="fw-bold text-blue-900 ms-2 me-auto" style="font-size: 0.75rem;">6 personas</span>
-                            <span class="fw-bold text-yellow-600" style="font-size: 0.75rem;">Planeado</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Oaxaca -->
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="trip-card en-curso">
-                    <div class="card-header-band card-gradient-2">
-                        <span class="badge-status text-green-600">● En curso</span>
-                        <h2>Oaxaca, Oax.</h2>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="fw-bold text-blue-900 mb-1" style="font-size: 1.1rem;">Viaje a Oaxaca</h3>
-                        <p class="text-muted mb-3" style="font-size: 0.875rem;">📅 5-8 Abr 2026</p>
-                        <hr class="mb-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-stack">
-                                <div class="avatar" style="background:#16a34a;">M</div>
-                                <div class="avatar" style="background:#ef4444;">R</div>
-                                <div class="avatar" style="background:#eab308;">D</div>
-                            </div>
-                            <span class="fw-bold text-blue-900 ms-2 me-auto" style="font-size: 0.75rem;">4 personas</span>
-                            <span class="fw-bold text-green-600" style="font-size: 0.75rem;">En curso</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Baja California Sur -->
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="trip-card finalizado">
-                    <div class="card-header-band card-gradient-3">
-                        <span class="badge-status text-muted">● Finalizado</span>
-                        <h2>B.C.S., La Paz</h2>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="fw-bold text-blue-900 mb-1" style="font-size: 1.1rem;">Viaje a Baja California Sur</h3>
-                        <p class="text-muted mb-3" style="font-size: 0.875rem;">📅 12-16 Ene 2026</p>
-                        <hr class="mb-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-stack">
-                                <div class="avatar" style="background:#1f2937;">E</div>
-                                <div class="avatar" style="background:#115e59;">L</div>
-                                <div class="avatar" style="background:#1e40af;">N</div>
-                            </div>
-                            <span class="fw-bold text-blue-900 ms-2 me-auto" style="font-size: 0.75rem;">3 personas</span>
-                            <span class="fw-bold text-muted" style="font-size: 0.75rem;">Finalizado</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold mb-0" style="font-size: 2.25rem; color: #374151;">Mis viajes</h1>
+        <a href="{% url 'p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear nuevo viaje</a>
     </div>
-{%endblock%}
+
+    <div class="d-flex gap-2 mb-5 overflow-auto pb-2 flex-nowrap">
+        <button class="filter-btn active">Todos</button>
+        <button class="filter-btn">Planeados</button>
+        <button class="filter-btn">En curso</button>
+        <button class="filter-btn">Finalizados</button>
+    </div>
+
+    <div class="row g-4">
+
+        {% for viaje in viajes %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="trip-card {% if viaje.estado == 'en curso' %}en-curso{% elif viaje.estado == 'finalizado' %}finalizado{% endif %}">
+                
+                <div class="card-header-band {% if viaje.estado == 'en curso' %}card-gradient-2{% elif viaje.estado == 'finalizado' %}card-gradient-3{% else %}card-gradient-1{% endif %}">
+                    
+                    <span class="badge-status">
+                        {% if viaje.estado == 'planeado' %}
+                            <span class="text-yellow-600">● Planeado</span>
+                        {% elif viaje.estado == 'en curso' %}
+                            <span class="text-green-600">● En curso</span>
+                        {% else %}
+                            <span class="text-muted">● Finalizado</span>
+                        {% endif %}
+                    </span>
+                    
+                    <h2>{{ viaje.destino }}</h2>
+                </div>
+
+                <div class="p-4">
+                    <h3 class="fw-bold text-blue-900 mb-1" style="font-size: 1.1rem;">{{ viaje.nombre }}</h3>
+                    <p class="text-muted mb-3" style="font-size: 0.875rem;">
+                        📅 {{ viaje.fecha_inicio|date:"d M" }} - {{ viaje.fecha_fin|date:"d M Y" }}
+                    </p>
+                    <hr class="mb-3">
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-stack">
+                            <div class="avatar" style="background:#149B7E;">{{ viaje.nombre|slice:":1" }}</div>
+                            <div class="avatar" style="background:#f97316;">+</div>
+                        </div>
+                        <span class="fw-bold text-blue-900 ms-2 me-auto" style="font-size: 0.75rem;">
+                            Máx: {{ viaje.capacidad_max }} pers.
+                        </span>
+                        
+                        <span class="fw-bold 
+                            {% if viaje.estado == 'planeado' %}text-yellow-600
+                            {% elif viaje.estado == 'en curso' %}text-green-600
+                            {% else %}text-muted{% endif %}" 
+                            style="font-size: 0.75rem; text-transform: capitalize;">
+                            {{ viaje.estado }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="bg-white p-5 rounded-4 shadow-sm">
+                <h3 class="fw-bold text-muted">Aún no tienes viajes registrados</h3>
+                <p class="text-muted mb-4">Comienza a planear tu próxima aventura ahora mismo.</p>
+                <a href="{% url 'p_crear_viaje' %}" class="btn-teal">+ Crear mi primer viaje</a>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}
