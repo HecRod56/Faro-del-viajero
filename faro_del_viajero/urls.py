@@ -14,25 +14,25 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
-from apps.gestion_viajes.views import pagina_inicio, pagina_crear_viaje, pagina_ver_mis_viajes, pagina_viajes_planeados
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse # <-- Agrega esta importación
 
-def home_temporal(request): #pantalla a conectar en el futuro
-    return render(request, 'gestion_viajes/inicio.html')
+from apps.autenticado.views import register, login_view, profile_view, forgot_password_view
 
-def profile_temp(request): #pantalla a conectar en el futuro
-    return render(request, 'gestion_viajes/inicio.html')
+# Creamos una vista falsa rapidísima solo para que el base.html no se rompa
+def home_temporal(request):
+    return HttpResponse("<h1>Inicio de Faro del Viajero</h1> <a href='/login/'>Ir al Login</a>")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_temporal, name='home'),
-    path('',profile_temp, name='profile'),
+    #CONEXIÓN DE RAIZ CON LA APP
     path('', include('core.urls')),
-    path('inicio/', pagina_inicio, name='p_inicio'),
-    path('crear_viaje/', pagina_crear_viaje, name='p_crear_viaje'),
-    path('ver_mis_viajes/', pagina_ver_mis_viajes,name='p_ver_mis_viajes'), 
-    path('viajes_planeados/', pagina_viajes_planeados, name='p_viajes_planeados'),
+    path('', include('integrantes.urls')),
+    path('', home_temporal, name='home'),  # <-- ¡ESTO SALVA AL base.html!
+    path('registro/', register, name='register'), # http://127.0.0.1:8000/registro/
+    path('login/', login_view, name='login'),
+    path('recuperar/', forgot_password_view, name='forgot_password'), 
+    path('perfil/', profile_view, name='profile'),
 ]

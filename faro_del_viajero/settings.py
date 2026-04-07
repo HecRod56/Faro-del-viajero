@@ -13,9 +13,14 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import sys
+from dotenv import load_dotenv
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Cargar variables de entorno
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 #Buscar carpetas dentro de la carpeta de 'apps'
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -24,12 +29,13 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-epn1ezq30hi0fly)=f+&88yex1e(p621vm1ddyz21rl%#b!)it'
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
 
 
@@ -44,11 +50,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #APPS PROYECTO FARO_DEL_VIAJERO
-    'core',
-    'autenticado',
+    'apps.core',
+    'apps.autenticado',
     'gestion_viajes',
     'integrantes',
-]
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,7 +71,7 @@ ROOT_URLCONF = 'faro_del_viajero.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,10 +89,27 @@ WSGI_APPLICATION = 'faro_del_viajero.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+"""
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'faro_viajero_db'),
+        'USER': os.environ.get('DB_USER', 'faro_user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''), # Toma el password de tu .env
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+    }
+}
+"""
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 
@@ -126,3 +149,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Le indicamos a Django que el CustomUser vive en la app "autenticado"
+AUTH_USER_MODEL = 'autenticado.CustomUser'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+"""
+Si tu API necesita credenciales, agrégalas al .env:
+
+    API_KEY=tu_api_key
+    API_URL=https://api.ejemplo.com
+
+En settings.py o tu app:
+
+    API_KEY = config('API_KEY')
+    API_URL = config('API_URL')
+
+Luego, puedes usarlo en tus vistas o servicios:
+
+    import requests
+    from django.conf import settings
+
+    response = requests.get(f"{settings.API_URL}/endpoint", headers={"Authorization": f"Bearer {settings.API_KEY}"})
+    data = response.json()
+"""
