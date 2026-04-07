@@ -9,5 +9,7 @@ urlpatterns = [
     path('viaje/<int:id_viaje>/integrantes/', views.integrantes_viaje, name='integrantes_viaje'),
     path("viajes/integrantes/<int:id_integrante>/eliminar/", views.eliminar_integrante_mock, name="eliminar_integrante_mock"),
     path("mock/viaje/<int:id_viaje>/integrantes/anadir/", views.anadir_integrante_mock, name="anadir_integrante_mock"),
+    path("mock/viaje/<int:id_viaje>/integrantes/abandonar/", views.abandonar_viaje_mock, name="abandonar_viaje"),
+    path("viajes/integrantes/<int:id_integrante>/asignar-organizador/", views.asignar_organizador_mock, name="asignar_organizador"),
     path('mock/viaje/<int:id_viaje>/integrantes/perfil', views.informacion_integrante, name='mock_integrantes_perfil'),
 ]

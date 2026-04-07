@@ -90,6 +90,23 @@ def anadir_integrante_mock(request, id_viaje):
     print(f"[MOCK] {usuario_nuevo['nombre']} añadido al viaje {id_viaje}")
     return redirect("integrantes:mock_integrantes_como", id_viaje=id_viaje, usuario_id=usuario_actual_id)
 
+# RF-24: Abandonar viaje
+def abandonar_viaje_mock(request, id_viaje):
+    if request.method != "POST":
+        return redirect("integrantes:mock_integrantes", id_viaje=id_viaje)
+    usuario_actual_id = int(request.POST.get("usuario_actual_id", 1))
+    print(f"[MOCK] Usuario {usuario_actual_id} abandonó el viaje {id_viaje}")
+    return redirect("integrantes:mock_integrantes", id_viaje=id_viaje)
+
+# RF-23: Asignar organizador
+def asignar_organizador_mock(request, id_integrante):
+    if request.method != "POST":
+        return redirect("integrantes:mock_integrantes", id_viaje=1)
+    id_viaje = request.POST.get("id_viaje", 1)
+    usuario_actual_id = int(request.POST.get("usuario_actual_id", 1))
+    print(f"[MOCK] Integrante {id_integrante} es ahora organizador del viaje {id_viaje}")
+    return redirect("integrantes:mock_integrantes_como", id_viaje=id_viaje, usuario_id=usuario_actual_id)
+
 def informacion_integrante(request, id_viaje):
     puntos = [
         {"x": 10, "y": 15},
