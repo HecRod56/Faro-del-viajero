@@ -89,3 +89,13 @@ def anadir_integrante_mock(request, id_viaje):
 
     print(f"[MOCK] {usuario_nuevo['nombre']} añadido al viaje {id_viaje}")
     return redirect("integrantes:mock_integrantes_como", id_viaje=id_viaje, usuario_id=usuario_actual_id)
+
+def informacion_integrante(request, id_viaje):
+    puntos = [
+        {"x": 10, "y": 15},
+        {"x": 12, "y": 18},
+        {"x": 15, "y": 20},
+        {"x": 18, "y": 25},
+    ]
+    
+    return render(request, "integrantes/visualizar_perfil.html", {"puntos": puntos})
