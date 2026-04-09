@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect # Importamos redirect para navegar tras guardar
 from .models import Viaje # Importamos tu modelo para escribir en Postgres
-
+from django.shortcuts import render, get_object_or_404
 # 1. Página de inicio del módulo
 def pagina_inicio(request):
     return render(request, 'gestion_viajes/inicio.html')
@@ -36,10 +36,29 @@ def pagina_crear_viaje(request):
 
 # 3. Vista para ver todos los viajes registrados
 def pagina_ver_mis_viajes(request):
-    viajes_db = Viaje.objects.all() # Consultamos la tabla de Postgres
-    return render(request, 'gestion_viajes/ver_mis_viajes.html', {'viajes': viajes_db})
+    # Obtenemos el estado desde la URL (ej: ?estado=planeado)
+    estado_filtro = request.GET.get('estado')
+    
+    if estado_filtro:
+        # Filtramos los viajes por ese estado
+        viajes_db = Viaje.objects.filter(estado=estado_filtro)
+    else:
+        # Si no hay filtro, mostramos todos
+        viajes_db = Viaje.objects.all()
+        
+    return render(request, 'gestion_viajes/ver_mis_viajes.html', {
+        'viajes': viajes_db,
+        'filtro_actual': estado_filtro  # Pasamos esto para saber qué botón iluminar
+    })
 
 # 4. Vista para ver solo los viajes con estado 'planeado'
 def pagina_viajes_planeados(request):
     viajes_p = Viaje.objects.filter(estado='planeado')
     return render(request, 'gestion_viajes/viajes_planeados.html', {'viajes': viajes_p})
+
+# 5. Vista para mostrar el detalle de un viaje específico
+def pagina_detalle_viaje(request, viaje_id):
+    # Cambia status_404 por 404 a secas
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+    
+    return render(request, 'gestion_viajes/detalle_viaje.html', {'viaje': viaje})

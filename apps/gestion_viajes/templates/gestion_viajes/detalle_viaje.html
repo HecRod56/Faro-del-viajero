@@ -1,0 +1,175 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+    <style>
+        :root {
+            --teal: #149B7E;
+            --teal-light: #EBFBFA;
+            --teal-border: #b2e8e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F3F4F6;
+            color: #1e293b;
+            padding-top: 80px;
+        }
+
+        /* Reutilizando tus clases de tarjetas y formularios */
+        .section-card {
+            background-color: #fff;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #E5E7EB;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--teal);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-link {
+            color: var(--teal);
+            text-decoration: underline;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .map-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .map-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #F3F4F6;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .map-placeholder {
+            background-color: var(--teal-light);
+            border-radius: 1rem;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .teal-text { color: var(--teal); }
+
+        .btn-cancel {
+            border: 2px solid #D1D5DB;
+            border-radius: 999px;
+            color: #4B5563;
+            font-weight: 700;
+            padding: 0.4rem 2rem;
+            background: transparent;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-cancel:hover { background-color: #f3f4f6; }
+
+        .price-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+    </style>
+
+    <div class="container py-4 px-3">
+        <nav class="mb-3">
+            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
+            <span class="text-muted mx-1">&gt;</span>
+            <span class="text-muted" style="font-size:0.75rem;">Detalle del viaje</span>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold fs-3 mb-1" style="color:#0f172a;">{{ viaje.nombre }}</h1>
+                <span class="badge rounded-pill {% if viaje.estado == 'planeado' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size: 0.7rem;">
+                    {{ viaje.estado|upper }}
+                </span>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Regresar</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="section-card">
+                    <p class="section-label">Descripción y Destino</p>
+                    <h5 class="fw-bold mb-3">📍 {{ viaje.destino }}</h5>
+                    <p class="text-muted" style="line-height: 1.7;">
+                        {% if viaje.descripcion %}
+                            {{ viaje.descripcion }}
+                        {% else %}
+                            No hay una descripción detallada para este viaje todavía.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="section-card">
+                    <p class="section-label">Fechas del Viaje</p>
+                    <div class="row text-center">
+                        <div class="col-5">
+                            <p class="text-muted small mb-1">SALIDA</p>
+                            <p class="fw-bold fs-5 mb-0">{{ viaje.fecha_inicio|date:"d M Y" }}</p>
+                        </div>
+                        <div class="col-2 d-flex align-items-center justify-content-center teal-text">
+                            <i class="fs-4">→</i>
+                        </div>
+                        <div class="col-5">
+                            <p class="text-muted small mb-1">REGRESO</p>
+                            <p class="fw-bold fs-5 mb-0">{{ viaje.fecha_fin|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="section-card">
+                    <p class="section-label">Presupuesto Estimado</p>
+                    <div class="d-flex align-items-baseline gap-1">
+                        <span class="teal-text fw-bold fs-4">$</span>
+                        <span class="price-display">{{ viaje.presupuesto_estimado|default:"0.00" }}</span>
+                    </div>
+                    <p class="text-muted small">Pesos Mexicanos (MXN)</p>
+                </div>
+
+                <div class="map-card">
+                    <div class="map-card-header">
+                        <span class="teal-text">🗺️</span>
+                        <span>Ubicación en el mapa</span>
+                    </div>
+                    <div class="p-3">
+                        <div class="map-placeholder">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Mexico_blank_map.svg"
+                                 class="w-75 opacity-25" alt="Mapa de México">
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <span class="text-muted small">Integrantes máx:</span>
+                            <span class="fw-bold small">{{ viaje.capacidad_max }} personas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
