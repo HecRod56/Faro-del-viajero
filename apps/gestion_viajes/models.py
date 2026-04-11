@@ -47,3 +47,24 @@ class HistorialEstado(models.Model):
 
     def __str__(self):
         return f"Cambio en {self.viaje.nombre}: {self.estado_anterior} -> {self.estado_nuevo}"
+
+class Gasto(models.Model):
+    CATEGORIAS = [
+        ('transporte', 'Transporte 🚗'),
+        ('comida', 'Comida 🍕'),
+        ('hospedaje', 'Hospedaje 🏨'),
+        ('entretenimiento', 'Entretenimiento 🎟️'),
+        ('otros', 'Otros 📦'),
+    ]
+
+    viaje = models.ForeignKey(Viaje, on_delete=models.CASCADE, related_name='gastos')
+    # Opcional: ¿Quién pagó? Referenciamos a Participante
+    pagado_por = models.ForeignKey(Participante, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    concepto = models.CharField(max_length=100)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    categoria = models.CharField(max_length=20, choices=CATEGORIAS, default='otros')
+    fecha = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.concepto} (${self.cantidad}) - {self.viaje.nombre}"
