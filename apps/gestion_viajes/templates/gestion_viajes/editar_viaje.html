@@ -1,0 +1,181 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+    <style>
+        :root {
+            --teal: #149B7E;
+            --teal-light: #EBFBFA;
+            --teal-border: #b2e8e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F3F4F6;
+            color: #1e293b;
+            padding-top: 80px;
+        }
+
+        .input-field {
+            border-radius: 0.75rem;
+            border: 1px solid #D1D5DB;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 155, 126, 0.12);
+        }
+
+        .section-card {
+            background-color: #fff;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #E5E7EB;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--teal);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+        }
+
+        .btn-cancel {
+            border: 2px solid #D1D5DB;
+            border-radius: 999px;
+            color: #4B5563;
+            font-weight: 700;
+            padding: 0.4rem 2rem;
+            background: transparent;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f3f4f6;
+        }
+
+        .btn-save {
+            background-color: var(--teal);
+            color: white;
+            border-radius: 999px;
+            font-weight: 700;
+            padding: 0.4rem 2rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .breadcrumb-link {
+            color: var(--teal);
+            text-decoration: underline;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .teal-text { color: var(--teal); }
+        label.fw-bold { font-size: 0.875rem; }
+    </style>
+
+    <div class="container py-4 px-3">
+        <nav class="mb-3">
+            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
+            <span class="text-muted mx-1">&gt;</span>
+            <span><a href="{% url 'p_detalle_viaje' viaje.id %}" class="breadcrumb-link">Detalle</a></span>
+            <span class="text-muted mx-1">&gt;</span>
+            <span class="text-muted" style="font-size:0.75rem;">Editar viaje</span>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Editar: {{ viaje.nombre }}</h1>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="section-card">
+                    <p class="section-label">Información General</p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="row g-4">
+                            <div class="col-12 col-md-8">
+                                <label class="fw-bold mb-2">Nombre del Viaje</label>
+                                <input type="text" name="nombre" class="form-control input-field" 
+                                       value="{{ viaje.nombre }}" required>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="fw-bold mb-2">Estado</label>
+                                <select name="estado" class="form-select input-field">
+                                    <option value="planeado" {% if viaje.estado == 'planeado' %}selected{% endif %}>Planeado</option>
+                                    <option value="en curso" {% if viaje.estado == 'en curso' %}selected{% endif %}>En curso</option>
+                                    <option value="finalizado" {% if viaje.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="fw-bold mb-2">Destino</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
+                                    <input type="text" name="destino" class="form-control input-field" 
+                                           style="border-radius: 0 0.75rem 0.75rem 0;"
+                                           value="{{ viaje.destino }}" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="fw-bold mb-2">Descripción</label>
+                                <textarea name="descripcion" class="form-control input-field" rows="4">{{ viaje.descripcion }}</textarea>
+                            </div>
+
+                            <p class="section-label mt-5">Logística y Presupuesto</p>
+
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-2">Fecha de Inicio</label>
+                                <input type="date" name="fecha_inicio" class="form-control input-field" 
+                                       value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-2">Fecha de Fin</label>
+                                <input type="date" name="fecha_fin" class="form-control input-field" 
+                                       value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
+                                    <input type="number" name="presupuesto_estimado" step="0.01" class="form-control input-field" 
+                                           style="border-radius: 0 0.75rem 0.75rem 0;"
+                                           value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
+                                <input type="number" name="capacidad_max" class="form-control input-field" 
+                                       value="{{ viaje.capacidad_max }}">
+                            </div>
+
+                            <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                                <a href="{% url 'p_detalle_viaje' viaje.id %}" class="btn-cancel">Cancelar</a>
+                                <button type="submit" class="btn-save">Guardar Cambios</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

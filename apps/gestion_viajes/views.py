@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect # Importamos redirect para navegar tras guardar
-from .models import Viaje # Importamos tu modelo para escribir en Postgres
+from .models import Viaje, Gasto, Participante# Importamos tu modelo para escribir en Postgres
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Sum # Importamos Sum para hacer matemáticas
+from django.contrib.auth import get_user_model # Importa esto al principio
+
 # 1. Página de inicio del módulo
 def pagina_inicio(request):
     return render(request, 'gestion_viajes/inicio.html')
@@ -58,7 +61,88 @@ def pagina_viajes_planeados(request):
 
 # 5. Vista para mostrar el detalle de un viaje específico
 def pagina_detalle_viaje(request, viaje_id):
-    # Cambia status_404 por 404 a secas
     viaje = get_object_or_404(Viaje, id=viaje_id)
     
-    return render(request, 'gestion_viajes/detalle_viaje.html', {'viaje': viaje})
+    # ESTA LÍNEA ES LA CLAVE: Trae a los amigos de la base de datos
+    participantes_list = viaje.participantes.all() 
+    
+    total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+    presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
+    
+    return render(request, 'gestion_viajes/detalle_viaje.html', {
+        'viaje': viaje,
+        'participantes': participantes_list, # <--- Verifica que diga 'participantes'
+        'total_gastado': total_gastado,
+        'presupuesto_restante': presupuesto_restante
+    })
+
+# 6. Vista para EDITAR un viaje existente
+def pagina_editar_viaje(request, viaje_id):
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+
+    if request.method == 'POST':
+        # Actualizamos los campos del objeto con lo que viene del formulario
+        viaje.nombre = request.POST.get('nombre')
+        viaje.destino = request.POST.get('destino')
+        viaje.descripcion = request.POST.get('descripcion')
+        viaje.fecha_inicio = request.POST.get('fecha_inicio')
+        viaje.fecha_fin = request.POST.get('fecha_fin')
+        viaje.capacidad_max = request.POST.get('capacidad_max')
+        viaje.presupuesto_estimado = request.POST.get('presupuesto_estimado')
+        viaje.estado = request.POST.get('estado') # Agregamos estado por si quieren cambiarlo
+        
+        viaje.save() # Guardamos los cambios en Postgres
+        return redirect('p_detalle_viaje', viaje_id=viaje.id)
+
+    # Si es GET, enviamos el objeto 'viaje' para rellenar los inputs
+    return render(request, 'gestion_viajes/editar_viaje.html', {'viaje': viaje})
+
+# 7. Vista para ELIMINAR un viaje
+def eliminar_viaje(request, viaje_id):
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+    viaje.delete() # ¡Adiós registro!
+    return redirect('p_ver_mis_viajes')
+
+# 8. Vista para registrar un nuevo gasto
+def registrar_gasto(request, viaje_id):
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+    
+    if request.method == 'POST':
+        concepto = request.POST.get('concepto')
+        cantidad = request.POST.get('cantidad')
+        categoria = request.POST.get('categoria')
+        
+        # Creamos el gasto ligado a este viaje
+        Gasto.objects.create(
+            viaje=viaje,
+            concepto=concepto,
+            cantidad=cantidad,
+            categoria=categoria
+        )
+        
+        # Regresamos a la misma página de detalle para ver el gasto reflejado
+        return redirect('p_detalle_viaje', viaje_id=viaje.id)
+    
+    return redirect('p_detalle_viaje', viaje_id=viaje.id)
+
+# 9. Vista para añadir un participante (por ahora simplificado)
+
+
+def añadir_participante(request, viaje_id):
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+    User = get_user_model() # Esto obtiene automáticamente tu CustomUser
+    
+    user = request.user
+    # Si no hay sesión iniciada, buscamos al primer usuario de tu tabla CustomUser
+    if not user.is_authenticated:
+        user = User.objects.first() 
+
+    if user: # Si encontramos un usuario (ya sea el logueado o el primero de la DB)
+        if not Participante.objects.filter(viaje=viaje, usuario=user).exists():
+            Participante.objects.create(
+                viaje=viaje,
+                usuario=user,
+                rol='integrante'
+            )
+    
+    return redirect('p_detalle_viaje', viaje_id=viaje.id)
