@@ -90,6 +90,30 @@
             font-weight: 800;
             color: #0f172a;
         }
+    .organizer-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--teal);
+            color: white;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(20, 155, 126, 0.2);
+        }
+
+        .btn-outline-teal {
+            border: 1px solid var(--teal);
+            color: var(--teal);
+            transition: all 0.2s;
+        }
+
+        .btn-outline-teal:hover {
+            background-color: var(--teal);
+            color: white;
+        }    
     </style>
 
     <div class="container py-4 px-3">
@@ -99,17 +123,28 @@
             <span class="text-muted" style="font-size:0.75rem;">Detalle del viaje</span>
         </nav>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="fw-bold fs-3 mb-1" style="color:#0f172a;">{{ viaje.nombre }}</h1>
-                <span class="badge rounded-pill {% if viaje.estado == 'planeado' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size: 0.7rem;">
-                    {{ viaje.estado|upper }}
-                </span>
-            </div>
-            <div class="d-flex gap-3">
-                <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Regresar</a>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="fw-bold fs-3 mb-1" style="color:#0f172a;">{{ viaje.nombre }}</h1>
+        <span class="badge rounded-pill {% if viaje.estado == 'planeado' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size: 0.7rem;">
+            {{ viaje.estado|upper }}
+        </span>
+    </div>
+    
+    <div class="d-flex gap-2">
+        <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Regresar</a>
+        
+        <a href="{% url 'p_editar_viaje' viaje.id %}" class="btn-save text-decoration-none d-inline-flex align-items-center">
+            <span class="me-2">✏️</span> Editar
+        </a>
+
+        <a href="{% url 'p_eliminar_viaje' viaje.id %}" 
+           class="btn-cancel border-danger text-danger text-decoration-none"
+           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">
+            🗑️
+        </a>
+    </div>
+</div>
 
         <div class="row g-4">
             <div class="col-12 col-lg-8">
@@ -153,7 +188,7 @@
                     <p class="text-muted small">Pesos Mexicanos (MXN)</p>
                 </div>
 
-                <div class="map-card">
+<div class="map-card mb-4">
                     <div class="map-card-header">
                         <span class="teal-text">🗺️</span>
                         <span>Ubicación en el mapa</span>
@@ -163,13 +198,121 @@
                             <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Mexico_blank_map.svg"
                                  class="w-75 opacity-25" alt="Mapa de México">
                         </div>
-                        <div class="mt-3 d-flex justify-content-between">
-                            <span class="text-muted small">Integrantes máx:</span>
-                            <span class="fw-bold small">{{ viaje.capacidad_max }} personas</span>
+                    </div>
+                </div>
+
+                    <div class="section-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <p class="section-label m-0">Integrantes</p>
+                            <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn btn-sm btn-outline-teal" style="font-size: 0.6rem; border-radius: 999px; padding: 0.2rem 0.8rem;">
+                                + Unirme
+                            </a>
                         </div>
+
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            {% for p in participantes %}
+                                <div class="organizer-avatar" title="{{ p.usuario.username }}">
+                                    {{ p.usuario.username|first|upper }}
+                                </div>
+                            {% empty %}
+                                <p class="small text-muted mb-0">No hay integrantes aún.</p>
+                            {% endfor %}
+                        </div>
+                        
+                        <hr class="my-3 opacity-10">
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Ocupación:</span>
+                            <span class="fw-bold small">{{ participantes|length }} / {{ viaje.capacidad_max }} personas</span>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3 opacity-10">
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Ocupación:</span>
+                        <span class="fw-bold small">{{ viaje.participantes.count }} / {{ viaje.capacidad_max }} personas</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row mb-4">
+    <div class="col-md-4">
+        <div class="section-card text-center py-3">
+            <p class="section-label mb-1">Presupuesto Inicial</p>
+            <h4 class="fw-bold mb-0">${{ viaje.presupuesto_estimado }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="section-card text-center py-3 border-danger">
+            <p class="section-label mb-1 text-danger">Total Gastado</p>
+            <h4 class="fw-bold mb-0 text-danger">-${{ total_gastado }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="section-card text-center py-3 {% if presupuesto_restante < 0 %}border-danger bg-danger-subtle{% else %}border-success{% endif %}">
+            <p class="section-label mb-1 {% if presupuesto_restante < 0 %}text-danger{% else %}text-success{% endif %}">Disponible</p>
+            <h4 class="fw-bold mb-0 {% if presupuesto_restante < 0 %}text-danger{% else %}text-success{% endif %}">
+                ${{ presupuesto_restante }}
+            </h4>
+        </div>
+    </div>
+</div>
+
+    <div class="section-card mt-4">
+    <p class="section-label">Añadir Gasto Rápido</p>
+    <form action="{% url 'p_registrar_gasto' viaje.id %}" method="POST" class="row g-3">
+        {% csrf_token %}
+        <div class="col-12 col-md-5">
+            <input type="text" name="concepto" class="form-control input-field" placeholder="¿En qué gastaste?" required>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
+                <input type="number" name="cantidad" step="0.01" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" placeholder="0.00" required>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <select name="categoria" class="form-select input-field">
+                <option value="comida">🍕 Comida</option>
+                <option value="transporte">🚗 Transporte</option>
+                <option value="hospedaje">🏨 Hospedaje</option>
+                <option value="entretenimiento">🎟️ Entretenimiento</option>
+                <option value="otros">📦 Otros</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-1">
+            <button type="submit" class="btn-save w-100" style="padding: 0.6rem 0;">+</button>
+        </div>
+    </form>
+</div>
+<div class="section-card mt-4">
+    <p class="section-label">Gastos Registrados</p>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="small fw-bold">CONCEPTO</th>
+                    <th class="small fw-bold">CATEGORÍA</th>
+                    <th class="small fw-bold text-end">CANTIDAD</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in viaje.gastos.all %}
+                <tr>
+                    <td>{{ gasto.concepto }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ gasto.get_categoria_display }}</span></td>
+                    <td class="text-end fw-bold text-danger">-${{ gasto.cantidad }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-4">Aún no hay gastos registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
