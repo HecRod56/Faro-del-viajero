@@ -68,13 +68,47 @@ def pagina_detalle_viaje(request, viaje_id):
     
     total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
     presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
-    
+
+    # Se estima la duracion del viaje en dias 
+    duracion = duracion_viaje((viaje.fecha_fin-viaje.fecha_inicio).days)
+
+    # Logica para la barra del presupuesto gastado
+    total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
+    presupuesto_restante = viaje.presupuesto_estimado - total_gastado
+
+    if viaje.presupuesto_estimado and viaje.presupuesto_estimado > 0:
+        porcentaje_gastado = (total_gastado / viaje.presupuesto_estimado) * 100
+        porcentaje_gastado = min(porcentaje_gastado, 100)  # tope en 100%
+    else:
+        porcentaje_gastado = 0
+
+   
+
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
         'participantes': participantes_list, # <--- Verifica que diga 'participantes'
         'total_gastado': total_gastado,
-        'presupuesto_restante': presupuesto_restante
+        'presupuesto_restante': presupuesto_restante,
+        'duracion_viaje_dias': duracion, 
+        'porcentaje_gastado': porcentaje_gastado
     })
+
+#5.1 Calculo de la duracion de un viaje 
+def duracion_viaje(dias):
+    def plural(valor, singular, plural):
+        return f"{valor} {singular if valor == 1 else plural}"
+    anos, resto = divmod(dias, 365)
+    meses, dias_restantes = divmod(resto, 30)
+
+    partes = []
+    if anos:
+        partes.append(plural(anos, "año", "años"))
+    if meses:
+        partes.append(plural(meses, "mes", "meses"))
+    if dias_restantes or not partes:  # asegura que algo se muestre
+        partes.append(plural(dias_restantes, "día", "días"))
+
+    return ", ".join(partes) 
 
 # 6. Vista para EDITAR un viaje existente
 def pagina_editar_viaje(request, viaje_id):
@@ -146,3 +180,7 @@ def añadir_participante(request, viaje_id):
             )
     
     return redirect('p_detalle_viaje', viaje_id=viaje.id)
+
+
+
+
