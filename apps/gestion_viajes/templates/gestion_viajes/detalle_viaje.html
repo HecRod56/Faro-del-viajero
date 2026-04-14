@@ -2,317 +2,601 @@
 {% load static %}
 
 {% block content %}
-    <style>
-        :root {
-            --teal: #149B7E;
-            --teal-light: #EBFBFA;
-            --teal-border: #b2e8e0;
-        }
+<style>
+    :root {
+        --teal: #149B7E;
+        --teal-light: #EBFBFA;
+        --teal-border: #b2e8e0;
+    }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #F3F4F6;
-            color: #1e293b;
-            padding-top: 80px;
-        }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #F3F4F6;
+        color: #1e293b;
+        padding-top: 80px;
+    }
 
-        /* Reutilizando tus clases de tarjetas y formularios */
-        .section-card {
-            background-color: #fff;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            border: 1px solid #E5E7EB;
-            margin-bottom: 1.5rem;
-        }
+    /* ── Hero ── */
+    .hero-wrapper {
+        width: 100%;
+        position: relative;
+        height: 150px;
+        padding: 0 1.5rem;
+        box-sizing: border-box;
+        background-color: #F3F4F6;
+        margin-top: 10px;
+    }
 
-        .section-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--teal);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            margin-bottom: 1rem;
-        }
+    .hero-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 1.25rem;
+    }
 
-        .breadcrumb-link {
-            color: var(--teal);
-            text-decoration: underline;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
+    .status-pill {
+        position: absolute;
+        top: 14px;
+        right: 34px;
+        background: white;
+        border-radius: 999px;
+        padding: 4px 14px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--teal);
+        border: 1.5px solid var(--teal-border);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-        .map-card {
-            background: white;
-            border-radius: 1.5rem;
-            border: 1px solid #E5E7EB;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--teal);
+        display: inline-block;
+    }
 
-        .map-card-header {
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid #F3F4F6;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 700;
-        }
+    /* ── Layout ── */
+    .page-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem 1.5rem 3rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
+    }
 
-        .map-placeholder {
-            background-color: var(--teal-light);
-            border-radius: 1rem;
-            height: 350px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .col-left  { grid-column: 1; display: flex; flex-direction: column; gap: 1rem; }
+    .col-right { grid-column: 2; display: flex; flex-direction: column; gap: 1rem; }
+    .full-width { grid-column: 1 / -1; }
 
-        .teal-text { color: var(--teal); }
+    @media (max-width: 700px) {
+        .page-content { grid-template-columns: 1fr; }
+        .col-left, .col-right, .full-width { grid-column: 1; }
+    }
 
-        .btn-cancel {
-            border: 2px solid #D1D5DB;
-            border-radius: 999px;
-            color: #4B5563;
-            font-weight: 700;
-            padding: 0.4rem 2rem;
-            background: transparent;
-            transition: background 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
+    /* ── Cards ── */
+    .section-card {
+        background-color: #fff;
+        border-radius: 1.25rem;
+        border: 1px solid #E5E7EB;
+        overflow: hidden;
+    }
 
-        .btn-cancel:hover { background-color: #f3f4f6; }
+    .card-body {
+        padding: 1.25rem 1.5rem;
+    }
 
-        .price-display {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
+    .card-divider {
+        border: none;
+        border-top: 1px solid #6d6d6d;
+        margin: 0;
+    }
+
+    .section-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: var(--teal);
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        margin: 0 0 0.6rem 0;
+    }
+
+    /* ── Metadatos ── */
+    .meta-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #4B5563;
+        margin-bottom: 0.7rem;
+    }
+
+    .meta-icon {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+        width: 18px;
+        text-align: center;
+        margin-top: 1px;
+    }
+
+    .meta-label {
+        color: #9CA3AF;
+        font-size: 0.68rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .meta-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+
+    /* ── Avatares ── */
+    .resp-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--teal);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
     .organizer-avatar {
-            width: 40px;
-            height: 40px;
-            background-color: var(--teal);
-            color: white;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            flex-shrink: 0;
-            box-shadow: 0 2px 4px rgba(20, 155, 126, 0.2);
-        }
+        width: 34px;
+        height: 34px;
+        background-color: var(--teal);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        border: 2px solid white;
+        margin-left: -7px;
+    }
 
-        .btn-outline-teal {
-            border: 1px solid var(--teal);
-            color: var(--teal);
-            transition: all 0.2s;
-        }
+    .organizer-avatar:first-child { margin-left: 0; }
 
-        .btn-outline-teal:hover {
-            background-color: var(--teal);
-            color: white;
-        }    
-    </style>
+    /* ── Presupuesto ── */
+    .budget-bar-bg {
+        width: 100%;
+        height: 7px;
+        border-radius: 999px;
+        background: #E5E7EB;
+        overflow: hidden;
+        margin: 7px 0 4px;
+    }
 
-    <div class="container py-4 px-3">
-        <nav class="mb-3">
-            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
-            <span class="text-muted mx-1">&gt;</span>
-            <span class="text-muted" style="font-size:0.75rem;">Detalle del viaje</span>
-        </nav>
+    .budget-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: var(--teal);
+    }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="fw-bold fs-3 mb-1" style="color:#0f172a;">{{ viaje.nombre }}</h1>
-        <span class="badge rounded-pill {% if viaje.estado == 'planeado' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size: 0.7rem;">
-            {{ viaje.estado|upper }}
-        </span>
-    </div>
-    
-    <div class="d-flex gap-2">
-        <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Regresar</a>
-        
-        <a href="{% url 'p_editar_viaje' viaje.id %}" class="btn-save text-decoration-none d-inline-flex align-items-center">
-            <span class="me-2">✏️</span> Editar
-        </a>
+    /* ── Botones ── */
+    .btn-teal {
+        background: var(--teal);
+        color: white;
+        border: none;
+        border-radius: 999px;
+        font-size: 0.73rem;
+        font-weight: 700;
+        padding: 0.4rem 1.25rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
 
-        <a href="{% url 'p_eliminar_viaje' viaje.id %}" 
-           class="btn-cancel border-danger text-danger text-decoration-none"
-           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">
-            🗑️
-        </a>
+    .btn-teal:hover { background: #108a6e; color: white; }
+
+    .btn-outline-gray {
+        border: 1.5px solid #D1D5DB;
+        border-radius: 999px;
+        color: #4B5563;
+        font-weight: 600;
+        font-size: 0.73rem;
+        padding: 0.4rem 1.1rem;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-outline-gray:hover { background: #F9FAFB; color: #4B5563; }
+
+    .btn-outline-teal {
+        border: 1.5px solid var(--teal);
+        border-radius: 999px;
+        color: var(--teal);
+        font-weight: 600;
+        font-size: 0.73rem;
+        padding: 0.4rem 1.1rem;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-outline-teal:hover { background: var(--teal); color: white; }
+
+    .btn-danger-outline {
+        border: 1.5px solid #FCA5A5;
+        border-radius: 999px;
+        color: #EF4444;
+        font-weight: 600;
+        font-size: 0.73rem;
+        padding: 0.4rem 0.9rem;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-danger-outline:hover { background: #FEF2F2; color: #EF4444; }
+
+    .delete-link {
+        color: #EF4444;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .delete-link:hover { text-decoration: underline; }
+
+    /* ── Utilidades ── */
+    .txt-muted { color: #9CA3AF; font-size: 0.72rem; }
+    .txt-sm    { font-size: 0.8rem; }
+    .txt-bold  { font-weight: 700; color: #1e293b; }
+
+    /* ── Tabla de gastos ── */
+    .gastos-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+    }
+
+    .gastos-table th {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #9CA3AF;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid #F3F4F6;
+        text-align: left;
+    }
+
+    .gastos-table td {
+        padding: 0.65rem 0.75rem;
+        border-bottom: 1px solid #F9FAFB;
+        color: #374151;
+    }
+
+    .gastos-table tr:last-child td { border-bottom: none; }
+
+    .categoria-badge {
+        background: #F3F4F6;
+        color: #4B5563;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.68rem;
+        font-weight: 600;
+    }
+
+    /* ── Formulario rápido ── */
+    .input-field {
+        border: 1.5px solid #E5E7EB;
+        border-radius: 0.75rem;
+        font-size: 0.78rem;
+        padding: 0.45rem 0.75rem;
+        color: #1e293b;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+    .input-field:focus { border-color: var(--teal); box-shadow: none; }
+
+    /* ── Cards de resumen presupuesto ── */
+    .budget-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+    }
+
+    .budget-summary-item {
+        padding: 1rem 1.25rem;
+        text-align: center;
+        border-right: 1px solid #F3F4F6;
+    }
+
+    .budget-summary-item:last-child { border-right: none; }
+
+    /* ── Fechas del viaje ── */
+    .dates-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .date-box {
+        text-align: center;
+        padding: 0.85rem 1rem;
+        background: var(--teal-light);
+        border-radius: 0.85rem;
+        border: 1px solid var(--teal-border);
+    }
+
+    .date-box-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--teal);
+        margin-bottom: 0.3rem;
+    }
+
+    .date-box-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .date-box-year {
+        font-size: 0.7rem;
+        color: #6B7280;
+        margin-top: 2px;
+    }
+
+    .date-arrow {
+        font-size: 1.4rem;
+        color: var(--teal);
+        text-align: center;
+        line-height: 1;
+    }
+
+    .duration-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.85rem 1.5rem;
+        border-top: 1px solid #F3F4F6;
+    }
+</style>
+
+<!-- Hero full-width -->
+<div class="hero-wrapper">
+    <img src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=1400&q=80" alt="Destino">
+    <div class="status-pill">
+        <span class="status-dot"></span>
+        {% if viaje.estado == 'planeado' %}Planeado{% else %}{{ viaje.estado|capfirst }}{% endif %}
     </div>
 </div>
 
-        <div class="row g-4">
-            <div class="col-12 col-lg-8">
-                <div class="section-card">
-                    <p class="section-label">Descripción y Destino</p>
-                    <h5 class="fw-bold mb-3">📍 {{ viaje.destino }}</h5>
-                    <p class="text-muted" style="line-height: 1.7;">
-                        {% if viaje.descripcion %}
-                            {{ viaje.descripcion }}
-                        {% else %}
-                            No hay una descripción detallada para este viaje todavía.
-                        {% endif %}
-                    </p>
-                </div>
+<!-- Contenido en dos columnas -->
+<div class="page-content">
 
-                <div class="section-card">
-                    <p class="section-label">Fechas del Viaje</p>
-                    <div class="row text-center">
-                        <div class="col-5">
-                            <p class="text-muted small mb-1">SALIDA</p>
-                            <p class="fw-bold fs-5 mb-0">{{ viaje.fecha_inicio|date:"d M Y" }}</p>
-                        </div>
-                        <div class="col-2 d-flex align-items-center justify-content-center teal-text">
-                            <i class="fs-4">→</i>
-                        </div>
-                        <div class="col-5">
-                            <p class="text-muted small mb-1">REGRESO</p>
-                            <p class="fw-bold fs-5 mb-0">{{ viaje.fecha_fin|date:"d M Y" }}</p>
-                        </div>
+    <!-- ══ COLUMNA IZQUIERDA ══ -->
+    <div class="col-left">
+
+        <!-- Info principal + acciones -->
+        <div class="section-card">
+            <div class="card-body" style="padding-bottom: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h1 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
+                    <div style="display: flex; gap: 6px;">
+                        <a href="{% url 'p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-lg-4">
-                <div class="section-card">
-                    <p class="section-label">Presupuesto Estimado</p>
-                    <div class="d-flex align-items-baseline gap-1">
-                        <span class="teal-text fw-bold fs-4">$</span>
-                        <span class="price-display">{{ viaje.presupuesto_estimado|default:"0.00" }}</span>
-                    </div>
-                    <p class="text-muted small">Pesos Mexicanos (MXN)</p>
-                </div>
+            <hr class="card-divider">
 
-<div class="map-card mb-4">
-                    <div class="map-card-header">
-                        <span class="teal-text">🗺️</span>
-                        <span>Ubicación en el mapa</span>
-                    </div>
-                    <div class="p-3">
-                        <div class="map-placeholder">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Mexico_blank_map.svg"
-                                 class="w-75 opacity-25" alt="Mapa de México">
+            <div class="card-body">
+                <p class="section-label">Descripción y destino</p>
+                <h5 style="font-size: 0.92rem; font-weight: 700; margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
+                <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
+                    {% if viaje.descripcion %}
+                        {{ viaje.descripcion }}
+                    {% else %}
+                        No hay una descripción detallada para este viaje todavía.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Responsable + Integrantes -->
+        <div class="section-card">
+            <div style="display: grid; grid-template-columns: 1fr 1fr;">
+                <div class="card-body" style="border-right: 1px solid #F3F4F6;">
+                    <p class="section-label">Responsable</p>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="resp-avatar">AG</div>
+                        <div>
+                            <div class="txt-bold txt-sm">Ana García</div>
+                            <div class="txt-muted">Organizador</div>
                         </div>
                     </div>
                 </div>
-
-                    <div class="section-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <p class="section-label m-0">Integrantes</p>
-                            <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn btn-sm btn-outline-teal" style="font-size: 0.6rem; border-radius: 999px; padding: 0.2rem 0.8rem;">
-                                + Unirme
-                            </a>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                        <p class="section-label" style="margin: 0;">Integrantes</p>
+                        <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">+ Unirme</a>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center;">
                             {% for p in participantes %}
                                 <div class="organizer-avatar" title="{{ p.usuario.username }}">
                                     {{ p.usuario.username|first|upper }}
                                 </div>
                             {% empty %}
-                                <p class="small text-muted mb-0">No hay integrantes aún.</p>
+                                <span class="txt-muted">Sin integrantes</span>
                             {% endfor %}
                         </div>
-                        
-                        <hr class="my-3 opacity-10">
-                        
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted small">Ocupación:</span>
-                            <span class="fw-bold small">{{ participantes|length }} / {{ viaje.capacidad_max }} personas</span>
-                        </div>
                     </div>
-                    
-                    <hr class="my-3 opacity-10">
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Ocupación:</span>
-                        <span class="fw-bold small">{{ viaje.participantes.count }} / {{ viaje.capacidad_max }} personas</span>
+                    <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
+                        <span class="txt-muted">Ocupación:</span>
+                        <span class="txt-muted" style="font-weight: 600;">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
-    <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="section-card text-center py-3">
-            <p class="section-label mb-1">Presupuesto Inicial</p>
-            <h4 class="fw-bold mb-0">${{ viaje.presupuesto_estimado }}</h4>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="section-card text-center py-3 border-danger">
-            <p class="section-label mb-1 text-danger">Total Gastado</p>
-            <h4 class="fw-bold mb-0 text-danger">-${{ total_gastado }}</h4>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="section-card text-center py-3 {% if presupuesto_restante < 0 %}border-danger bg-danger-subtle{% else %}border-success{% endif %}">
-            <p class="section-label mb-1 {% if presupuesto_restante < 0 %}text-danger{% else %}text-success{% endif %}">Disponible</p>
-            <h4 class="fw-bold mb-0 {% if presupuesto_restante < 0 %}text-danger{% else %}text-success{% endif %}">
-                ${{ presupuesto_restante }}
-            </h4>
-        </div>
-    </div>
-</div>
+    <!-- ══ COLUMNA DERECHA ══ -->
+    <div class="col-right">
 
-    <div class="section-card mt-4">
-    <p class="section-label">Añadir Gasto Rápido</p>
-    <form action="{% url 'p_registrar_gasto' viaje.id %}" method="POST" class="row g-3">
-        {% csrf_token %}
-        <div class="col-12 col-md-5">
-            <input type="text" name="concepto" class="form-control input-field" placeholder="¿En qué gastaste?" required>
-        </div>
-        <div class="col-12 col-md-3">
-            <div class="input-group">
-                <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
-                <input type="number" name="cantidad" step="0.01" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" placeholder="0.00" required>
+        <!-- Fechas del viaje — rediseñado -->
+        <div class="section-card">
+            <div class="card-body">
+                <p class="section-label">Fechas del viaje</p>
+                <div class="dates-grid">
+                    <div class="date-box">
+                        <div class="date-box-label">Salida</div>
+                        <div class="date-box-value">{{ viaje.fecha_inicio|date:"d M" }}</div>
+                        <div class="date-box-year">{{ viaje.fecha_inicio|date:"Y" }}</div>
+                    </div>
+                    <div class="date-arrow">→</div>
+                    <div class="date-box">
+                        <div class="date-box-label">Regreso</div>
+                        <div class="date-box-value">{{ viaje.fecha_fin|date:"d M" }}</div>
+                        <div class="date-box-year">{{ viaje.fecha_fin|date:"Y" }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="duration-row">
+                <span class="meta-icon">⏱</span>
+                <div>
+                    <div class="meta-label">Duración</div>
+                    <div class="meta-value">{{ duracion_viaje_dias }}</div>
+                </div>
             </div>
         </div>
-        <div class="col-12 col-md-3">
-            <select name="categoria" class="form-select input-field">
-                <option value="comida">🍕 Comida</option>
-                <option value="transporte">🚗 Transporte</option>
-                <option value="hospedaje">🏨 Hospedaje</option>
-                <option value="entretenimiento">🎟️ Entretenimiento</option>
-                <option value="otros">📦 Otros</option>
-            </select>
+
+        <!-- Añadir gasto rápido -->
+        <div class="section-card">
+            <div class="card-body">
+                <p class="section-label">Añadir gasto rápido</p>
+                <form action="{% url 'p_registrar_gasto' viaje.id %}" method="POST">
+                    {% csrf_token %}
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
+                        <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
+                        <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
+                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: 0.78rem; border-right: 1px solid #E5E7EB;">$</span>
+                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: 0.78rem; width: 100%;" placeholder="0.00" required>
+                        </div>
+                        <select name="categoria" class="input-field">
+                            <option value="comida">🍕 Comida</option>
+                            <option value="transporte">🚗 Transporte</option>
+                            <option value="hospedaje">🏨 Hospedaje</option>
+                            <option value="entretenimiento">🎟️ Entretenimiento</option>
+                            <option value="otros">📦 Otros</option>
+                        </select>
+                        <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="col-12 col-md-1">
-            <button type="submit" class="btn-save w-100" style="padding: 0.6rem 0;">+</button>
+
+
+    </div>
+
+    <!-- ══ GASTOS REGISTRADOS — ANCHO COMPLETO ══ -->
+    <div class="section-card full-width">
+        <div class="card-body" style="padding-bottom: 0.75rem;">
+            <p class="section-label" style="margin: 0;">Gastos registrados</p>
         </div>
-    </form>
-</div>
-<div class="section-card mt-4">
-    <p class="section-label">Gastos Registrados</p>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <table class="gastos-table">
+            <thead>
                 <tr>
-                    <th class="small fw-bold">CONCEPTO</th>
-                    <th class="small fw-bold">CATEGORÍA</th>
-                    <th class="small fw-bold text-end">CANTIDAD</th>
+                    <th>Concepto</th>
+                    <th>Categoría</th>
+                    <th style="text-align: right;">Cantidad</th>
                 </tr>
             </thead>
             <tbody>
                 {% for gasto in viaje.gastos.all %}
                 <tr>
                     <td>{{ gasto.concepto }}</td>
-                    <td><span class="badge bg-light text-dark border">{{ gasto.get_categoria_display }}</span></td>
-                    <td class="text-end fw-bold text-danger">-${{ gasto.cantidad }}</td>
+                    <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
+                    <td style="text-align: right; font-weight: 700; color: #EF4444;">-${{ gasto.cantidad }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="text-center text-muted py-4">Aún no hay gastos registrados.</td>
+                    <td colspan="3" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos registrados.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- ══ PRESUPUESTO — ANCHO COMPLETO ══ -->
+    <div class="section-card full-width">
+        <div class="budget-summary-grid">
+            <div class="budget-summary-item">
+                <p class="section-label" style="margin-bottom: 0.3rem;">Presupuesto</p>
+                <div class="txt-bold" style="font-size: 1rem;">${{ viaje.presupuesto_estimado }}</div>
+            </div>
+            <div class="budget-summary-item">
+                <p class="section-label" style="margin-bottom: 0.3rem; color: #EF4444;">Gastado</p>
+                <div style="font-size: 1rem; font-weight: 700; color: #EF4444;">-${{ total_gastado }}</div>
+            </div>
+            <div class="budget-summary-item">
+                <p class="section-label" style="margin-bottom: 0.3rem; color: {% if presupuesto_restante < 0 %}#EF4444{% else %}#10B981{% endif %};">Disponible</p>
+                <div style="font-size: 1rem; font-weight: 700; color: {% if presupuesto_restante < 0 %}#EF4444{% else %}#10B981{% endif %};">
+                    ${{ presupuesto_restante }}
+                </div>
+            </div>
+        </div>
+
+        <hr class="card-divider">
+
+        <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                <span class="txt-bold" style="font-size: 0.85rem;">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
+                <span class="txt-muted">presupuesto total</span>
+            </div>
+            <div class="budget-bar-bg">
+                <div class="budget-bar-fill" style="width: {{ porcentaje_gastado }}%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span class="txt-muted">$0</span>
+                <span class="txt-muted">${{ viaje.presupuesto_estimado }}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══ ACCIONES FINALES — ANCHO COMPLETO ══ -->
+    <div class="full-width" style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
+        <a href="{% url 'p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">← Regresar a mis viajes</a>
+        <a href="{% url 'p_eliminar_viaje' viaje.id %}"
+           class="delete-link"
+           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar viaje</a>
+    </div>
+
 </div>
 {% endblock %}
