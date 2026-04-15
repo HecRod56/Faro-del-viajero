@@ -1,4 +1,4 @@
-from gestion_viajes.models import Participante, Viaje
+from apps.gestion_viajes.models import Participante, Viaje
 from django.contrib.auth import get_user_model
 
 def lista_integrantes_viaje(id_viaje):
