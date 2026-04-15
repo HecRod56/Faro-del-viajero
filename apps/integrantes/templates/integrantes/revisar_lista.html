@@ -1,11 +1,6 @@
-{% extends "core/base.html" %}
-{% load static %}
-
-{% block head %}
-    <link rel="stylesheet" href="{% static 'integrantes/lista.css' %}" />
-{% endblock %}
-
-{% block content %}
+{% extends "core/base.html" %} {% load static %} {% block head %}
+<link rel="stylesheet" href="{% static 'integrantes/lista.css' %}" />
+{% endblock %} {% block content %}
 
 <div class="container mt-4">
 
@@ -126,6 +121,12 @@
         data-bs-target="#modalAbandonarViaje"
       >
         <i class="bi bi-box-arrow-right me-2"></i>
+      <button
+        class="btn btn-danger rounded-pill px-4"
+        data-bs-toggle="modal"
+        data-bs-target="#modalAbandonarViaje"
+      >
+        <i class="bi bi-box-arrow-right me-2"></i>
         Abandonar este viaje
       </button>
     </div>
@@ -225,7 +226,12 @@
           <i class="bi bi-box-arrow-right text-danger me-2"></i>
           Abandonar viaje
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
       </div>
       <div class="modal-body pt-2">
         <p class="mb-0">
@@ -234,10 +240,23 @@
         </p>
       </div>
       <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-        <form method="POST" action="{% url 'integrantes:abandonar_viaje' viaje.id %}">
+        <button
+          type="button"
+          class="btn btn-secondary rounded-pill px-4"
+          data-bs-dismiss="modal"
+        >
+          Cancelar
+        </button>
+        <form
+          method="POST"
+          action="{% url 'integrantes:abandonar_viaje' viaje.id %}"
+        >
           {% csrf_token %}
-          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
+          <input
+            type="hidden"
+            name="usuario_actual_id"
+            value="{{ usuario_actual_id }}"
+          />
           <button type="submit" class="btn btn-danger rounded-pill px-4">
             <i class="bi bi-box-arrow-right me-1"></i> Abandonar
           </button>
@@ -256,7 +275,12 @@
           <i class="bi bi-person-fill-up text-success me-2"></i>
           Asignar organizador
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
       </div>
       <div class="modal-body pt-2">
         <p class="mb-0">
@@ -265,7 +289,13 @@
         </p>
       </div>
       <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+        <button
+          type="button"
+          class="btn btn-secondary rounded-pill px-4"
+          data-bs-dismiss="modal"
+        >
+          Cancelar
+        </button>
         <form id="formAsignarOrganizador" method="POST" action="">
           {% csrf_token %}
           <input type="hidden" name="id_viaje" value="{{ viaje.id }}" />
