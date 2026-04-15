@@ -20,4 +20,5 @@ urlpatterns = [
     path('', include('core.urls')),
     path('', include('integrantes.urls')),
     path('', include('apps.autenticado.urls')),
+    path('viajes/', include('apps.gestion_viajes.urls')),
 ]
