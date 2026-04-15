@@ -47,8 +47,11 @@ INSTALLED_APPS = [
     #APPS PROYECTO FARO_DEL_VIAJERO
     'apps.core',
     'apps.autenticado',
-    'gestion_viajes',
-    'integrantes',
+    'apps.gestion_viajes',
+    'apps.integrantes',
+    'apps.actividades',
+    'apps.chat',
+    'apps.galeria',
     ]
 
 MIDDLEWARE = [
