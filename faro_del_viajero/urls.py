@@ -19,8 +19,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse # <-- Agrega esta importación
 
-from apps.autenticado.views import register, login_view, profile_view, forgot_password_view
-
 # Creamos una vista falsa rapidísima solo para que el base.html no se rompa
 def home_temporal(request):
     return HttpResponse("<h1>Inicio de Faro del Viajero</h1> <a href='/login/'>Ir al Login</a>")
@@ -28,11 +26,8 @@ def home_temporal(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     #CONEXIÓN DE RAIZ CON LA APP
+    path('', home_temporal, name='home'),  # <-- ¡ESTO SALVA AL base.html!
     path('', include('core.urls')),
     path('', include('integrantes.urls')),
-    path('', home_temporal, name='home'),  # <-- ¡ESTO SALVA AL base.html!
-    path('registro/', register, name='register'), # http://127.0.0.1:8000/registro/
-    path('login/', login_view, name='login'),
-    path('recuperar/', forgot_password_view, name='forgot_password'), 
-    path('perfil/', profile_view, name='profile'),
+    path('', include('apps.autenticado.urls')),
 ]
