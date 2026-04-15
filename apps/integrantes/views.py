@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
+from .services import lista_integrantes
 
 # Create your views here.
-def integrantes_viaje(request, id_viaje):
+def integrantes_viaje(request, id_viaje, usuario_id):
+
+    lista_integrantes.lista_integrantes_viaje(id_viaje=id_viaje)
+
     return render(request, 'integrantes/revisar_lista.html')
 
 
