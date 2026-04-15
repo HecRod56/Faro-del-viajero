@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{%block content%}
+{% load static %}
+{% block content %}
 
     <style>
         :root {
@@ -96,6 +97,9 @@
             padding: 0.4rem 2rem;
             background: transparent;
             transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
         }
 
         .btn-cancel:hover {
@@ -103,13 +107,18 @@
         }
 
         .btn-save {
-            background-color: #9CA3AF;
+            background-color: var(--teal); /* Cambiado de gris a teal */
             color: white;
             border-radius: 999px;
             font-weight: 700;
             padding: 0.4rem 2rem;
             border: none;
-            cursor: not-allowed;
+            cursor: pointer; /* Cambiado de not-allowed a pointer */
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
         }
 
         .breadcrumb-link {
@@ -158,117 +167,201 @@
         }
     </style>
 
-<div class="container py-4 px-3">
-        <!-- Breadcrumb -->
+    <div class="container py-4 px-3">
         <nav class="mb-3">
-            <span><a href="#" class="breadcrumb-link">Mis viajes</a></span>
+            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
             <span class="text-muted mx-1">&gt;</span>
             <span class="text-muted" style="font-size:0.75rem;">Crear viaje</span>
         </nav>
 
-        <!-- Page header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Crear nuevo viaje</h1>
-            <div class="d-flex gap-3">
-                <button class="btn-cancel">Cancelar</button>
-                <button class="btn-save">Guardar viaje</button>
-            </div>
-        </div>
-
-        <div class="row g-4">
-
-            <!-- Left column -->
-            <div class="col-12 col-lg-8">
-
-                <!-- Trip info -->
-                <div class="section-card">
-                    <p class="section-label">Información del viaje</p>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="fw-bold mb-1">Nombre del viaje <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="ej. Viaje a Cancún con los amigos" class="form-control input-field">
-                        </div>
-                        <div class="col-12">
-                            <label class="fw-bold mb-1">Destino - Estado de la República <span class="text-danger">*</span></label>
-                            <select class="form-select input-field">
-                                <option>Selecciona el estado de destino</option>
-                            </select>
-                            <p class="text-muted mt-1" style="font-size:0.65rem; font-style:italic;">Solo destinos dentro de la República Mexicana</p>
-                        </div>
-                        <div class="col-12">
-                            <label class="fw-bold mb-1">Descripción <span class="text-muted fw-normal">(opcional)</span></label>
-                            <textarea placeholder="¿Qué van a hacer en este viaje? Cuéntale a tu grupo..." class="form-control input-field" rows="3" style="resize:none;"></textarea>
-                        </div>
-                    </div>
+        <form method="POST">
+            {% csrf_token %} <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Crear nuevo viaje</h1>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'p_inicio' %}" class="btn-cancel">Cancelar</a>
+                    <button type="submit" class="btn-save">Guardar viaje</button>
                 </div>
+            </div>
 
-                <!-- Dates & capacity -->
-                <div class="section-card">
-                    <p class="section-label">Fechas y Capacidad</p>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-1">Fecha de inicio <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="dd/mm/aaaa" class="form-control input-field">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-1">Fecha de fin <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="dd/mm/aaaa" class="form-control input-field">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-1">Máx. integrantes <span class="text-danger">*</span></label>
-                            <input type="number" placeholder="ej. 10" class="form-control input-field">
-                            <p class="text-muted mt-1" style="font-size:0.65rem; font-style:italic;">Mínimo 2 personas</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-1">Presupuesto estimado <span class="text-muted fw-normal">(opcional)</span></label>
-                            <div class="input-prefix">
-                                <span>$</span>
-                                <input type="text" placeholder="MXN" class="form-control input-field">
+            <div class="row g-4">
+
+                <div class="col-12 col-lg-8">
+
+                    <div class="section-card">
+                        <p class="section-label">Información del viaje</p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="fw-bold mb-1">Nombre del viaje <span class="text-danger">*</span></label>
+                                <input type="text" name="nombre" placeholder="ej. Viaje a Cancún con los amigos" class="form-control input-field" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="fw-bold mb-1">Destino - Estado de la República <span class="text-danger">*</span></label>
+                                <select id="destino" name="destino" class="form-select input-field" required>
+                                    <option value="" disabled selected>Selecciona el estado de destino</option>
+                                    <option value="Aguascalientes">Aguascalientes</option>
+                                    <option value="Baja California">Baja California</option>
+                                    <option value="Baja California Sur">Baja California Sur</option>
+                                    <option value="Campeche">Campeche</option>
+                                    <option value="Coahuila">Coahuila</option>
+                                    <option value="Colima">Colima</option>
+                                    <option value="Chiapas">Chiapas</option>
+                                    <option value="Chihuahua">Chihuahua</option>
+                                    <option value="Ciudad de México">Ciudad de México</option>
+                                    <option value="Durango">Durango</option>
+                                    <option value="Guanajuato">Guanajuato</option>
+                                    <option value="Guerrero">Guerrero</option>
+                                    <option value="Hidalgo">Hidalgo</option>
+                                    <option value="Jalisco">Jalisco</option>
+                                    <option value="México">México</option>
+                                    <option value="Michoacán">Michoacán</option>
+                                    <option value="Morelos">Morelos</option>
+                                    <option value="Nayarit">Nayarit</option>
+                                    <option value="Nuevo León">Nuevo León</option>
+                                    <option value="Oaxaca">Oaxaca</option>
+                                    <option value="Puebla">Puebla</option>
+                                    <option value="Querétaro">Querétaro</option>
+                                    <option value="Quintana Roo">Quintana Roo</option>
+                                    <option value="San Luis Potosí">San Luis Potosí</option>
+                                    <option value="Sinaloa">Sinaloa</option>
+                                    <option value="Sonora">Sonora</option>
+                                    <option value="Tabasco">Tabasco</option>
+                                    <option value="Tamaulipas">Tamaulipas</option>
+                                    <option value="Tlaxcala">Tlaxcala</option>
+                                    <option value="Veracruz">Veracruz</option>
+                                    <option value="Yucatán">Yucatán</option>
+                                    <option value="Zacatecas">Zacatecas</option>
+                                    </select>
+                                <p class="text-muted mt-1" style="font-size:0.65rem; font-style:italic;">Solo destinos dentro de la República Mexicana</p>
+                            </div>
+                            <div class="col-12">
+                                <label class="fw-bold mb-1">Descripción <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea name="descripcion" placeholder="¿Qué van a hacer en este viaje? Cuéntale a tu grupo..." class="form-control input-field" rows="3" style="resize:none;"></textarea>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Participants -->
-                <div class="section-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <p class="section-label mb-0">
-                            Participantes <span class="text-muted fw-normal" style="text-transform:none; letter-spacing:0;">(opcional — puedes agregar más después)</span>
-                        </p>
-                        <span class="text-muted" style="font-size:0.65rem;">1 de 7 personas</span>
-                    </div>
-                    <div class="organizer-badge d-flex align-items-center gap-3 mb-3">
-                        <div class="organizer-avatar">J</div>
-                        <div>
-                            <p class="mb-0 fw-bold" style="font-size:0.875rem;">José Pérez (tú)</p>
-                            <p class="mb-0 teal-text" style="font-size:0.65rem; font-weight:600;">Organizador</p>
+                    <div class="section-card">
+                        <p class="section-label">Fechas y Capacidad</p>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Fecha de inicio <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha_inicio" class="form-control input-field" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Fecha de fin <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha_fin" class="form-control input-field" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Máx. integrantes <span class="text-danger">*</span></label>
+                                <input type="number" name="capacidad_max" min="2" placeholder="ej. 10" class="form-control input-field" required>
+                                <p class="text-muted mt-1" style="font-size:0.65rem; font-style:italic;">Mínimo 2 personas</p>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Presupuesto estimado <span class="text-muted fw-normal">(opcional)</span></label>
+                                <div class="input-prefix">
+                                    <span>$</span>
+                                    <input type="number" step="0.01" name="presupuesto_estimado" placeholder="MXN" class="form-control input-field">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <button class="add-participant-btn">+ Añadir participante por correo</button>
+
+                    <div class="section-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <p class="section-label mb-0">
+                                Participantes <span class="text-muted fw-normal" style="text-transform:none; letter-spacing:0;">(opcional)</span>
+                            </p>
+                        </div>
+                        <div class="organizer-badge d-flex align-items-center gap-3 mb-3">
+                            <div class="organizer-avatar">U</div>
+                            <div>
+                                <p class="mb-0 fw-bold" style="font-size:0.875rem;">Usuario Actual (tú)</p>
+                                <p class="mb-0 teal-text" style="font-size:0.65rem; font-weight:600;">Organizador</p>
+                            </div>
+                        </div>
+                        <button type="button" class="add-participant-btn">+ Añadir participante por correo</button>
+                    </div>
+
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <div class="map-card">
+                        <div class="map-card-header">
+                            <span class="teal-text">📍</span>
+                            <span>Destino seleccionado: <span class="teal-text">—</span></span>
+                        </div>
+                        <div class="p-3">
+                            <div class="map-placeholder">
+                                {% include "gestion_viajes/mapa.svg" %}
+                            </div>
+                            <p class="text-center text-muted mt-3 mb-0" style="font-size:0.65rem; font-style:italic;">
+                                ● Selecciona un estado para ver su ubicación en el mapa
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
             </div>
-
-            <!-- Right column: Map -->
-            <div class="col-12 col-lg-4">
-                <div class="map-card">
-                    <div class="map-card-header">
-                        <span class="teal-text">📍</span>
-                        <span>Destino seleccionado: <span class="teal-text">—</span></span>
-                    </div>
-                    <div class="p-3">
-                        <div class="map-placeholder">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Mexico_blank_map.svg"
-                                 class="w-75 opacity-25" alt="Mapa de México">
-                        </div>
-                        <p class="text-center text-muted mt-3 mb-0" style="font-size:0.65rem; font-style:italic;">
-                            ● Selecciona un estado para ver su ubicación en el mapa
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        </form>
     </div>
-{% endblock %}
 
+    <script>
+        const estadosMap = {
+            "Aguascalientes": "MX-AGU",
+            "Baja California": "MX-BCN",
+            "Baja California Sur": "MX-BCS",
+            "Campeche": "MX-CAM",
+            "Coahuila": "MX-COA",
+            "Colima": "MX-COL",
+            "Chiapas": "MX-CHP",
+            "Chihuahua": "MX-CHH",
+            "Ciudad de México": "MX-DIF",
+            "Durango": "MX-DUR",
+            "Guanajuato": "MX-GUA",
+            "Guerrero": "MX-GRO",
+            "Hidalgo": "MX-HID",
+            "Jalisco": "MX-JAL",
+            "México": "MX-MEX",
+            "Michoacán": "MX-MIC",
+            "Morelos": "MX-MOR",
+            "Nayarit": "MX-NAY",
+            "Nuevo León": "MX-NEL",
+            "Oaxaca": "MX-OAX",
+            "Puebla": "MX-PUE",
+            "Querétaro": "MX-QUE",
+            "Quintana Roo": "MX-ROO",
+            "San Luis Potosí": "MX-SLP",
+            "Sinaloa": "MX-SIN",
+            "Sonora": "MX-SON",
+            "Tabasco": "MX-TAB",
+            "Tamaulipas": "MX-TAM",
+            "Tlaxcala": "MX-TLA",
+            "Veracruz": "MX-VER",
+            "Yucatán": "MX-YUC",
+            "Zacatecas": "MX-ZAC"
+        };
+    const select = document.getElementById("destino");
+    const texto = document.getElementById("estadoTexto");
+
+    function limpiarMapa() {
+    document.querySelectorAll("[id^='MX-']").forEach(e => {
+        e.style.fill = "#ffffff";
+    });
+    }
+
+    select.addEventListener("change", function () {
+    const nombreEstado = this.value;
+    const idSVG = estadosMap[nombreEstado];
+
+    limpiarMapa();
+
+    if (idSVG) {
+        const estado = document.getElementById(idSVG);
+        if (estado) {
+        estado.style.fill = "#0E9E8E";
+        }
+    }
+    });
+    </script>
+
+{% endblock %}

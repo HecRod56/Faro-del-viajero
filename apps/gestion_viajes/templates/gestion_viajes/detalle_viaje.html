@@ -1,0 +1,608 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --teal: #149B7E;
+        --teal-light: #EBFBFA;
+        --teal-border: #b2e8e0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #F3F4F6;
+        color: #1e293b;
+        padding-top: 80px;
+    }
+
+    /* ── Hero ── */
+    .hero-wrapper {
+        width: 100%;
+        position: relative;
+        height: 150px;
+        padding: 0 1.5rem;
+        box-sizing: border-box;
+        background-color: #F3F4F6;
+        margin-top: 10px;
+    }
+
+    .hero-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 1.25rem;
+    }
+
+    .status-pill {
+        position: absolute;
+        top: 14px;
+        right: 34px;
+        background: white;
+        border-radius: 999px;
+        padding: 4px 14px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--teal);
+        border: 1.5px solid var(--teal-border);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--teal);
+        display: inline-block;
+    }
+
+    /* ── Layout ── */
+    .page-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem 1.5rem 3rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
+    }
+
+    .col-left  { grid-column: 1; display: flex; flex-direction: column; gap: 1rem; }
+    .col-right { grid-column: 2; display: flex; flex-direction: column; gap: 1rem; }
+    .full-width { grid-column: 1 / -1; }
+
+    @media (max-width: 700px) {
+        .page-content { grid-template-columns: 1fr; }
+        .col-left, .col-right, .full-width { grid-column: 1; }
+    }
+
+    /* ── Cards ── */
+    .section-card {
+        background-color: #fff;
+        border-radius: 1.25rem;
+        border: 1px solid #E5E7EB;
+        overflow: hidden;
+    }
+
+    .card-body {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .card-divider {
+        border: none;
+        border-top: 1px solid #6d6d6d;
+        margin: 0;
+    }
+
+    .section-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: var(--teal);
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        margin: 0 0 0.6rem 0;
+    }
+
+    /* ── Metadatos ── */
+    .meta-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #4B5563;
+        margin-bottom: 0.7rem;
+    }
+
+    .meta-icon {
+        color: #9CA3AF;
+        font-size: 0.85rem;
+        width: 18px;
+        text-align: center;
+        margin-top: 1px;
+    }
+
+    .meta-label {
+        color: #9CA3AF;
+        font-size: 0.68rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .meta-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+
+    /* ── Avatares ── */
+    .resp-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--teal);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .organizer-avatar {
+        width: 34px;
+        height: 34px;
+        background-color: var(--teal);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        border: 2px solid white;
+        margin-left: -7px;
+    }
+
+    .organizer-avatar:first-child { margin-left: 0; }
+
+    /* ── Presupuesto ── */
+    .budget-bar-bg {
+        width: 100%;
+        height: 7px;
+        border-radius: 999px;
+        background: #E5E7EB;
+        overflow: hidden;
+        margin: 7px 0 4px;
+    }
+
+    .budget-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: var(--teal);
+    }
+
+    /* ── Botones ── */
+    .btn-teal {
+        background: var(--teal);
+        color: white;
+        border: none;
+        border-radius: 999px;
+        font-size: 0.73rem;
+        font-weight: 700;
+        padding: 0.4rem 1.25rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-teal:hover { background: #108a6e; color: white; }
+
+    .btn-outline-gray {
+        border: 1.5px solid #D1D5DB;
+        border-radius: 999px;
+        color: #4B5563;
+        font-weight: 600;
+        font-size: 0.73rem;
+        padding: 0.4rem 1.1rem;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-outline-gray:hover { background: #F9FAFB; color: #4B5563; }
+
+    .btn-outline-teal {
+        border: 1.5px solid var(--teal);
+        border-radius: 999px;
+        color: var(--teal);
+        font-weight: 600;
+        font-size: 0.73rem;
+        padding: 0.4rem 1.1rem;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-outline-teal:hover { background: var(--teal); color: white; }
+
+    .btn-danger-outline {
+        border: 1.5px solid #FCA5A5;
+        border-radius: 999px;
+        color: #EF4444;
+        font-weight: 600;
+        font-size: 0.73rem;
+        padding: 0.4rem 0.9rem;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-danger-outline:hover { background: #FEF2F2; color: #EF4444; }
+
+    .delete-link {
+        color: #EF4444;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .delete-link:hover { text-decoration: underline; }
+
+    /* ── Utilidades ── */
+    .txt-muted { color: #9CA3AF; font-size: 0.72rem; }
+    .txt-sm    { font-size: 0.8rem; }
+    .txt-bold  { font-weight: 700; color: #1e293b; }
+
+    /* ── Tabla de gastos ── */
+    .gastos-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+    }
+
+    .gastos-table th {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #9CA3AF;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid #F3F4F6;
+        text-align: left;
+    }
+
+    .gastos-table td {
+        padding: 0.65rem 0.75rem;
+        border-bottom: 1px solid #F9FAFB;
+        color: #374151;
+    }
+
+    .gastos-table tr:last-child td { border-bottom: none; }
+
+    .categoria-badge {
+        background: #F3F4F6;
+        color: #4B5563;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.68rem;
+        font-weight: 600;
+    }
+
+    /* ── Formulario rápido ── */
+    .input-field {
+        border: 1.5px solid #E5E7EB;
+        border-radius: 0.75rem;
+        font-size: 0.78rem;
+        padding: 0.45rem 0.75rem;
+        color: #1e293b;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+    .input-field:focus { border-color: var(--teal); box-shadow: none; }
+
+    /* ── Cards de resumen presupuesto ── */
+    .budget-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+    }
+
+    .budget-summary-item {
+        padding: 1rem 1.25rem;
+        text-align: center;
+        border-right: 1px solid #F3F4F6;
+    }
+
+    .budget-summary-item:last-child { border-right: none; }
+
+    /* ── Fechas del viaje ── */
+    .dates-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .date-box {
+        text-align: center;
+        padding: 0.85rem 1rem;
+        background: var(--teal-light);
+        border-radius: 0.85rem;
+        border: 1px solid var(--teal-border);
+    }
+
+    .date-box-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--teal);
+        margin-bottom: 0.3rem;
+    }
+
+    .date-box-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .date-box-year {
+        font-size: 0.7rem;
+        color: #6B7280;
+        margin-top: 2px;
+    }
+
+    .date-arrow {
+        font-size: 1.4rem;
+        color: var(--teal);
+        text-align: center;
+        line-height: 1;
+    }
+
+    .duration-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.85rem 1.5rem;
+        border-top: 1px solid #F3F4F6;
+    }
+</style>
+
+<!-- Hero full-width -->
+<div class="hero-wrapper">
+    <img src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=1400&q=80" alt="Destino">
+    <div class="status-pill">
+        <span class="status-dot"></span>
+        {% if viaje.estado == 'planeado' %}Planeado{% else %}{{ viaje.estado|capfirst }}{% endif %}
+    </div>
+</div>
+
+<!-- Contenido en dos columnas -->
+<div class="page-content">
+
+    <!-- ══ COLUMNA IZQUIERDA ══ -->
+    <div class="col-left">
+
+        <!-- Info principal + acciones -->
+        <div class="section-card">
+            <div class="card-body" style="padding-bottom: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h1 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
+                    <div style="display: flex; gap: 6px;">
+                        <a href="{% url 'p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="card-divider">
+
+            <div class="card-body">
+                <p class="section-label">Descripción y destino</p>
+                <h5 style="font-size: 0.92rem; font-weight: 700; margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
+                <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
+                    {% if viaje.descripcion %}
+                        {{ viaje.descripcion }}
+                    {% else %}
+                        No hay una descripción detallada para este viaje todavía.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Responsable + Integrantes -->
+        <div class="section-card">
+            <div style="display: grid; grid-template-columns: 1fr 1fr;">
+                <div class="card-body" style="border-right: 1px solid #F3F4F6;">
+                    <p class="section-label">Responsable</p>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="resp-avatar">AG</div>
+                        <div>
+                            <div class="txt-bold txt-sm">Ana García</div>
+                            <div class="txt-muted">Organizador</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                        <p class="section-label" style="margin: 0;">Integrantes</p>
+                        {% if not es_participante %}
+                            <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
+                                + Unirme
+                            </a>
+                        {% else %}
+                            <span class="badge bg-success-subtle text-success rounded-pill">Ya eres parte</span>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center;">
+                            {% for p in participantes %}
+                                <div class="organizer-avatar" title="{{ p.usuario.username }}">
+                                    {{ p.usuario.username|first|upper }}
+                                </div>
+                            {% empty %}
+                                <span class="txt-muted">Sin integrantes</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
+                        <span class="txt-muted">Ocupación:</span>
+                        <span class="txt-muted" style="font-weight: 600;">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══ COLUMNA DERECHA ══ -->
+    <div class="col-right">
+
+        <!-- Fechas del viaje — rediseñado -->
+        <div class="section-card">
+            <div class="card-body">
+                <p class="section-label">Fechas del viaje</p>
+                <div class="dates-grid">
+                    <div class="date-box">
+                        <div class="date-box-label">Salida</div>
+                        <div class="date-box-value">{{ viaje.fecha_inicio|date:"d M" }}</div>
+                        <div class="date-box-year">{{ viaje.fecha_inicio|date:"Y" }}</div>
+                    </div>
+                    <div class="date-arrow">→</div>
+                    <div class="date-box">
+                        <div class="date-box-label">Regreso</div>
+                        <div class="date-box-value">{{ viaje.fecha_fin|date:"d M" }}</div>
+                        <div class="date-box-year">{{ viaje.fecha_fin|date:"Y" }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="duration-row">
+                <span class="meta-icon">⏱</span>
+                <div>
+                    <div class="meta-label">Duración</div>
+                    <div class="meta-value">{{ duracion_viaje_dias }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Añadir gasto rápido -->
+        <div class="section-card">
+            <div class="card-body">
+                <p class="section-label">Añadir gasto rápido</p>
+                <form action="{% url 'p_registrar_gasto' viaje.id %}" method="POST">
+                    {% csrf_token %}
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
+                        <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
+                        <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
+                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: 0.78rem; border-right: 1px solid #E5E7EB;">$</span>
+                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: 0.78rem; width: 100%;" placeholder="0.00" required>
+                        </div>
+                        <select name="categoria" class="input-field">
+                            <option value="comida">🍕 Comida</option>
+                            <option value="transporte">🚗 Transporte</option>
+                            <option value="hospedaje">🏨 Hospedaje</option>
+                            <option value="entretenimiento">🎟️ Entretenimiento</option>
+                            <option value="otros">📦 Otros</option>
+                        </select>
+                        <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- ══ GASTOS REGISTRADOS — ANCHO COMPLETO ══ -->
+    <div class="section-card full-width">
+        <div class="card-body" style="padding-bottom: 0.75rem;">
+            <p class="section-label" style="margin: 0;">Gastos registrados</p>
+        </div>
+        <table class="gastos-table">
+            <thead>
+                <tr>
+                    <th>{Concepto}</th>
+                    <th>Categoría</th>
+                    <th style="text-align: right;">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in viaje.gastos.all %}
+                <tr>
+                    <td>{{ gasto.concepto }}</td>
+                    <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
+                    <td style="text-align: right; font-weight: 700; color: #EF4444;">-${{ gasto.cantidad }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ══ PRESUPUESTO — ANCHO COMPLETO ══ -->
+    <div class="section-card full-width">
+        <div class="budget-summary-grid">
+            <div class="budget-summary-item">
+                <p class="section-label" style="margin-bottom: 0.3rem;">Presupuesto</p>
+                <div class="txt-bold" style="font-size: 1rem;">${{ viaje.presupuesto_estimado }}</div>
+            </div>
+            <div class="budget-summary-item">
+                <p class="section-label" style="margin-bottom: 0.3rem; color: #EF4444;">Gastado</p>
+                <div style="font-size: 1rem; font-weight: 700; color: #EF4444;">-${{ total_gastado }}</div>
+            </div>
+            <div class="budget-summary-item">
+                <p class="section-label" style="margin-bottom: 0.3rem; color: {% if presupuesto_restante < 0 %}#EF4444{% else %}#10B981{% endif %};">Disponible</p>
+                <div style="font-size: 1rem; font-weight: 700; color: {% if presupuesto_restante < 0 %}#EF4444{% else %}#10B981{% endif %};">
+                    ${{ presupuesto_restante }}
+                </div>
+            </div>
+        </div>
+
+        <hr class="card-divider">
+
+        <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                <span class="txt-bold" style="font-size: 0.85rem;">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
+                <span class="txt-muted">presupuesto total</span>
+            </div>
+            <div class="budget-bar-bg">
+                <div class="budget-bar-fill" style="width: {{ porcentaje_gastado }}%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span class="txt-muted">$0</span>
+                <span class="txt-muted">${{ viaje.presupuesto_estimado }}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══ ACCIONES FINALES — ANCHO COMPLETO ══ -->
+    <div class="full-width" style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
+        <a href="{% url 'p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">← Regresar a mis viajes</a>
+        <a href="{% url 'p_eliminar_viaje' viaje.id %}"
+           class="delete-link"
+           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar viaje</a>
+    </div>
+
+</div>
+{% endblock %}
