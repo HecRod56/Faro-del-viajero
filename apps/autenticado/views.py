@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .models import CustomUser
 from django.contrib import messages
+from django.http import JsonResponse  # <-- NUEVO IMPORT NECESARIO
 
 # Create your views here.
 
@@ -16,6 +17,7 @@ def register(request):
 
         # 2. Crea el usuario en la base de datos
         if email and password:
+            # Como tu username es el correo, evitamos duplicidad
             user = CustomUser.objects.create_user(username=email, email=email, password=password, first_name=full_name)
             user.phone = phone 
             user.date_of_birth = dob
@@ -50,3 +52,28 @@ def profile_view(request):
 
 def forgot_password_view(request):
     return render(request, 'autenticado/forgot_password.html')
+
+
+# ==========================================
+# VISTAS DE VALIDACIÓN EN TIEMPO REAL (AJAX)
+# ==========================================
+
+def validar_correo(request):
+    """Verifica si el correo ya existe en CustomUser"""
+    email = request.GET.get('email', None)
+    existe = False
+    
+    if email:
+        existe = CustomUser.objects.filter(email=email).exists()
+        
+    return JsonResponse({'existe': existe})
+
+def validar_telefono(request):
+    """Verifica si el teléfono ya existe en CustomUser"""
+    phone = request.GET.get('phone', None)
+    existe = False
+    
+    if phone:
+        existe = CustomUser.objects.filter(phone=phone).exists()
+        
+    return JsonResponse({'existe': existe})
