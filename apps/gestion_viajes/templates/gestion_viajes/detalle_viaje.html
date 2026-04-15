@@ -443,7 +443,13 @@
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
                         <p class="section-label" style="margin: 0;">Integrantes</p>
-                        <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">+ Unirme</a>
+                        {% if not es_participante %}
+                            <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
+                                + Unirme
+                            </a>
+                        {% else %}
+                            <span class="badge bg-success-subtle text-success rounded-pill">Ya eres parte</span>
+                        {% endif %}
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
                         <div style="display: flex; align-items: center;">

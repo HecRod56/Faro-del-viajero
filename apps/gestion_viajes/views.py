@@ -20,8 +20,8 @@ def pagina_crear_viaje(request):
         capacidad = request.POST.get('capacidad_max')
         presupuesto = request.POST.get('presupuesto_estimado')
 
-        # Creamos el registro en la base de datos PostgreSQL
-        Viaje.objects.create(
+        # 1. Creamos el viaje y lo guardamos en una variable 'nuevo_viaje' (Postgres)
+        nuevo_viaje = Viaje.objects.create(
             nombre=nombre,
             destino=destino,
             descripcion=descripcion,
@@ -31,6 +31,20 @@ def pagina_crear_viaje(request):
             presupuesto_estimado=presupuesto if presupuesto else 0
         )
         
+        # 2. AUTOMATIZACIÓN: Registrar al creador como Organizador
+        # Si el usuario no está logueado (por pruebas), usamos el primero de la DB
+        user_actual = request.user
+        if not user_actual.is_authenticated:
+            User = get_user_model()
+            user_actual = User.objects.first()
+
+        if user_actual:
+            Participante.objects.create(
+                viaje=nuevo_viaje,
+                usuario=user_actual,
+                rol='organizador' # <--- Clave para RF.2-07 y RF.2-09
+            )
+        
         # Una vez guardado, redirigimos a la lista de viajes para confirmar
         return redirect('p_ver_mis_viajes')
 
@@ -39,6 +53,16 @@ def pagina_crear_viaje(request):
 
 # 3. Vista para ver todos los viajes registrados
 def pagina_ver_mis_viajes(request):
+    user_actual = request.user
+    
+    # Si no está logueado, para que no truene, buscamos al primer usuario de la DB
+    if not user_actual.is_authenticated:
+        User = get_user_model()
+        user_actual = User.objects.first()
+
+    # RF.2-05: Solo traer viajes donde participa este usuario
+    viajes_db = Viaje.objects.filter(participantes__usuario=user_actual)
+
     # Obtenemos el estado desde la URL (ej: ?estado=planeado)
     estado_filtro = request.GET.get('estado')
     
@@ -63,6 +87,9 @@ def pagina_viajes_planeados(request):
 def pagina_detalle_viaje(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
     
+    # Verifica si el usuario logueado ya está en la lista de participantes
+    es_participante = viaje.participantes.filter(usuario=request.user).exists() if request.user.is_authenticated else False
+
     # ESTA LÍNEA ES LA CLAVE: Trae a los amigos de la base de datos
     participantes_list = viaje.participantes.all() 
     
@@ -87,6 +114,7 @@ def pagina_detalle_viaje(request, viaje_id):
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
         'participantes': participantes_list, # <--- Verifica que diga 'participantes'
+        'es_participante': es_participante,
         'total_gastado': total_gastado,
         'presupuesto_restante': presupuesto_restante,
         'duracion_viaje_dias': duracion, 
