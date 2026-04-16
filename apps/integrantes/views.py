@@ -3,12 +3,31 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from .services import lista_integrantes
 
+from apps.gestion_viajes.models import Viaje
+from apps.integrantes.services.lista_integrantes import lista_integrantes_viaje, datos_viaje, usuario_es_organizador
+
 # Create your views here.
-def integrantes_viaje(request, id_viaje, usuario_id):
+def integrantes_viaje(request, id_viaje, usuario_id=2):
+    viaje = get_object_or_404(Viaje, id=id_viaje)
 
-    lista_integrantes.lista_integrantes_viaje(id_viaje=id_viaje)
+    integrantes = lista_integrantes_viaje(
+        viaje=viaje,
+        usuario_id=usuario_id
+    )
 
-    return render(request, 'integrantes/revisar_lista.html')
+    es_organizador_actual = usuario_es_organizador(
+        viaje=viaje,
+        id_usuario=usuario_id
+    )
+
+    viaje_info = datos_viaje(viaje)
+
+    return render(request, "integrantes/revisar_lista.html", {
+        "viaje": viaje_info,
+        "integrantes": integrantes,
+        "usuario_actual_id": usuario_id,
+        "es_organizador_actual": es_organizador_actual,
+    })
 
 
 def integrantes_viaje_mock(request, id_viaje, usuario_id=1):
