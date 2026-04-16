@@ -518,6 +518,7 @@
         <div class="section-card">
             <div class="card-body">
                 <p class="section-label">Añadir gasto rápido</p>
+                {% if puede_registrar_gasto %}
                 <form action="{% url 'p_registrar_gasto' viaje.id %}" method="POST">
                     {% csrf_token %}
                     <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
@@ -536,6 +537,11 @@
                         <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
                     </div>
                 </form>
+                {% else %}
+                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: 0.78rem; text-align: center;">
+                    <strong>⚠️ {{ razon_no_puede_registrar }}</strong>
+                </div>
+                {% endif %}
             </div>
         </div>
 
