@@ -1,0 +1,134 @@
+[
+  {
+    "model": "autenticado.customuser",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$seed$abc123==",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "juan_perez",
+      "first_name": "Juan",
+      "last_name": "Pérez",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-01-01T00:00:00Z",
+      "email": "juan@correo.com",
+      "phone": "+525512345678",
+      "dob": "1990-05-15",
+      "currency": "MXN",
+      "profile_picture": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "autenticado.customuser",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$seed$abc123==",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "ana_garcia",
+      "first_name": "Ana",
+      "last_name": "García",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-01-02T00:00:00Z",
+      "email": "ana@correo.com",
+      "phone": "+525523456789",
+      "dob": "1992-08-20",
+      "currency": "MXN",
+      "profile_picture": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "autenticado.customuser",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$seed$abc123==",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "carlos_lopez",
+      "first_name": "Carlos",
+      "last_name": "López",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-01-03T00:00:00Z",
+      "email": "carlos@correo.com",
+      "phone": "+525534567890",
+      "dob": "1988-03-10",
+      "currency": "MXN",
+      "profile_picture": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "autenticado.customuser",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$seed$abc123==",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "maria_torres",
+      "first_name": "María",
+      "last_name": "Torres",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-01-04T00:00:00Z",
+      "email": "maria@correo.com",
+      "phone": "+525545678901",
+      "dob": "1995-11-30",
+      "currency": "MXN",
+      "profile_picture": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "autenticado.customuser",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$seed$abc123==",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "pedro_ruiz",
+      "first_name": "Pedro",
+      "last_name": "Ruiz",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-01-05T00:00:00Z",
+      "email": "pedro@correo.com",
+      "phone": "+525556789012",
+      "dob": "1993-07-22",
+      "currency": "MXN",
+      "profile_picture": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "autenticado.customuser",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$seed$abc123==",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "sofia_mendez",
+      "first_name": "Sofía",
+      "last_name": "Méndez",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-01-06T00:00:00Z",
+      "email": "sofia@correo.com",
+      "phone": "+525567890123",
+      "dob": "1997-02-14",
+      "currency": "MXN",
+      "profile_picture": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  }
+]
