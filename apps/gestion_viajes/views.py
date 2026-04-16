@@ -106,9 +106,33 @@ def pagina_detalle_viaje(request, viaje_id):
         porcentaje_gastado = (total_gastado / viaje.presupuesto_estimado) * 100
         porcentaje_gastado = min(porcentaje_gastado, 100)  # tope en 100%
     else:
-        porcentaje_gastado = 0
+        porcentaje_gastado = 0  
 
-   
+    # VALIDACIONES PARA EL FORMULARIO DE GASTOS
+    puede_registrar_gasto = True
+    razon_no_puede_registrar = ""
+    
+    # 1. Verificar si el estado del viaje es "finalizado"
+    if viaje.estado == 'finalizado':
+        puede_registrar_gasto = False
+        razon_no_puede_registrar = "No puedes registrar gastos en un viaje finalizado."
+    
+    # 2. Verificar si el presupuesto está en cifras negativas
+    elif presupuesto_restante < 0:
+        puede_registrar_gasto = False
+        razon_no_puede_registrar = "No puedes registrar más gastos, el presupuesto ya es negativo."
+    
+    # 3. Verificar si el rol del usuario es "integrante"
+    else:
+        if request.user.is_authenticated:
+            participante = Participante.objects.filter(
+                viaje=viaje,
+                usuario=request.user
+            ).first()
+            
+            if participante and participante.rol == 'integrante':
+                puede_registrar_gasto = False
+                razon_no_puede_registrar = "Solo los organizadores pueden registrar gastos."
 
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
@@ -117,7 +141,9 @@ def pagina_detalle_viaje(request, viaje_id):
         'total_gastado': total_gastado,
         'presupuesto_restante': presupuesto_restante,
         'duracion_viaje_dias': duracion, 
-        'porcentaje_gastado': porcentaje_gastado
+        'porcentaje_gastado': porcentaje_gastado,
+        'puede_registrar_gasto': puede_registrar_gasto,
+        'razon_no_puede_registrar': razon_no_puede_registrar
     })
 
 #5.1 Calculo de la duracion de un viaje 
@@ -173,7 +199,30 @@ def registrar_gasto(request, viaje_id):
         cantidad = request.POST.get('cantidad')
         categoria = request.POST.get('categoria')
         
-        # Creamos el gasto ligado a este viaje
+        # VALIDACIÓN 1: El estado del viaje no puede ser "finalizado"
+        if viaje.estado == 'finalizado':
+            # Redirigimos sin guardar el gasto
+            return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        
+        # VALIDACIÓN 2: Verificar que el presupuesto no esté en cifras negativas
+        total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+        presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
+        
+        # Si la suma de este gasto + lo ya gastado excede el presupuesto
+        if presupuesto_restante < 0:
+            return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        
+        # VALIDACIÓN 3: El rol del usuario no puede ser "integrante"
+        if request.user.is_authenticated:
+            participante = Participante.objects.filter(
+                viaje=viaje,
+                usuario=request.user
+            ).first()
+            
+            if participante and participante.rol == 'integrante':
+                return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        
+        # Si pasa todas las validaciones, creamos el gasto ligado a este viaje
         Gasto.objects.create(
             viaje=viaje,
             concepto=concepto,
