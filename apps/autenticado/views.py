@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, get_user_model
 from .models import CustomUser
 from django.contrib import messages
 from django.http import JsonResponse  # <-- NUEVO IMPORT NECESARIO
+
+User = get_user_model()
 
 # Create your views here.
 
@@ -33,17 +35,22 @@ def login_view(request):
         correo = request.POST.get('email')
         contra = request.POST.get('password')
 
-        # 2. Django busca si el usuario existe y la contraseña es correcta
-        # Como se uso el correo como username en el registro anterior:
-        user = authenticate(request, username=correo, password=contra)
-
-        if user is not None:
-            # SI EXISTE: Iniciamos sesión y mandamos al home
-            login(request, user)
-            return redirect('core:home')
+        # 2. Verificamos primero si el correo existe en la bd
+        user_exists = User.objects.filter(email=correo).exists()
+        
+        if not user_exists:
+            messages.error(request, "Usuario inexistente. Por favor, verifica tu correo o regístrate.")
         else:
-            # NO EXISTE o datos mal: Mandamos error
-            messages.error(request, "Correo o contraseña incorrectos.")
+            # 3. Si el correo existe, intentamos autenticar la contraseña
+            user = authenticate(request, username=correo, password=contra)        
+            
+            if user is not None:
+                # SI EXISTE: Iniciamos sesión y mandamos al home
+                login(request, user)
+                return redirect('core:home')
+            else:
+                # NO EXISTE o datos mal: Mandamos error
+                messages.error(request, "Contraseña incorrecta. Inténtalo de nuevo.")
             
     return render(request, 'autenticado/login.html')
 

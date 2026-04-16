@@ -85,6 +85,33 @@
         transition: color 0.2s;
     }
     .auth-links a:hover, .terms-link:hover { color: var(--turquesa); }
+
+    .alert-custom {
+        border-radius: 14px;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1.5px solid transparent;
+    }
+
+    .alert-error .alert-icon, .alert-error .alert-text {
+        color: #DC3545;
+    }
+
+    .alert-success {
+        background-color: #F0FFF4;
+        border-color: #C6F6D5;
+    }
+
+    .alert-success .alert-icon, .alert-success .alert-text {
+        color: #2F855A;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 
 <div class="container-fluid p-0 vh-100 d-flex">
@@ -118,6 +145,17 @@
                 </div>
 
                 <h1 class="text-turquesa fw-bold mb-5" style="font-size: 32px; letter-spacing: -0.5px;">¡Bienvenido de nuevo!</h1>
+               
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert-custom mb-4 alert-{{ message.tags }}">
+                            <span class="alert-icon">
+                                {% if message.tags == 'success' %}✓{% else %}⚠{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
                 <form method="POST" id="loginForm" class="text-start">
                     {% csrf_token %}
