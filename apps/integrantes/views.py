@@ -45,6 +45,37 @@ def lista_integrantes(request, id_viaje):
         'usuario_actual_id':    request.user.id,
     })
 
+def informacion_integrante(request, id_viaje, id_usuario):
+    # 🔹 obtener viaje
+    viaje = get_object_or_404(Viaje, id=id_viaje)
+
+    # 🔹 obtener usuario
+    usuario = get_object_or_404(CustomUser, id=id_usuario)
+
+    # 🔹 obtener relación participante (usuario dentro del viaje)
+    participante = get_object_or_404(
+        Participante,
+        viaje=viaje,
+        usuario=usuario
+    )
+
+    # 🔹 verificar si es organizador en este viaje
+    es_organizador = participante.rol == "organizador"
+
+    # 🔹 viajes del usuario (para la sección "viajes compartidos")
+    viajes_usuario = (
+        Participante.objects
+        .filter(usuario=usuario)
+        .select_related("viaje")
+    )
+
+    return render(request, "integrantes/visualizar_perfil.html", {
+        "usuario": usuario,
+        "viaje_actual": viaje,
+        "participante": participante,
+        "es_organizador": es_organizador,
+        "viajes": viajes_usuario,
+    })
 
 @login_required
 def eliminar_integrante(request, id_integrante):

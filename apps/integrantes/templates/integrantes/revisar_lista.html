@@ -52,7 +52,12 @@
 
       <!-- Avatar + Nombre + Rol -->
       <div class="d-flex align-items-center gap-3 flex-wrap">
-        <div class="avatar-circle">{{ user.nombre|first }}</div>
+        <a
+          href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
+        >
+          <div class="avatar-circle">{{ user.nombre|first }}</div>
+        </a>
+        
         <div class="fw-semibold">
           {{ user.nombre }}
           {% if user.es_actual %}
@@ -66,17 +71,18 @@
 
       <!-- ── Botones de acción ────────────────────────── -->
       <div class="d-flex align-items-center gap-2">
-        {% if not user.es_organizador %}
 
-          <!-- Llamar (visible para todos) -->
-          <a
-            href="tel:{{ user.telefono }}"
-            class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
-            style="width: 36px; height: 36px"
-            title="Llamar a {{ user.nombre }}"
-          >
-            <i class="bi bi-telephone-fill"></i>
-          </a>
+        <!-- Llamar (visible para todos) -->
+        <a
+          href="tel:{{ user.telefono }}"
+          class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
+          style="width: 36px; height: 36px"
+          title="Llamar a {{ user.nombre }}"
+        >
+          <i class="bi bi-telephone-fill"></i>
+        </a>
+
+        {% if not user.es_organizador %}
 
           {% if es_organizador_actual %}
             <!-- Eliminar integrante -->
