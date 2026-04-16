@@ -3,7 +3,6 @@ from .models import Viaje, Gasto, Participante# Importamos tu modelo para escrib
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum # Importamos Sum para hacer matemáticas
 from django.contrib.auth import get_user_model # Importa esto al principio
-
 # 1. Página de inicio del módulo
 def pagina_inicio(request):
     return render(request, 'gestion_viajes/inicio.html')

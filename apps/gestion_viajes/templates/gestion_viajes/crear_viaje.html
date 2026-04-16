@@ -251,6 +251,9 @@
                                 <label class="fw-bold mb-1">Fecha de fin <span class="text-danger">*</span></label>
                                 <input type="date" name="fecha_fin" class="form-control input-field" required>
                             </div>
+                            <div id="errores-fechas" class="d-none mt-2 p-2 rounded-3" 
+                                 style="background-color:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:0.75rem;">
+                            </div>
                             <div class="col-12 col-md-6">
                                 <label class="fw-bold mb-1">Máx. integrantes <span class="text-danger">*</span></label>
                                 <input type="number" name="capacidad_max" min="2" placeholder="ej. 10" class="form-control input-field" required>
@@ -306,6 +309,54 @@
     </div>
 
     <script>
+const hoy = new Date();
+const yyyy = hoy.getFullYear();
+const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+const dd = String(hoy.getDate()).padStart(2, '0');
+const fechaHoy = `${yyyy}-${mm}-${dd}`;
+
+const fechaInicio = document.querySelector('[name="fecha_inicio"]');
+const fechaFin = document.querySelector('[name="fecha_fin"]');
+
+fechaInicio.min = fechaHoy;
+fechaFin.min = fechaHoy;
+
+function validarFechas() {
+    let errores = [];
+
+    if (fechaInicio.value && fechaInicio.value < fechaHoy) {
+        errores.push("• La fecha de inicio no puede ser menor a hoy.");
+        fechaInicio.classList.add("is-invalid");
+    } else {
+        fechaInicio.classList.remove("is-invalid");
+    }
+
+    if (fechaFin.value && fechaFin.value < fechaHoy) {
+        errores.push("• La fecha de fin no puede ser menor a hoy.");
+        fechaFin.classList.add("is-invalid");
+    } else {
+        fechaFin.classList.remove("is-invalid");
+    }
+
+    if (fechaInicio.value && fechaFin.value && fechaFin.value < fechaInicio.value) {
+        errores.push("• La fecha de fin no puede ser menor a la fecha de inicio.");
+        fechaFin.classList.add("is-invalid");
+    }
+
+    const contenedor = document.getElementById("errores-fechas");
+    if (errores.length > 0) {
+        contenedor.innerHTML = errores.map(e => `<p class="mb-1">${e}</p>`).join("");
+        contenedor.classList.remove("d-none");
+    } else {
+        contenedor.innerHTML = "";
+        contenedor.classList.add("d-none");
+    }
+}
+
+fechaInicio.addEventListener("change", validarFechas);
+fechaFin.addEventListener("change", validarFechas);
+
+
         const estadosMap = {
             "Aguascalientes": "MX-AGU",
             "Baja California": "MX-BCN",
