@@ -3,32 +3,64 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from .services import lista_integrantes
 
-from apps.gestion_viajes.models import Viaje
-from apps.integrantes.services.lista_integrantes import lista_integrantes_viaje, datos_viaje, usuario_es_organizador
+from apps.gestion_viajes.models import Viaje, Participante
+from apps.autenticado.models import CustomUser
+from apps.integrantes.services import lista_integrantes, viaje_data
 
 # Create your views here.
-def integrantes_viaje(request, id_viaje, usuario_id=2):
+def integrantes_viaje(request, id_viaje, id_usuario=1):
     viaje = get_object_or_404(Viaje, id=id_viaje)
 
-    integrantes = lista_integrantes_viaje(
+    integrantes = lista_integrantes.lista_integrantes_viaje(
         viaje=viaje,
-        usuario_id=usuario_id
+        usuario_id=id_usuario
     )
 
-    es_organizador_actual = usuario_es_organizador(
+    es_organizador_actual = lista_integrantes.usuario_es_organizador(
         viaje=viaje,
-        id_usuario=usuario_id
+        id_usuario=id_usuario
     )
 
-    viaje_info = datos_viaje(viaje)
+    viaje_info = viaje_data.datos_viaje(viaje)
 
     return render(request, "integrantes/revisar_lista.html", {
         "viaje": viaje_info,
         "integrantes": integrantes,
-        "usuario_actual_id": usuario_id,
+        "usuario_actual_id": id_usuario,
         "es_organizador_actual": es_organizador_actual,
     })
 
+def informacion_integrante(request, id_viaje, id_usuario):
+    # 🔹 obtener viaje
+    viaje = get_object_or_404(Viaje, id=id_viaje)
+
+    # 🔹 obtener usuario
+    usuario = get_object_or_404(CustomUser, id=id_usuario)
+
+    # 🔹 obtener relación participante (usuario dentro del viaje)
+    participante = get_object_or_404(
+        Participante,
+        viaje=viaje,
+        usuario=usuario
+    )
+
+    # 🔹 verificar si es organizador en este viaje
+    es_organizador = participante.rol == "organizador"
+
+    # 🔹 viajes del usuario (para la sección "viajes compartidos")
+    viajes_usuario = (
+        Participante.objects
+        .filter(usuario=usuario)
+        .select_related("viaje")
+    )
+
+    return render(request, "integrantes/visualizar_perfil.html", {
+        "usuario": usuario,
+        "viaje_actual": viaje,
+        "participante": participante,
+        "es_organizador": es_organizador,
+        "viajes": viajes_usuario,
+    })
 
 def integrantes_viaje_mock(request, id_viaje, usuario_id=1):
     """
@@ -129,13 +161,3 @@ def asignar_organizador_mock(request, id_integrante):
     usuario_actual_id = int(request.POST.get("usuario_actual_id", 1))
     print(f"[MOCK] Integrante {id_integrante} es ahora organizador del viaje {id_viaje}")
     return redirect("integrantes:mock_integrantes_como", id_viaje=id_viaje, usuario_id=usuario_actual_id)
-
-def informacion_integrante(request, id_viaje):
-    puntos = [
-        {"x": 10, "y": 15},
-        {"x": 12, "y": 18},
-        {"x": 15, "y": 20},
-        {"x": 18, "y": 25},
-    ]
-    
-    return render(request, "integrantes/visualizar_perfil.html", {"puntos": puntos})

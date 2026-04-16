@@ -5,6 +5,7 @@ app_name = 'integrantes'
 
 urlpatterns = [
     path('viaje/<int:id_viaje>/integrantes/', views.integrantes_viaje, name='integrantes_viaje'),
+    path('viaje/<int:id_viaje>/integrante/<int:id_usuario>/', views.informacion_integrante, name='informacion_integrante'),
     path("viajes/integrantes/<int:id_integrante>/eliminar/", views.eliminar_integrante_mock, name="eliminar_integrante_mock"),
     path("viajes/integrantes/<int:id_integrante>/asignar-organizador/", views.asignar_organizador_mock, name="asignar_organizador"),
     path('mock/viaje/<int:id_viaje>/integrantes/', views.integrantes_viaje_mock, name='mock_integrantes'),
