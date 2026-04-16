@@ -1,0 +1,32 @@
+[
+  {
+    "model": "gestion_viajes.viaje",
+    "pk": 1,
+    "fields": {
+      "nombre": "Viaje a Cancún",
+      "destino": "Quintana Roo",
+      "descripcion": "Un viaje de playa y relax en el Caribe mexicano.",
+      "fecha_inicio": "2025-07-10",
+      "fecha_fin": "2025-07-17",
+      "capacidad_max": 10,
+      "presupuesto_estimado": "15000.00",
+      "estado": "planeado",
+      "imagen_destino": ""
+    }
+  },
+  {
+    "model": "gestion_viajes.viaje",
+    "pk": 2,
+    "fields": {
+      "nombre": "Fin de semana en Oaxaca",
+      "destino": "Oaxaca",
+      "descripcion": "Gastronomía, cultura y mercados tradicionales.",
+      "fecha_inicio": "2025-08-01",
+      "fecha_fin": "2025-08-04",
+      "capacidad_max": 6,
+      "presupuesto_estimado": "8000.00",
+      "estado": "planeado",
+      "imagen_destino": ""
+    }
+  }
+]

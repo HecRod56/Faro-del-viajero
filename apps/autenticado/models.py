@@ -5,7 +5,7 @@ class CustomUser(AbstractUser):
     # Identificador principal
     email = models.EmailField(unique=True)
     
-    # 👇 AHORA SÍ, TUS CAMPOS PERSONALIZADOS 👇
+    # Campos adicionales
     phone = models.CharField(max_length=15, blank=True, null=True)
     dob = models.DateField(null=True, blank=True, verbose_name="Fecha de nacimiento")
     
@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
     profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']  # username sigue siendo requerido por AbstractUser, aunque no lo uses para login
 
     # Solución al choque de nombres (Error E304)
     groups = models.ManyToManyField(
