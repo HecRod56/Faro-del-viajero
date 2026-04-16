@@ -15,10 +15,8 @@ def home_temporal(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #CONEXIÓN DE RAIZ CON LA APP
-    #path('', home_temporal, name='home'),  # <-- ¡ESTO SALVA AL base.html!
     path('', include('core.urls')),
-    path('', include('integrantes.urls')),
+    path('viajes/integrantes/', include('apps.integrantes.urls')),  # ← cambiado
     path('', include('apps.autenticado.urls')),
     path('viajes/', include('apps.gestion_viajes.urls')),
     path('', include('actividades.urls')),

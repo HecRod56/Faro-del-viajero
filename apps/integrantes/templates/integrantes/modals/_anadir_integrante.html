@@ -16,7 +16,7 @@
             Cupos disponibles: <strong>{{ viaje.cupos_disponibles }}</strong> de {{ viaje.cupos_totales }}
           </span>
         </div>
-        <form id="formAnadirIntegrante" method="POST" action="{% url 'integrantes:anadir_integrante_mock' viaje.id %}">
+        <form id="formAnadirIntegrante" method="POST" action="{% url 'integrantes:anadir' viaje.id %}">
           {% csrf_token %}
           <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
           <label for="correoNuevoIntegrante" class="form-label fw-semibold small">

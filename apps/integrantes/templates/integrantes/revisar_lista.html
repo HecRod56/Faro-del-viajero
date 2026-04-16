@@ -88,7 +88,7 @@
               data-bs-toggle="modal"
               data-bs-target="#modalEliminarIntegrante"
               data-nombre="{{ user.nombre }}"
-              data-id="{{ user.id }}"
+              data-url-eliminar="{% url 'integrantes:eliminar' user.id %}"
             >
               <i class="bi bi-trash-fill"></i>
             </button>
@@ -103,7 +103,7 @@
               data-bs-toggle="modal"
               data-bs-target="#modalAsignarOrganizador"
               data-nombre="{{ user.nombre }}"
-              data-id="{{ user.id }}"
+              data-url-asignar="{% url 'integrantes:asignar_organizador' user.id %}"
             >
               <i class="bi bi-person-fill-up"></i>
             </button>
@@ -143,19 +143,23 @@
   // Modal: Eliminar — poblar nombre e id en el form
   document.getElementById("modalEliminarIntegrante")
     .addEventListener("show.bs.modal", function (event) {
-      const boton = event.relatedTarget;
-      document.getElementById("modalNombreIntegrante").textContent = boton.getAttribute("data-nombre");
-      document.getElementById("formEliminarIntegrante").action =
-        `/viajes/integrantes/${boton.getAttribute("data-id")}/eliminar/`;
+      const boton  = event.relatedTarget;
+      const nombre = boton.getAttribute("data-nombre");
+      const url    = boton.getAttribute("data-url-eliminar");
+
+      document.getElementById("modalNombreIntegrante").textContent = nombre;
+      document.getElementById("formEliminarIntegrante").action = url;
     });
 
   // Modal: Asignar organizador — poblar nombre e id en el form
   document.getElementById("modalAsignarOrganizador")
     .addEventListener("show.bs.modal", function (event) {
-      const boton = event.relatedTarget;
-      document.getElementById("modalNombreAsignar").textContent = boton.getAttribute("data-nombre");
-      document.getElementById("formAsignarOrganizador").action =
-        `/viajes/integrantes/${boton.getAttribute("data-id")}/asignar-organizador/`;
+      const boton  = event.relatedTarget;
+      const nombre = boton.getAttribute("data-nombre");
+      const url    = boton.getAttribute("data-url-asignar");
+
+      document.getElementById("modalNombreAsignar").textContent = nombre;
+      document.getElementById("formAsignarOrganizador").action = url;
     });
 </script>
 
