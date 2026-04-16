@@ -1,6 +1,11 @@
-{% extends "core/base.html" %} {% load static %} {% block head %}
-<link rel="stylesheet" href="{% static 'integrantes/lista.css' %}" />
-{% endblock %} {% block content %}
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'integrantes/lista.css' %}" />
+{% endblock %}
+
+{% block content %}
 
 <div class="container mt-4">
 
@@ -32,7 +37,6 @@
       class="img-fluid rounded-4 w-100"
       style="height: 180px; object-fit: cover"
     />
-    <!-- Badge de estado (esquina superior derecha) -->
     <div class="position-absolute top-0 end-0 p-2">
       <span class="badge bg-white text-dark rounded-pill px-3 shadow-sm">
         <span class="text-success me-1">●</span>{{ viaje.estado }}
@@ -62,8 +66,8 @@
 
       <!-- ── Botones de acción ────────────────────────── -->
       <div class="d-flex align-items-center gap-2">
-
         {% if not user.es_organizador %}
+
           <!-- Llamar (visible para todos) -->
           <a
             href="tel:{{ user.telefono }}"
@@ -75,7 +79,7 @@
           </a>
 
           {% if es_organizador_actual %}
-            <!-- Eliminar integrante (solo Organizador) -->
+            <!-- Eliminar integrante -->
             <button
               type="button"
               class="btn btn-sm btn-outline-danger rounded-circle p-0 d-flex align-items-center justify-content-center"
@@ -89,7 +93,7 @@
               <i class="bi bi-trash-fill"></i>
             </button>
 
-            <!-- Asignar organizador (solo Organizador, para no-actuales) -->
+            <!-- Asignar organizador (no al usuario actual) -->
             {% if not user.es_actual %}
             <button
               type="button"
@@ -104,23 +108,16 @@
               <i class="bi bi-person-fill-up"></i>
             </button>
             {% endif %}
+          {% endif %}
 
-          {% endif %}{# fin es_organizador_actual #}
-        {% endif %}{# fin not user.es_organizador #}
-
+        {% endif %}
       </div>
     </div>
     {% endfor %}
 
-    <!-- Botón Abandonar (solo para integrantes, no para el organizador actual) -->
+    <!-- Botón Abandonar (solo integrantes) -->
     {% if not es_organizador_actual %}
     <div class="mt-4">
-      <button
-        class="btn btn-danger rounded-pill px-4"
-        data-bs-toggle="modal"
-        data-bs-target="#modalAbandonarViaje"
-      >
-        <i class="bi bi-box-arrow-right me-2"></i>
       <button
         class="btn btn-danger rounded-pill px-4"
         data-bs-toggle="modal"
@@ -136,182 +133,14 @@
 </div>
 
 <!-- ══ MODALES ════════════════════════════════════════════ -->
-
-<!-- Modal: Eliminar integrante -->
-<div class="modal fade" id="modalEliminarIntegrante" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold" id="modalEliminarLabel">
-          <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-          Eliminar integrante
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body pt-2">
-        <p class="mb-0">
-          ¿Estás seguro de que deseas eliminar a
-          <strong id="modalNombreIntegrante"></strong>
-          del viaje? Esta acción no se puede deshacer.
-        </p>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
-          Cancelar
-        </button>
-        <form id="formEliminarIntegrante" method="POST" action="">
-          {% csrf_token %}
-          <input type="hidden" name="id_viaje" value="{{ viaje.id }}" />
-          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
-          <button type="submit" class="btn btn-danger rounded-pill px-4">
-            <i class="bi bi-trash-fill me-1"></i> Eliminar
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Añadir integrante (solo Organizador) -->
-<div class="modal fade" id="modalAnadirIntegrante" tabindex="-1" aria-labelledby="modalAnadirLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold" id="modalAnadirLabel">
-          <i class="bi bi-person-plus-fill me-2" style="color: var(--color-primary)"></i>
-          Añadir integrante
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex align-items-center gap-2 mb-3 p-2 rounded-3" style="background-color: #e8f7f5">
-          <i class="bi bi-people-fill" style="color: var(--color-primary)"></i>
-          <span class="small">
-            Cupos disponibles: <strong>{{ viaje.cupos_disponibles }}</strong> de {{ viaje.cupos_totales }}
-          </span>
-        </div>
-        <form id="formAnadirIntegrante" method="POST" action="{% url 'integrantes:anadir_integrante_mock' viaje.id %}">
-          {% csrf_token %}
-          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
-          <label for="correoNuevoIntegrante" class="form-label fw-semibold small">Correo electrónico</label>
-          <input
-            type="email"
-            id="correoNuevoIntegrante"
-            name="correo"
-            class="form-control rounded-3"
-            placeholder="ejemplo@correo.com"
-            required
-          />
-          <div class="form-text" style="color: var(--color-text-secondary)">
-            El usuario debe estar registrado en la plataforma.
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" form="formAnadirIntegrante" class="btn btn-primary rounded-pill px-4">
-          <i class="bi bi-person-check-fill me-1"></i> Añadir
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Abandonar viaje -->
-<div class="modal fade" id="modalAbandonarViaje" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-box-arrow-right text-danger me-2"></i>
-          Abandonar viaje
-        </h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Cerrar"
-        ></button>
-      </div>
-      <div class="modal-body pt-2">
-        <p class="mb-0">
-          ¿Estás seguro de que deseas abandonar <strong>{{ viaje.nombre }}</strong>?
-          Esta acción no se puede deshacer.
-        </p>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button
-          type="button"
-          class="btn btn-secondary rounded-pill px-4"
-          data-bs-dismiss="modal"
-        >
-          Cancelar
-        </button>
-        <form
-          method="POST"
-          action="{% url 'integrantes:abandonar_viaje' viaje.id %}"
-        >
-          {% csrf_token %}
-          <input
-            type="hidden"
-            name="usuario_actual_id"
-            value="{{ usuario_actual_id }}"
-          />
-          <button type="submit" class="btn btn-danger rounded-pill px-4">
-            <i class="bi bi-box-arrow-right me-1"></i> Abandonar
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Asignar organizador -->
-<div class="modal fade" id="modalAsignarOrganizador" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-person-fill-up text-success me-2"></i>
-          Asignar organizador
-        </h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Cerrar"
-        ></button>
-      </div>
-      <div class="modal-body pt-2">
-        <p class="mb-0">
-          ¿Deseas asignar a <strong id="modalNombreAsignar"></strong> como nuevo organizador?
-          Tú pasarás a ser integrante.
-        </p>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button
-          type="button"
-          class="btn btn-secondary rounded-pill px-4"
-          data-bs-dismiss="modal"
-        >
-          Cancelar
-        </button>
-        <form id="formAsignarOrganizador" method="POST" action="">
-          {% csrf_token %}
-          <input type="hidden" name="id_viaje" value="{{ viaje.id }}" />
-          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
-          <button type="submit" class="btn btn-success rounded-pill px-4">
-            <i class="bi bi-person-fill-up me-1"></i> Confirmar
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+{% include "integrantes/modals/_eliminar_integrante.html" %}
+{% include "integrantes/modals/_anadir_integrante.html" %}
+{% include "integrantes/modals/_abandonar_viaje.html" %}
+{% include "integrantes/modals/_asignar_organizador.html" %}
 
 <!-- ══ SCRIPTS ════════════════════════════════════════════ -->
 <script>
-  // Modal: Eliminar integrante — poblar nombre e id en el form
+  // Modal: Eliminar — poblar nombre e id en el form
   document.getElementById("modalEliminarIntegrante")
     .addEventListener("show.bs.modal", function (event) {
       const boton = event.relatedTarget;
