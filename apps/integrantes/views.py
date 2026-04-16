@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from apps.gestion_viajes.models import Viaje, Participante
+from apps.autenticado.models import CustomUser
 
 @login_required
-def lista_integrantes(request, id_viaje):
+def lista_integrantes(request, id_viaje, id_usuario=None):
     viaje = get_object_or_404(Viaje, id=id_viaje)
     participantes = Participante.objects.filter(viaje=viaje).select_related('usuario')
 
