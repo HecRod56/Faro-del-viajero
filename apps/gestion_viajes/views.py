@@ -3,6 +3,8 @@ from .models import Viaje, Gasto, Participante# Importamos tu modelo para escrib
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum # Importamos Sum para hacer matemáticas
 from django.contrib.auth import get_user_model # Importa esto al principio
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 # 1. Página de inicio del módulo
 def pagina_inicio(request):
@@ -189,7 +191,6 @@ def registrar_gasto(request, viaje_id):
 
 # 9. Vista para añadir un participante (por ahora simplificado)
 
-
 def añadir_participante(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
     User = get_user_model() # Esto obtiene automáticamente tu CustomUser
@@ -199,13 +200,27 @@ def añadir_participante(request, viaje_id):
     if not user.is_authenticated:
         user = User.objects.first() 
 
-    if user: # Si encontramos un usuario (ya sea el logueado o el primero de la DB)
-        if not Participante.objects.filter(viaje=viaje, usuario=user).exists():
-            Participante.objects.create(
-                viaje=viaje,
-                usuario=user,
-                rol='integrante'
-            )
+    if user:
+        # 1. Contar cuántos participantes tiene ya este viaje
+        cantidad_actual = Participante.objects.filter(viaje=viaje).count()
+
+        # 2. Validar si ya existe el usuario en el viaje
+        ya_es_participante = Participante.objects.filter(viaje=viaje, usuario=user).exists()
+
+        if not ya_es_participante:
+            # 3. Validar capacidad máxima
+            if cantidad_actual < viaje.capacidad_max:
+                Participante.objects.create(
+                    viaje=viaje,
+                    usuario=user,
+                    rol='integrante'
+                )
+                messages.success(request, "¡Te has unido al viaje con éxito!")
+            else:
+                # Si llega aquí, es porque alguien intentó entrar por URL y el viaje está lleno
+                messages.error(request, "Lo sentimos, este viaje ya alcanzó su capacidad máxima.")
+        else:
+            messages.info(request, "Ya formas parte de este viaje.")
     
     return redirect('p_detalle_viaje', viaje_id=viaje.id)
 

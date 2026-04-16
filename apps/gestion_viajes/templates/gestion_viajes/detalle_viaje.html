@@ -172,6 +172,9 @@
     .organizer-avatar:first-child { margin-left: 0; }
 
     /* ── Presupuesto ── */
+    .presupuesto-negativo { color: #EF4444 !important; }
+    .presupuesto-positivo { color: #10B981 !important; }
+
     .budget-bar-bg {
         width: 100%;
         height: 7px;
@@ -185,6 +188,7 @@
         height: 100%;
         border-radius: 999px;
         background: var(--teal);
+        transition: width 0.3s ease;
     }
 
     /* ── Botones ── */
@@ -384,6 +388,9 @@
         padding: 0.85rem 1.5rem;
         border-top: 1px solid #F3F4F6;
     }
+
+    .text-danger-custom { color: #EF4444 !important; }
+    .text-success-custom { color: #10B981 !important; }
 </style>
 
 <!-- Hero full-width -->
@@ -443,12 +450,17 @@
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
                         <p class="section-label" style="margin: 0;">Integrantes</p>
+                        
                         {% if not es_participante %}
-                            <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
-                                + Unirme
-                            </a>
+                            {% if participantes|length < viaje.capacidad_max %}
+                                <a href="{% url 'p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
+                                    + Unirme
+                                </a>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: 0.65rem;">⚠️ Viaje Lleno</span>
+                            {% endif %}
                         {% else %}
-                            <span class="badge bg-success-subtle text-success rounded-pill">Ya eres parte</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: 0.65rem;">Ya eres parte</span>
                         {% endif %}
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
@@ -538,7 +550,7 @@
         <table class="gastos-table">
             <thead>
                 <tr>
-                    <th>{Concepto}</th>
+                    <th>Concepto</th>
                     <th>Categoría</th>
                     <th style="text-align: right;">Cantidad</th>
                 </tr>
@@ -571,8 +583,9 @@
                 <div style="font-size: 1rem; font-weight: 700; color: #EF4444;">-${{ total_gastado }}</div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label" style="margin-bottom: 0.3rem; color: {% if presupuesto_restante < 0 %}#EF4444{% else %}#10B981{% endif %};">Disponible</p>
-                <div style="font-size: 1rem; font-weight: 700; color: {% if presupuesto_restante < 0 %}#EF4444{% else %}#10B981{% endif %};">
+                <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="margin-bottom: 0.3rem;">Disponible</p>
+                    
+                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}" style="font-size: 1rem; font-weight: 700;">
                     ${{ presupuesto_restante }}
                 </div>
             </div>
@@ -586,7 +599,12 @@
                 <span class="txt-muted">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
-                <div class="budget-bar-fill" style="width: {{ porcentaje_gastado }}%;"></div>
+                <div id="progreso-viaje" class="budget-bar-fill" data-porcentaje="{{ porcentaje_gastado }}"></div>
+                <script>
+                    // Esto aplica el ancho después de que carga la página y no genera errores en el editor
+                    const bar = document.getElementById('progreso-viaje');
+                    bar.style.width = bar.dataset.porcentaje + '%';
+                </script>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span class="txt-muted">$0</span>
