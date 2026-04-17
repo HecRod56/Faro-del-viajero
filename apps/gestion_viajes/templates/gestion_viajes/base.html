@@ -1,12 +1,8 @@
-{% extends "base.html" %}
-
-{% block content %}
-
+{% extends "base.html" %} {% block content %}
     {% include "gestion_viajes/navbar_viaje.html" %}
 
     <div class="gestion-viajes-content">
         {% block viajes_content %}
-        {% endblock %}
+            {% endblock %}
     </div>
-
 {% endblock %}
