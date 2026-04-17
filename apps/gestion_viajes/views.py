@@ -87,66 +87,74 @@ def pagina_viajes_planeados(request):
 
 # 5. Vista para mostrar el detalle de un viaje específico
 def pagina_detalle_viaje(request, viaje_id):
+    # 1. Obtenemos el viaje o lanzamos 404
     viaje = get_object_or_404(Viaje, id=viaje_id)
     
-    # Verifica si el usuario logueado ya está en la lista de participantes
-    es_participante = viaje.participantes.filter(usuario=request.user).exists() if request.user.is_authenticated else False
+    # 2. --- BLOQUE DE SEGURIDAD RNF-06 (Control de Acceso) ---
+    # Verificamos si el usuario es participante antes de calcular nada
+    if request.user.is_authenticated:
+        participante_actual = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
+        
+        if not participante_actual:
+            from django.contrib import messages
+            messages.error(request, "Acceso denegado: No eres integrante de este viaje.")
+            return redirect('p_ver_mis_viajes')
+        
+        es_participante = True
+        rol_usuario = participante_actual.rol
+    else:
+        # Si no está autenticado, lo mandamos al login o lista
+        return redirect('login') 
 
-    # ESTA LÍNEA ES LA CLAVE: Trae a los amigos de la base de datos
+    # 3. LÓGICA DE CÁLCULOS (Presupuesto y Gastos)
+    # Traemos a todos los participantes para la lista lateral
     participantes_list = viaje.participantes.all() 
     
-    total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+    # Matemáticas de gastos
+    total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
     presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
 
-    # Se estima la duracion del viaje en dias 
-    duracion = duracion_viaje((viaje.fecha_fin-viaje.fecha_inicio).days)
-
-    # Logica para la barra del presupuesto gastado
-    total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
-    presupuesto_restante = viaje.presupuesto_estimado - total_gastado
-
+    # Porcentaje para la barra de progreso
     if viaje.presupuesto_estimado and viaje.presupuesto_estimado > 0:
-        porcentaje_gastado = (total_gastado / viaje.presupuesto_estimado) * 100
-        porcentaje_gastado = min(porcentaje_gastado, 100)  # tope en 100%
+        porcentaje_gastado = min((total_gastado / viaje.presupuesto_estimado) * 100, 100)
     else:
         porcentaje_gastado = 0  
 
-    # VALIDACIONES PARA EL FORMULARIO DE GASTOS
+    # 4. CÁLCULO DE DURACIÓN
+    # Usamos tu función auxiliar duracion_viaje
+    duracion = duracion_viaje((viaje.fecha_fin - viaje.fecha_inicio).days)
+
+    # 5. REGLAS DE NEGOCIO PARA REGISTRO DE GASTOS
     puede_registrar_gasto = True
     razon_no_puede_registrar = ""
     
-    # 1. Verificar si el estado del viaje es "finalizado"
+    # Regla 1: Estado finalizado
     if viaje.estado == 'finalizado':
         puede_registrar_gasto = False
         razon_no_puede_registrar = "No puedes registrar gastos en un viaje finalizado."
     
-    # 2. Verificar si el presupuesto está en cifras negativas
+    # Regla 2: Presupuesto agotado
     elif presupuesto_restante < 0:
         puede_registrar_gasto = False
-        razon_no_puede_registrar = "No puedes registrar más gastos, el presupuesto ya es negativo."
+        razon_no_puede_registrar = "Presupuesto excedido. No se permiten más gastos."
     
-    # 3. Verificar si el rol del usuario es "integrante"
-    else:
-        if request.user.is_authenticated:
-            participante = Participante.objects.filter(
-                viaje=viaje,
-                usuario=request.user
-            ).first()
-            
-            if participante and participante.rol == 'integrante':
-                puede_registrar_gasto = False
-                razon_no_puede_registrar = "Solo los organizadores pueden registrar gastos."
+    # Regla 3: Solo organizadores (Rol)
+    elif rol_usuario == 'integrante':
+        puede_registrar_gasto = False
+        razon_no_puede_registrar = "Solo los organizadores pueden registrar gastos."
 
+    # 6. RENDERIZADO FINAL
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
-        'participantes': participantes_list, # <--- Verifica que diga 'participantes'
+        'participantes': participantes_list,
         'es_participante': es_participante,
         'total_gastado': total_gastado,
         'presupuesto_restante': presupuesto_restante,
         'duracion_viaje_dias': duracion, 
         'porcentaje_gastado': porcentaje_gastado,
         'puede_registrar_gasto': puede_registrar_gasto,
-        'razon_no_puede_registrar': razon_no_puede_registrar
+        'razon_no_puede_registrar': razon_no_puede_registrar,
+        'rol_usuario': rol_usuario # Útil para mostrar/ocultar botones en el HTML
     })
 
 #5.1 Calculo de la duracion de un viaje 
