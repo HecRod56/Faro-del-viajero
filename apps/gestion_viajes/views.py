@@ -108,7 +108,10 @@ def pagina_detalle_viaje(request, viaje_id):
 
     # 3. LÓGICA DE CÁLCULOS (Presupuesto y Gastos)
     # Traemos a todos los participantes para la lista lateral
-    participantes_list = viaje.participantes.all() 
+    participantes_list = viaje.participantes.all()
+    
+    # Obtener al organizador del viaje
+    organizador = participantes_list.filter(rol='organizador').first() 
     
     # Matemáticas de gastos
     total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
@@ -137,16 +140,12 @@ def pagina_detalle_viaje(request, viaje_id):
     elif presupuesto_restante < 0:
         puede_registrar_gasto = False
         razon_no_puede_registrar = "Presupuesto excedido. No se permiten más gastos."
-    
-    # Regla 3: Solo organizadores (Rol)
-    elif rol_usuario == 'integrante':
-        puede_registrar_gasto = False
-        razon_no_puede_registrar = "Solo los organizadores pueden registrar gastos."
 
     # 6. RENDERIZADO FINAL
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
         'participantes': participantes_list,
+        'organizador': organizador,
         'es_participante': es_participante,
         'total_gastado': total_gastado,
         'presupuesto_restante': presupuesto_restante,
@@ -223,26 +222,48 @@ def registrar_gasto(request, viaje_id):
         if presupuesto_restante < 0:
             return redirect('p_detalle_viaje', viaje_id=viaje.id)
         
-        # VALIDACIÓN 3: El rol del usuario no puede ser "integrante"
+        # VALIDACIÓN 3: El usuario debe ser participante del viaje
         if request.user.is_authenticated:
             participante = Participante.objects.filter(
                 viaje=viaje,
                 usuario=request.user
             ).first()
             
-            if participante and participante.rol == 'integrante':
+            if not participante:
                 return redirect('p_detalle_viaje', viaje_id=viaje.id)
         
-        # Si pasa todas las validaciones, creamos el gasto ligado a este viaje
-        Gasto.objects.create(
-            viaje=viaje,
-            concepto=concepto,
-            cantidad=cantidad,
-            categoria=categoria
-        )
+            # Si pasa todas las validaciones, creamos el gasto ligado a este viaje y al participante
+            Gasto.objects.create(
+                viaje=viaje,
+                pagado_por=participante,
+                concepto=concepto,
+                cantidad=cantidad,
+                categoria=categoria
+            )
         
         # Regresamos a la misma página de detalle para ver el gasto reflejado
         return redirect('p_detalle_viaje', viaje_id=viaje.id)
+    
+    return redirect('p_detalle_viaje', viaje_id=viaje.id)
+
+# 8.1 Vista para eliminar un gasto
+def eliminar_gasto(request, gasto_id):
+    gasto = get_object_or_404(Gasto, id=gasto_id)
+    viaje = gasto.viaje
+    
+    # Verificar que el usuario sea el que registró el gasto o un organizador
+    if request.user.is_authenticated:
+        participante = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
+        
+        if participante:
+            # Permite eliminar si es quien registró el gasto o si es organizador
+            if gasto.pagado_por.usuario == request.user or participante.rol == 'organizador':
+                gasto.delete()
+                messages.success(request, "Gasto eliminado correctamente.")
+            else:
+                messages.error(request, "No tienes permiso para eliminar este gasto.")
+        else:
+            messages.error(request, "No eres parte de este viaje.")
     
     return redirect('p_detalle_viaje', viaje_id=viaje.id)
 
