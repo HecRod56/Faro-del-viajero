@@ -1,0 +1,99 @@
+<style>
+    /* ── Sub-Navbar Viaje ── */
+    .sub-navbar-viaje {
+        background-color: #fff;
+        border-bottom: 1px solid #E5E7EB;
+        position: sticky;
+        top: 80px;
+        z-index: 40;
+        display: flex;
+        justify-content: center;
+    }
+
+    .sub-navbar-container {
+        max-width: 1100px;
+        width: 100%;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .sub-nav-link {
+        position: relative;
+        color: #6B7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.75rem 0;
+        transition: color 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .sub-nav-link:hover {
+        color: #149B7E;
+    }
+
+    .sub-nav-link.active {
+        color: #149B7E;
+        font-weight: 600;
+    }
+
+    .sub-nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #149B7E;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .integrantes-badge {
+        background-color: #EBFBFA;
+        color: #149B7E;
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .sub-navbar-container {
+            gap: 1rem;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .sub-nav-link {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<nav class="sub-navbar-viaje">
+    <div class="sub-navbar-container">
+        <a href="{% url 'p_detalle_viaje' viaje.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'p_detalle_viaje' %}active{% endif %}">
+            Resumen
+        </a>
+        <a href="#actividades" class="sub-nav-link {% if request.resolver_match.url_name == 'actividades' %}active{% endif %}">
+            Actividades
+        </a>
+        <a href="#gastos" class="sub-nav-link {% if request.resolver_match.url_name == 'gastos' %}active{% endif %}">
+            Gastos
+        </a>
+        <a href="#chat" class="sub-nav-link {% if request.resolver_match.url_name == 'chat' %}active{% endif %}">
+            Chat
+        </a>
+        <a href="#galeria" class="sub-nav-link {% if request.resolver_match.url_name == 'galeria' %}active{% endif %}">
+            Galería
+        </a>
+        <a href="{% url 'integrantes:integrantes_viaje' id_viaje=viaje.id usuario_id=request.user.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'integrantes_viaje' %}active{% endif %}">
+            Integrantes <span class="integrantes-badge">{{ viaje.participantes.count }}</span>
+        </a>
+    </div>
+</nav>

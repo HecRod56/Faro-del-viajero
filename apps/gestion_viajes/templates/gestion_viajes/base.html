@@ -4,6 +4,10 @@
 
     {% include "gestion_viajes/navbar_viaje.html" %}
 
+    {% if viaje %}
+        {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+    {% endif %}
+
     <div class="gestion-viajes-content">
         {% block viajes_content %}
         {% endblock %}
