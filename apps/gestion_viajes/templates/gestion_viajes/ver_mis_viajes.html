@@ -1,4 +1,11 @@
 {% extends "core/base.html" %}
+{% block subnav %}
+    <div style="background: white; border-bottom: 1px solid #E5E7EB; padding: 1rem 1.5rem;">
+        <nav style="font-size: 0.75rem; color: #9CA3AF;">
+            <span style="color: #1e293b; font-weight: 700;">Mis viajes</span>
+        </nav>
+    </div>
+{% endblock %}
 {% block content %}
 <style>
     body {
@@ -126,7 +133,6 @@
     </div>
   {% endfor %}
 {% endif %}
-    <p class="text-muted mb-1" style="font-size: 0.875rem;">Mis viajes</p>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold mb-0" style="font-size: 2.25rem; color: #374151;">Mis viajes</h1>
