@@ -1,0 +1,142 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .chat-item-active   { background: linear-gradient(135deg, #149B7E, #1BB59A); }
+    .chat-item-inactive { background: linear-gradient(135deg, #7ECECA, #9BD8D0); }
+    .chat-bg {
+        background-image: url('https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=900&auto=format&fit=crop&q=40');
+        background-size: cover;
+        background-position: center;
+    }
+    .members-bg {
+        background: linear-gradient(160deg, #149B7E, #0d6b58);
+    }
+</style>
+
+<!-- SUBNAV -->
+<div class="bg-white border-bottom px-4">
+    <div class="container-fluid">
+        <nav class="d-flex gap-2 align-items-center py-2" style="font-size:11px; font-weight:700;">
+            <a href="{% url 'p_ver_mis_viajes' %}" class="text-decoration-none" style="color:#149B7E;">Mis viajes</a>
+            <span class="text-muted">›</span>
+            <a href="{% url 'chat:lista_chats' %}" class="text-decoration-none" style="color:#149B7E;">Chat</a>
+            <span class="text-muted">›</span>
+            <span class="text-muted">Integrantes</span>
+        </nav>
+
+        <div class="d-flex gap-4">
+            <span class="text-muted pb-2">Resumen</span>
+            <span class="text-muted pb-2">Actividades</span>
+            <span class="text-muted pb-2">Gastos</span>
+            <span class="fw-bold pb-2 border-bottom border-2" style="color:#149B7E;">Chat</span>
+            <span class="text-muted pb-2">Galería</span>
+            <span class="fw-bold pb-2 border-bottom border-2" style="color:#149B7E;">Integrantes</span>
+        </div>
+    </div>
+</div>
+
+<main class="container-fluid px-4 py-3">
+    <div class="row g-3" style="height:calc(100vh - 220px); min-height:500px;">
+
+        <!-- IZQUIERDA -->
+        <div class="col-12 col-lg-3 d-flex flex-column gap-3 overflow-auto">
+            {% for v in viajes %}
+            <a href="{% url 'chat:chat_viaje' v.id %}" class="text-decoration-none">
+                <div class="{% if v.id == viaje.id %}chat-item-active{% else %}chat-item-inactive{% endif %} rounded-4 p-3 d-flex align-items-center gap-3 shadow-sm">
+                    
+                    <div style="width:48px;height:48px;" class="rounded-3 overflow-hidden">
+                        {% if v.imagen_destino %}
+                            <img src="{{ v.imagen_destino.url }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white fw-bold" style="background:rgba(255,255,255,.3);">
+                                {{ v.destino|first }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-white fw-bold mb-0 text-truncate" style="font-size:13px;">
+                            Viaje a {{ v.destino }}
+                        </p>
+                        <p class="text-white mb-0 fst-italic text-truncate" style="font-size:11px;opacity:.8;">
+                            {{ v.nombre }}
+                        </p>
+                    </div>
+
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- CENTRO -->
+        <div class="col-12 col-lg-6 chat-bg rounded-4 d-flex flex-column shadow-sm border overflow-hidden">
+
+            <div class="chat-item-active px-3 py-2 d-flex align-items-center">
+                <p class="text-white fw-bold mb-0">
+                    Viaje a {{ viaje.destino }}
+                </p>
+            </div>
+
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center text-white">
+                <span style="background:rgba(255,255,255,.8); color:#374151; padding:6px 12px; border-radius:20px;">
+                    Panel de integrantes
+                </span>
+            </div>
+
+        </div>
+
+        <!-- DERECHA: PARTICIPANTES -->
+        <div class="col-12 col-lg-3 members-bg rounded-4 d-flex flex-column shadow-sm overflow-hidden">
+
+            <!-- HEADER -->
+            <div class="position-relative" style="height:120px;">
+                {% if viaje.imagen_destino %}
+                    <img src="{{ viaje.imagen_destino.url }}" class="w-100 h-100 object-fit-cover" style="opacity:.7;">
+                {% endif %}
+                <div class="position-absolute bottom-0 w-100 p-3 text-white">
+                    <p class="fw-bold mb-0">Viaje a {{ viaje.destino }}</p>
+                    <small>Integrantes</small>
+                </div>
+            </div>
+
+            <!-- LISTA -->
+            <div class="flex-grow-1 overflow-auto p-3">
+
+                {% for p in participantes %}
+                <div class="d-flex align-items-center gap-2 mb-3">
+
+                    <!-- Avatar -->
+                    <img src="https://api.dicebear.com/7.x/personas/svg?seed={{ p.usuario.username }}"
+                         class="rounded-circle"
+                         style="width:32px;height:32px;">
+
+                    <!-- Info -->
+                    <div>
+                        <p class="text-white mb-0" style="font-size:12px;">
+                            {{ p.usuario.get_full_name|default:p.usuario.username }}
+
+                            {% if p.usuario == request.user %}
+                                (Tú)
+                            {% endif %}
+                        </p>
+
+                        {% if p.rol == "organizador" %}
+                            <small class="text-white-50">(Organizador)</small>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% empty %}
+                <p class="text-white-50">No hay participantes</p>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+{% endblock %}
