@@ -57,11 +57,15 @@
     .strength-bar { height: 100%; width: 0; transition: width 0.3s, background-color 0.3s; }
     .strength-text { font-size: 12px; font-weight: 600; margin-top: 4px; display: block; }
     .password-toggle { position: absolute; right: 18px; top: 44px; cursor: pointer; color: #888; font-size: 18px; }
+    
+    /* Estilo para errores de validación */
+    .error-feedback {
+        display: none; color: #dc3545; font-size: 13px; font-weight: 600; margin-top: 6px;
+    }
 </style>
 
 <div class="container-fluid p-0 vh-100 d-flex">
     <div class="row g-0 w-100 h-100">
-        
         <div class="d-none d-lg-block col-lg-6 bg-image position-relative" 
              style="background-image: url('https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1931&auto=format&fit=crop'); 
                     background-size: cover; background-position: center;">
@@ -99,6 +103,7 @@
                         <div class="mb-4">
                             <label class="form-label">Correo electrónico *</label>
                             <input type="email" id="email" name="email" class="form-control" placeholder="nombre@ejemplo.com">
+                            <div id="emailError" class="error-feedback">⚠️ Este correo ya está registrado.</div>
                         </div>
 
                         <div class="mb-4 position-relative">
@@ -132,6 +137,7 @@
                                 <span class="input-group-text">+52</span>
                                 <input type="tel" id="phone" name="phone" class="form-control input-phone" placeholder="10 dígitos" maxlength="10">
                             </div>
+                            <div id="phoneError" class="error-feedback">⚠️ Este teléfono ya está registrado.</div>
                         </div>
 
                         <div class="mb-4">
@@ -174,7 +180,6 @@
                             </button>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>
@@ -189,47 +194,74 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 text-oscuro" style="font-size: 14px;">
-                <p><strong>📞 Teléfono:</strong> Lo usamos como capa adicional de seguridad para recuperar tu cuenta y para notificaciones urgentes del viaje (si las habilitas).</p>
-                <p><strong>📅 Fecha de Nacimiento:</strong> Por términos legales, necesitas ser mayor de 18 años para organizar y confirmar reservaciones financieras (vuelos, hoteles) dentro de la plataforma.</p>
-                <p class="mb-0 text-muted small">Tus datos están encriptados y no los compartimos con terceros sin tu consentimiento.</p>
+                <p><strong>📞 Teléfono:</strong> Lo usamos como capa adicional de seguridad para recuperar tu cuenta.</p>
+                <p><strong>📅 Fecha de Nacimiento:</strong> Por términos legales, necesitas ser mayor de 18 años.</p>
+                <p class="mb-0 text-muted small">Tus datos están encriptados.</p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- VARIABLES GLOBALES ---
+    // --- ELEMENTOS ---
     const step1Container = document.getElementById('step1Container');
     const step2Container = document.getElementById('step2Container');
     const btnNext = document.getElementById('btnNext');
     const btnBack = document.getElementById('btnBack');
     const btnSubmit = document.getElementById('btnSubmit');
+    const unifiedForm = document.getElementById('unifiedRegisterForm');
     
-    // Indicadores visuales
     const lineIndicator = document.getElementById('lineIndicator');
     const dot2Indicator = document.getElementById('dot2Indicator');
     const stepText = document.getElementById('stepText');
 
-    // Campos Paso 1
     const fullName = document.getElementById('fullName');
     const email = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
     
-    // Campos Paso 2
     const phoneInput = document.getElementById('phone');
+    const phoneError = document.getElementById('phoneError');
     const dobInput = document.getElementById('dob');
     const termsCheck = document.getElementById('termsCheck');
     const ageError = document.getElementById('ageError');
 
-    // --- TRANSICIONES DE PASOS ---
-    btnNext.addEventListener('click', () => {
-        step1Container.classList.add('d-none');
-        step2Container.classList.remove('d-none');
-        lineIndicator.classList.add('active');
-        dot2Indicator.classList.remove('inactive');
-        dot2Indicator.classList.add('active');
-        stepText.textContent = 'Paso 2 de 2: Datos de contacto';
+    // --- LÓGICA PASO 1 (Correo) ---
+    btnNext.addEventListener('click', async () => {
+        const originalContent = btnNext.innerHTML;
+        btnNext.innerHTML = 'Verificando...';
+        btnNext.disabled = true;
+
+        try {
+            // Petición a la API que creamos en views.py
+            const response = await fetch(`/api/validar-correo/?email=${encodeURIComponent(email.value)}`);
+            const data = await response.json();
+
+            if (data.existe) {
+                emailError.style.display = 'block';
+                email.style.borderColor = '#dc3545';
+                btnNext.innerHTML = originalContent;
+                btnNext.disabled = false;
+            } else {
+                emailError.style.display = 'none';
+                email.style.borderColor = 'var(--borde-gris)';
+                
+                // Transición al paso 2
+                step1Container.classList.add('d-none');
+                step2Container.classList.remove('d-none');
+                lineIndicator.classList.add('active');
+                dot2Indicator.classList.remove('inactive');
+                dot2Indicator.classList.add('active');
+                stepText.textContent = 'Paso 2 de 2: Datos de contacto';
+                btnNext.innerHTML = originalContent;
+                btnNext.disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+            btnNext.innerHTML = originalContent;
+            btnNext.disabled = false;
+        }
     });
 
     btnBack.addEventListener('click', () => {
@@ -241,7 +273,36 @@
         stepText.textContent = 'Paso 1 de 2: Datos básicos';
     });
 
-    // --- VALIDACIÓN PASO 1 ---
+    // --- LÓGICA PASO 2 (Teléfono y Envío Final) ---
+    unifiedForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Detener envío para validar teléfono
+        
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = 'Validando...';
+        btnSubmit.disabled = true;
+
+        try {
+            const response = await fetch(`/api/validar-telefono/?phone=${encodeURIComponent(phoneInput.value)}`);
+            const data = await response.json();
+
+            if (data.existe) {
+                phoneError.style.display = 'block';
+                phoneInput.style.borderColor = '#dc3545';
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.disabled = false;
+            } else {
+                phoneError.style.display = 'none';
+                // Si todo está bien, enviamos el formulario manualmente
+                unifiedForm.submit();
+            }
+        } catch (e) {
+            console.error(e);
+            btnSubmit.innerHTML = originalText;
+            btnSubmit.disabled = false;
+        }
+    });
+
+    // --- VALIDACIONES DE FORMATO Y CONTROLES ---
     const togglePassword = document.getElementById('togglePassword');
     const strengthBar = document.getElementById('strengthBar');
     const strengthText = document.getElementById('strengthText');
@@ -282,9 +343,6 @@
         btnNext.disabled = !(isNameValid && isEmailValid && isPasswordValid && doPasswordsMatch);
     }
 
-    [fullName, email, password, confirmPassword].forEach(input => input.addEventListener('input', validateStep1));
-
-    // --- VALIDACIÓN PASO 2 ---
     function validateStep2() {
         let isValid = true;
         const phoneVal = phoneInput.value.replace(/\D/g, '');
@@ -305,7 +363,21 @@
         btnSubmit.disabled = !isValid;
     }
 
-    phoneInput.addEventListener('input', function(e) { this.value = this.value.replace(/[^0-9]/g, ''); validateStep2(); });
+    // Escuchadores para inputs
+    [fullName, email, password, confirmPassword].forEach(input => {
+        input.addEventListener('input', () => {
+            emailError.style.display = 'none'; // Limpiar error de BD al escribir
+            email.style.borderColor = 'var(--borde-gris)';
+            validateStep1();
+        });
+    });
+
+    phoneInput.addEventListener('input', function(e) { 
+        this.value = this.value.replace(/[^0-9]/g, ''); 
+        phoneError.style.display = 'none'; // Limpiar error de BD al escribir
+        this.style.borderColor = 'var(--borde-gris)';
+        validateStep2(); 
+    });
     dobInput.addEventListener('change', validateStep2);
     termsCheck.addEventListener('change', validateStep2);
 </script>

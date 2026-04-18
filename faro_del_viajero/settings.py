@@ -173,3 +173,12 @@ Luego, puedes usarlo en tus vistas o servicios:
     response = requests.get(f"{settings.API_URL}/endpoint", headers={"Authorization": f"Bearer {settings.API_KEY}"})
     data = response.json()
 """
+# CONFIGURACIÓN DE CORREO (Usando python-decouple)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+# El nombre que aparecerá en la bandeja de entrada
+DEFAULT_FROM_EMAIL = 'Faro del Viajero <no-reply@faro_del_viajero@gmail.com>'
