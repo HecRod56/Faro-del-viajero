@@ -1,0 +1,32 @@
+<!-- Modal: Abandonar viaje (RF-24) -->
+<div class="modal fade" id="modalAbandonarViaje" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-box-arrow-right text-danger me-2"></i>
+          Abandonar viaje
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <p class="mb-0">
+          ¿Estás seguro de que deseas abandonar <strong>{{ viaje.nombre }}</strong>?
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <form method="POST" action="{% url 'integrantes:abandonar_viaje' viaje.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
+          <button type="submit" class="btn btn-danger rounded-pill px-4">
+            <i class="bi bi-box-arrow-right me-1"></i> Abandonar
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

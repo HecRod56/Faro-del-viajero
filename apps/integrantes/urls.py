@@ -1,15 +1,25 @@
 from django.urls import path
 from . import views
 
-app_name = 'integrantes'
+app_name = "integrantes"
+
+# http://127.0.0.1:8000/viajes/integrantes/1/
 
 urlpatterns = [
-    path('mock/viaje/<int:id_viaje>/integrantes/', views.integrantes_viaje_mock, name='mock_integrantes'),
-    path('mock/viaje/<int:id_viaje>/integrantes/como/<int:usuario_id>/', views.integrantes_viaje_mock, name='mock_integrantes_como'),
-    path('viaje/<int:id_viaje>/integrantes/', views.integrantes_viaje, name='integrantes_viaje'),
-    path("viajes/integrantes/<int:id_integrante>/eliminar/", views.eliminar_integrante_mock, name="eliminar_integrante_mock"),
-    path("mock/viaje/<int:id_viaje>/integrantes/anadir/", views.anadir_integrante_mock, name="anadir_integrante_mock"),
-    path("mock/viaje/<int:id_viaje>/integrantes/abandonar/", views.abandonar_viaje_mock, name="abandonar_viaje"),
-    path("viajes/integrantes/<int:id_integrante>/asignar-organizador/", views.asignar_organizador_mock, name="asignar_organizador"),
-    path('mock/viaje/<int:id_viaje>/integrantes/perfil', views.informacion_integrante, name='mock_integrantes_perfil'),
+    path("<int:id_viaje>/", views.lista_integrantes, name="lista"),
+    path("<int:id_viaje>/anadir/", views.anadir_integrante, name="anadir"),
+    path("<int:id_viaje>/abandonar/", views.abandonar_viaje, name="abandonar_viaje"),
+    path("<int:id_integrante>/eliminar/", views.eliminar_integrante, name="eliminar"),
+    path(
+        "<int:id_integrante>/asignar-organizador/",
+        views.asignar_organizador,
+        name="asignar_organizador",
+    ),
+    # En tus urlpatterns de urls.py añade una ruta "fantasma" o la real:
+    # Cambia la ruta 'informacion_integrante' por esta:
+    path(
+        "<int:id_viaje>/perfil/<int:id_usuario>/",
+        views.informacion_integrante,
+        name="informacion_integrante",
+    ),
 ]

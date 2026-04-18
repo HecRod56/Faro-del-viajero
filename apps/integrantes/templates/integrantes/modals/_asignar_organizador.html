@@ -1,0 +1,33 @@
+<!-- Modal: Asignar organizador (RF-23) -->
+<div class="modal fade" id="modalAsignarOrganizador" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-person-fill-up text-success me-2"></i>
+          Asignar organizador
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <p class="mb-0">
+          ¿Deseas asignar a <strong id="modalNombreAsignar"></strong> como nuevo organizador?
+          Tú pasarás a ser integrante.
+        </p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <form id="formAsignarOrganizador" method="POST" action="">
+          {% csrf_token %}
+          <input type="hidden" name="id_viaje" value="{{ viaje.id }}" />
+          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
+          <button type="submit" class="btn btn-success rounded-pill px-4">
+            <i class="bi bi-person-fill-up me-1"></i> Confirmar
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

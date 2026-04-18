@@ -1,0 +1,48 @@
+<!-- Modal: Añadir integrante (solo Organizador) -->
+<div class="modal fade" id="modalAnadirIntegrante" tabindex="-1" aria-labelledby="modalAnadirLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="modalAnadirLabel">
+          <i class="bi bi-person-plus-fill me-2" style="color: var(--color-primary)"></i>
+          Añadir integrante
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-center gap-2 mb-3 p-2 rounded-3" style="background-color: #e8f7f5">
+          <i class="bi bi-people-fill" style="color: var(--color-primary)"></i>
+          <span class="small">
+            Cupos disponibles: <strong>{{ viaje.cupos_disponibles }}</strong> de {{ viaje.cupos_totales }}
+          </span>
+        </div>
+        <form id="formAnadirIntegrante" method="POST" action="{% url 'integrantes:anadir' viaje.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
+          <label for="correoNuevoIntegrante" class="form-label fw-semibold small">
+            Correo electrónico
+          </label>
+          <input
+            type="email"
+            id="correoNuevoIntegrante"
+            name="correo"
+            class="form-control rounded-3"
+            placeholder="ejemplo@correo.com"
+            required
+          />
+          <div class="form-text" style="color: var(--color-text-secondary)">
+            El usuario debe estar registrado en la plataforma.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <button type="submit" form="formAnadirIntegrante" class="btn btn-primary rounded-pill px-4">
+          <i class="bi bi-person-check-fill me-1"></i> Añadir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
