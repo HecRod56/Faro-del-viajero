@@ -19,37 +19,37 @@ def register(request):
 
         # 2. Crea el usuario en la base de datos
         if email and password:
-            # Como tu username es el correo, evitamos duplicidad
             user = CustomUser.objects.create_user(username=email, email=email, password=password, first_name=full_name)
             user.phone = phone 
             user.date_of_birth = dob
             user.save()
-            messages.success(request, "¡Cuenta creada con éxito!")
-            return redirect('login')
+            
+            # NUEVO: Iniciamos sesión automáticamente después de registrarse
+            login(request, user)
+            messages.success(request, "¡Cuenta creada con éxito! Bienvenido.")
+            
+            # NUEVO: Redirigimos al perfil
+            return redirect('profile') 
     
     return render(request, 'autenticado/register.html')
 
 def login_view(request):
     if request.method == 'POST':
-        # 1. Saca los datos del form
         correo = request.POST.get('email')
         contra = request.POST.get('password')
 
-        # 2. Verificamos primero si el correo existe en la bd
-        user_exists = User.objects.filter(email=correo).exists()
+        user_exists = CustomUser.objects.filter(email=correo).exists()
         
         if not user_exists:
             messages.error(request, "Usuario inexistente. Por favor, verifica tu correo o regístrate.")
         else:
-            # 3. Si el correo existe, intentamos autenticar la contraseña
             user = authenticate(request, username=correo, password=contra)        
             
             if user is not None:
-                # SI EXISTE: Iniciamos sesión y mandamos al home
                 login(request, user)
-                return redirect('core:home')
+                # NUEVO: Redirigimos al perfil en lugar del home
+                return redirect('profile') 
             else:
-                # NO EXISTE o datos mal: Mandamos error
                 messages.error(request, "Contraseña incorrecta. Inténtalo de nuevo.")
             
     return render(request, 'autenticado/login.html')

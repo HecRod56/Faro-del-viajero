@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views  # Importamos las vistas de esta misma app
 from django.urls import reverse_lazy
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
     path('registro/', views.register, name='register'),
@@ -24,4 +25,6 @@ urlpatterns = [
         template_name='autenticado/password_reset_form.html',
         success_url='/login/' # Al terminar, lo mandamos al login
     ), name='password_reset_confirm'),
+    # Añadimos la ruta de logout
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 ]
