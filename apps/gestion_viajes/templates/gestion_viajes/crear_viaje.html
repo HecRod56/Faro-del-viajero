@@ -1,17 +1,54 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% block subnav %}
-    <div style="background: white; border-bottom: 1px solid #E5E7EB; padding: 1rem 1.5rem;">
-        <nav style="font-size: 0.75rem; color: #9CA3AF;">
-            <a href="{% url 'p_ver_mis_viajes' %}" style="color: #149B7E; text-decoration: none; font-weight: 600;">Mis viajes</a>
-            <span style="margin: 0 5px;">&gt;</span>
-            <span style="color: #1e293b; font-weight: 700;">Crear viaje</span>
+     <div class="breadcrumb-sticky-container">
+        <nav class="breadcrumb-nav">
+            <a href="{% url 'p_ver_mis_viajes' %}">Mis viajes</a>
+            <span style="margin: 0 8px;">&gt;</span>
+            <span class="current">Crear viaje</span>
         </nav>
     </div>
 {% endblock %}
+
 {% block content %}
 
     <style>
+        /*======BREADCRUMB======*/
+        .breadcrumb-sticky-container {
+            background-color: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 1rem 1.5rem;
+            position: -webkit-sticky; /* Soporte para Safari */
+            position: sticky;
+            top: 80px;
+            z-index: 1020; /* Por debajo del navbar principal pero sobre el contenido */
+        }
+
+        .breadcrumb-nav {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-nav a {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-nav a:hover { 
+            color: var(--teal); 
+            text-decoration: underline; 
+        }
+
+        .breadcrumb-nav span.current {
+            color: #9CA3AF;
+            font-weight: 700;
+        }
+        /*======FIN BREADCRUMB======*/
+
         :root {
             --teal: #149B7E;
             --teal-light: #EBFBFA;
@@ -177,14 +214,10 @@
     </style>
 
     <div class="container py-4 px-3">
-        <nav class="mb-3">
-            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
-            <span class="text-muted mx-1">&gt;</span>
-            <span class="text-muted" style="font-size:0.75rem;">Crear viaje</span>
-        </nav>
 
         <form method="POST">
-            {% csrf_token %} <div class="d-flex justify-content-between align-items-center mb-4">
+            {% csrf_token %} 
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Crear nuevo viaje</h1>
                 <div class="d-flex gap-3">
                     <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Cancelar</a>

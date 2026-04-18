@@ -1,11 +1,37 @@
 {% extends "core/base.html" %}
 {% block subnav %}
-    <div style="background: white; border-bottom: 1px solid #E5E7EB; padding: 1rem 1.5rem;">
-        <nav style="font-size: 0.75rem; color: #9CA3AF;">
-            <span style="color: #1e293b; font-weight: 700;">Mis viajes</span>
-        </nav>
-    </div>
+<style>
+    /* Hacemos que esta barra específica también sea sticky */
+    .sticky-breadcrumb {
+        background-color: #fff;
+        border-bottom: 1px solid #E5E7EB;
+        padding: 1rem 1.5rem;
+        position: sticky;
+        top: 80px; /* Se pega al tope de la ventana */
+        z-index: 40;
+    }
+    
+    .breadcrumb-simple {
+        font-size: 0.75rem;
+        color: #9CA3AF;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-current {
+        color: #1e293b;
+        font-weight: 700;
+    }
+</style>
+
+<div class="sticky-breadcrumb">
+    <nav class="breadcrumb-simple">
+        <span class="breadcrumb-current">Mis viajes</span>
+    </nav>
+</div>
 {% endblock %}
+
 {% block content %}
 <style>
     body {

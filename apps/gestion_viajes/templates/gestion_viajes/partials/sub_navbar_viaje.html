@@ -3,11 +3,13 @@
     .sub-navbar-viaje {
         background-color: #fff;
         border-bottom: 1px solid #E5E7EB;
+        padding: 1rem 1.5rem 0 1.5rem;
         position: sticky;
         top: 80px;
         z-index: 40;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        /*justify-content: center;*/
     }
 
     .sub-navbar-container {
@@ -51,6 +53,27 @@
         border-radius: 3px 3px 0 0;
     }
 
+    /* ── Breadcrumb (Migas de Pan) ── */
+    .breadcrumb-viaje {
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+        color: #9CA3AF;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .breadcrumb-item {
+        color: #149B7E;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .breadcrumb-current {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
     .integrantes-badge {
         background-color: #EBFBFA;
         color: #149B7E;
@@ -75,7 +98,15 @@
     }
 </style>
 
-<nav class="sub-navbar-viaje">
+<div class="sub-navbar-viaje">
+    <nav class="breadcrumb-viaje">
+        <a href="{% url 'p_detalle_viaje' viaje.id%}" class="breadcrumb-item">Mis viajes</a> 
+        <span>&gt;</span> 
+        <span class="breadcrumb-item">{{ viaje.get_estado_display|default:"Planeados" }}</span> 
+        <span>&gt;</span> 
+        <span class="breadcrumb-current">{{ viaje.nombre }}</span>
+    </nav>
+
     <div class="sub-navbar-container">
         <a href="{% url 'p_detalle_viaje' viaje.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'p_detalle_viaje' %}active{% endif %}">
             Resumen
@@ -92,8 +123,8 @@
         <a href="#galeria" class="sub-nav-link {% if request.resolver_match.url_name == 'galeria' %}active{% endif %}">
             Galería
         </a>
-        <a href="{% url 'integrantes:integrantes_viaje' id_viaje=viaje.id usuario_id=request.user.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'integrantes_viaje' %}active{% endif %}">
+        <a href="#" class="sub-nav-link">
             Integrantes <span class="integrantes-badge">{{ viaje.participantes.count }}</span>
         </a>
     </div>
-</nav>
+</div>

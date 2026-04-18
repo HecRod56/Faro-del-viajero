@@ -14,6 +14,42 @@
             color: #1e293b;
             padding-top: 80px;
         }
+        
+        /* ======Breadcrumb====== */
+        .breadcrumb-sticky-container {
+            background-color: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 1rem 1.5rem;
+            position: -webkit-sticky; /* Soporte para Safari */
+            position: sticky;
+            top: 80px;
+            z-index: 1020; /* Por debajo del navbar principal pero sobre el contenido */
+        }
+
+        .breadcrumb-nav {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-nav a {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-nav a:hover { 
+            color: var(--teal); 
+            text-decoration: underline; 
+        }
+
+        .breadcrumb-nav span.current {
+            color: #9CA3AF;
+            font-weight: 700;
+        }
+        /* ======Breadcrumb====== */
 
         .input-field {
             border-radius: 0.75rem;
@@ -85,16 +121,18 @@
         .teal-text { color: var(--teal); }
         label.fw-bold { font-size: 0.875rem; }
     </style>
+    
+    <div class="breadcrumb-sticky-container">
+        <nav class="breadcrumb-nav">
+            <a href="{% url 'p_ver_mis_viajes' %}">Mis viajes</a>
+            <span class="mx-2">&gt;</span>
+            <a href="{% url 'p_detalle_viaje' viaje.id %}">Detalle</a>
+            <span class="mx-2">&gt;</span>
+            <span class="current">Editar viaje</span>
+        </nav>
+    </div>
 
     <div class="container py-4 px-3">
-        <nav class="mb-3">
-            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
-            <span class="text-muted mx-1">&gt;</span>
-            <span><a href="{% url 'p_detalle_viaje' viaje.id %}" class="breadcrumb-link">Detalle</a></span>
-            <span class="text-muted mx-1">&gt;</span>
-            <span class="text-muted" style="font-size:0.75rem;">Editar viaje</span>
-        </nav>
-
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Editar: {{ viaje.nombre }}</h1>
         </div>
