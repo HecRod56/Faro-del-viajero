@@ -5,7 +5,6 @@
 {% block content %}
 <style>
     .chat-item-active   { background: linear-gradient(135deg, #149B7E, #1BB59A); }
-    .chat-item-inactive { background: linear-gradient(135deg, #7ECECA, #9BD8D0); }
     .chat-bg {
         {% if viaje.imagen_destino %}
         background-image: url('{{ viaje.imagen_destino.url }}');
@@ -23,7 +22,8 @@
         background: rgba(255,255,255,0.55);
         z-index: 0;
     }
-    .chat-messages { overflow-y: auto; flex: 1; position: relative; z-index: 1; max-height: calc(100vh - 340px); min-height: 0; }    .msg-bubble-right { border-top-right-radius: 4px !important; }
+    .chat-messages { overflow-y: auto; flex: 1; position: relative; z-index: 1; max-height: calc(100vh - 340px); min-height: 0; }
+    .msg-bubble-right { border-top-right-radius: 4px !important; }
     .msg-bubble-left  { border-top-left-radius: 4px !important; }
     .chat-input-bar { position: relative; z-index: 1; }
     .chat-header { position: relative; z-index: 1; }
@@ -35,9 +35,9 @@
         <nav class="d-flex gap-2 align-items-center py-2" style="font-size:11px; font-weight:700;">
             <a href="{% url 'p_ver_mis_viajes' %}" class="text-decoration-none" style="color:#149B7E;">Mis viajes</a>
             <span class="text-muted">›</span>
-            <a href="{% url 'chat:lista_chats' %}" class="text-decoration-none" style="color:#149B7E;">Chat</a>
-            <span class="text-muted">›</span>
             <span class="text-muted">{{ viaje.nombre }}</span>
+            <span class="text-muted">›</span>
+            <span class="text-muted">Chat</span>
         </nav>
         <div class="d-flex gap-4">
             <span class="text-muted pb-2" style="font-size:13px; cursor:pointer;">Resumen</span>
@@ -51,36 +51,10 @@
 </div>
 
 <main class="container-fluid px-4 py-3">
-    <div class="row g-3" style="height:calc(100vh - 220px); min-height:500px;">
+    <div style="height:calc(100vh - 220px); min-height:500px;">
 
-        <!-- IZQUIERDA: lista de chats -->
-        <div class="col-12 col-lg-4 d-flex flex-column gap-3 overflow-y-auto">
-            {% for v in viajes %}
-            <a href="{% url 'chat:chat_viaje' v.id %}" class="text-decoration-none">
-                <div class="{% if v.id == viaje.id %}chat-item-active{% else %}chat-item-inactive{% endif %} rounded-4 p-3 d-flex align-items-center gap-3 shadow-sm">
-                    <div class="rounded-3 overflow-hidden flex-shrink-0" style="width:48px;height:48px;">
-                        {% if v.imagen_destino %}
-                            <img src="{{ v.imagen_destino.url }}" class="w-100 h-100 object-fit-cover">
-                        {% else %}
-                            <div class="w-100 h-100 d-flex align-items-center justify-content-center fw-bold text-white" style="background:rgba(255,255,255,.3);">
-                                {{ v.destino|first }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="flex-grow-1 overflow-hidden">
-                        <div class="d-flex justify-content-between">
-                            <p class="text-white fw-bold mb-0 text-truncate" style="font-size:13px;">Viaje a {{ v.destino }}</p>
-                            <span class="text-white ms-1 flex-shrink-0" style="font-size:10px;opacity:.8;">{{ v.fecha_inicio|date:"d/m/y" }}</span>
-                        </div>
-                        <p class="text-white mb-0 fst-italic text-truncate" style="font-size:11px;opacity:.8;">{{ v.nombre }}</p>
-                    </div>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-
-        <!-- DERECHA: ventana de chat -->
-        <div class="col-12 col-lg-8 chat-bg rounded-4 d-flex flex-column shadow-sm border overflow-hidden position-relative">
+        <!-- Ventana de chat completa -->
+        <div class="chat-bg rounded-4 d-flex flex-column shadow-sm border overflow-hidden position-relative h-100">
 
             <!-- Header -->
             <div class="chat-item-active px-3 py-2 d-flex align-items-center gap-3 chat-header">
@@ -93,7 +67,7 @@
                         </div>
                     {% endif %}
                 </div>
-                <p class="text-white fw-bold mb-0 flex-grow-1" style="font-size:15px;">Viaje a {{ viaje.destino }}</p>
+                <p class="text-white fw-bold mb-0 flex-grow-1" style="font-size:15px;">{{ viaje.nombre }}</p>
                 <button class="btn rounded-circle d-flex align-items-center justify-content-center"
                         style="width:42px;height:42px;background:rgba(255,255,255,.2);"
                         onclick="document.getElementById('menuOpciones').classList.toggle('d-none')">
@@ -103,66 +77,53 @@
                 </button>
             </div>
 
-
-
-
-<!-- Menú ··· -->
-<div id="menuOpciones" class="d-none position-absolute bg-white rounded-4 shadow border" style="top:56px;right:12px;width:210px;z-index:20;">
-    <button onclick="document.getElementById('panelIntegrantes').classList.toggle('d-none'); document.getElementById('menuOpciones').classList.add('d-none')"
-            class="btn w-100 d-flex align-items-center gap-2 px-3 py-2 text-dark border-bottom" style="font-size:13px;">
-        <svg width="15" height="15" fill="none" stroke="#149B7E" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        Ver integrantes
-    </button>
-    <form method="POST" action="{% url 'chat:abandonar_viaje' viaje.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn w-100 text-start px-3 py-2 d-flex align-items-center gap-2" style="font-size:13px;color:#EF4444;">
-            <svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-            Abandonar viaje
-        </button>
-    </form>
-</div>
-
-
-
-
-<!-- Panel integrantes -->
-<div id="panelIntegrantes" class="d-none position-absolute top-0 end-0 h-100 rounded-4 overflow-hidden d-flex flex-column shadow" 
-     style="width:220px;z-index:15;background:linear-gradient(160deg,#149B7E,#0d6b58);">
-    
-    <!-- Header con X -->
-    <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom border-white border-opacity-25">
-        <div>
-            <p class="text-white fw-bold mb-0" style="font-size:13px;">{{ viaje.nombre }}</p>
-            <p class="mb-0" style="font-size:11px;color:rgba(255,255,255,.7);">Integrantes</p>
-        </div>
-        <button onclick="document.getElementById('panelIntegrantes').classList.add('d-none')"
-                class="btn rounded-circle d-flex align-items-center justify-content-center"
-                style="width:44px;height:44px;background:rgba(255,255,255,.25);flex-shrink:0;">
-            <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-        </button>
-    </div>
-
-    <!-- Lista de integrantes -->
-    <div class="flex-grow-1 px-3 py-3 d-flex flex-column gap-3" style="overflow-y:auto;">
-        {% for p in integrantes %}
-        <div class="d-flex align-items-center gap-2">
-            <img src="https://api.dicebear.com/7.x/personas/svg?seed={{ p.usuario.username }}"
-                 class="rounded-circle flex-shrink-0" style="width:36px;height:36px;border:2px solid rgba(255,255,255,.3);">
-            <div>
-                <p class="text-white fw-semibold mb-0" style="font-size:12px;">{{ p.usuario.get_full_name|default:p.usuario.username }}</p>
-                {% if p.usuario == viaje.creador %}
-                <p class="mb-0" style="font-size:10px;color:rgba(255,255,255,.6);">(Organizador)</p>
-                {% endif %}
+            <!-- Menú ··· -->
+            <div id="menuOpciones" class="d-none position-absolute bg-white rounded-4 shadow border" style="top:56px;right:12px;width:210px;z-index:20;">
+                <button onclick="document.getElementById('panelIntegrantes').classList.toggle('d-none'); document.getElementById('menuOpciones').classList.add('d-none')"
+                        class="btn w-100 d-flex align-items-center gap-2 px-3 py-2 text-dark border-bottom" style="font-size:13px;">
+                    <svg width="15" height="15" fill="none" stroke="#149B7E" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                    Ver integrantes
+                </button>
+                <form method="POST" action="{% url 'chat:abandonar_viaje' viaje.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn w-100 text-start px-3 py-2 d-flex align-items-center gap-2" style="font-size:13px;color:#EF4444;">
+                        <svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                        Abandonar viaje
+                    </button>
+                </form>
             </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
 
-
-
+            <!-- Panel integrantes -->
+            <div id="panelIntegrantes" class="d-none position-absolute top-0 end-0 h-100 rounded-4 overflow-hidden d-flex flex-column shadow" 
+                 style="width:220px;z-index:15;background:linear-gradient(160deg,#149B7E,#0d6b58);">
+                <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom border-white border-opacity-25">
+                    <div>
+                        <p class="text-white fw-bold mb-0" style="font-size:13px;">{{ viaje.nombre }}</p>
+                        <p class="mb-0" style="font-size:11px;color:rgba(255,255,255,.7);">Integrantes</p>
+                    </div>
+                    <button onclick="document.getElementById('panelIntegrantes').classList.add('d-none')"
+                            class="btn rounded-circle d-flex align-items-center justify-content-center"
+                            style="width:38px;height:38px;background:rgba(255,255,255,.25);flex-shrink:0;">
+                        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-grow-1 px-3 py-3 d-flex flex-column gap-3" style="overflow-y:auto;">
+                    {% for p in integrantes %}
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="https://api.dicebear.com/7.x/personas/svg?seed={{ p.usuario.username }}"
+                             class="rounded-circle flex-shrink-0" style="width:36px;height:36px;border:2px solid rgba(255,255,255,.3);">
+                        <div>
+                            <p class="text-white fw-semibold mb-0" style="font-size:12px;">{{ p.usuario.get_full_name|default:p.usuario.username }}</p>
+                            {% if p.usuario == viaje.creador %}
+                            <p class="mb-0" style="font-size:10px;color:rgba(255,255,255,.6);">(Organizador)</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
             <!-- Mensajes -->
             <div class="chat-messages px-3 py-3 d-flex flex-column gap-3" id="mensajesBox">
@@ -243,7 +204,6 @@
     const box = document.getElementById('mensajesBox');
     if (box) box.scrollTop = box.scrollHeight;
 
-    // Actualización automática cada 3 segundos
     setInterval(function() {
         fetch(window.location.href)
             .then(res => res.text())
@@ -259,8 +219,4 @@
             });
     }, 3000);
 </script>
-
-
-
-
 {% endblock %}
