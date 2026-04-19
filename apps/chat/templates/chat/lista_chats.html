@@ -49,9 +49,13 @@
                             {{ viaje.fecha_inicio|date:"d/m/y" }}
                         </span>
                     </div>
-                    <p class="mb-0 fst-italic text-truncate {% if forloop.first %}text-white{% else %}text-muted{% endif %}" style="font-size:11px; opacity:.85;">
-                        {{ viaje.nombre }}
-                    </p>
+                        <p class="mb-0 fst-italic text-truncate {% if forloop.first %}text-white{% else %}text-muted{% endif %}" style="font-size:11px;opacity:.85;">
+                            {% if viaje.ultimo_msg %}
+                                {{ viaje.ultimo_msg.contenido|truncatechars:35 }}
+                            {% else %}
+                                Sin mensajes aún
+                            {% endif %}
+                        </p>
                 </div>
             </div>
         </a>
