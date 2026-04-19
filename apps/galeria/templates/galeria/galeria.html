@@ -1,0 +1,260 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load cloudinary %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'galeria/galeria.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <!-- ── HEADER ──────────────────────────────────────────── -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h5 class="fw-bold mb-0">Galería - {{ viaje.nombre }}</h5>
+
+    <a
+      class="btn btn-success btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
+      data-bs-toggle="modal"
+      data-bs-target="#modalSubirImagen"
+      style="cursor: pointer"
+    >
+      <i class="bi bi-plus-lg"></i>
+      Agregar imagen
+    </a>
+  </div>
+
+  <!-- ── IMAGEN DEL VIAJE ───────────────────────────────── -->
+  <div class="position-relative mb-4">
+    <img
+      src="{{ viaje.imagen_destino.url }}"
+      class="img-fluid rounded-4 w-100"
+      style="height: 180px; object-fit: cover;"
+    />
+    <div class="position-absolute top-0 end-0 p-2">
+      <span class="badge bg-white text-dark rounded-pill px-3 shadow-sm">
+        <span class="text-success me-1">●</span>{{ viaje.get_estado_display }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── GALERÍA AGRUPADA POR FECHA ────────────────────── -->
+  {% if grupos_por_fecha %}
+    {% for fecha, imagenes in grupos_por_fecha.items %}
+    <div class="mb-4">
+
+      <!-- Encabezado de fecha -->
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-calendar3 text-muted"></i>
+        <span class="fw-semibold text-muted">{{ fecha|date:"d/m/Y" }}</span>
+      </div>
+
+      <!-- Grid de imágenes -->
+      <div class="galeria-grid">
+        {% for img in imagenes %}
+        <div
+          class="galeria-card"
+          data-bs-toggle="modal"
+          data-bs-target="#modalVerImagen"
+          data-imagen-url="{% cloudinary_url img.imagen %}"
+          data-autor="{{ img.subida_por.usuario.get_full_name|default:img.subida_por.usuario.email }}"
+          data-fecha="{{ img.fecha_subida|date:'d/m/Y H:i' }}"
+          data-descripcion="{{ img.descripcion }}"
+          data-imagen-id="{{ img.id }}"
+          data-puede-eliminar="{{ img.puede_eliminar|yesno:'true,false' }}"
+        >
+          <!-- Imagen -->
+          <div class="galeria-card__img-wrap">
+            {% cloudinary img.imagen width=300 height=300 crop="fill" quality="auto" fetch_format="auto" class="galeria-card__img" %}
+          </div>
+
+          <!-- Autor -->
+          <div class="galeria-card__footer">
+            <span class="galeria-card__autor">
+              {{ img.subida_por.usuario.first_name }} {{ img.subida_por.usuario.last_name|slice:":1" }}.
+            </span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+    {% endfor %}
+
+  {% else %}
+    <!-- Estado vacío -->
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-images fs-1 d-block mb-3"></i>
+      <p class="mb-1 fw-semibold">Aún no hay fotos en esta galería</p>
+      <p class="small">¡Sé el primero en compartir un momento del viaje!</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- ══ MODAL: Ver imagen ampliada (RF-67) ════════════════ -->
+<div class="modal fade" id="modalVerImagen" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow-lg bg-dark text-white">
+
+      <div class="modal-header border-0 pb-0 px-4 pt-3">
+        <div>
+          <p class="mb-0 fw-semibold" id="modalAutorNombre"></p>
+          <p class="mb-0 small text-white-50" id="modalFechaSubida"></p>
+          <p class="mb-0 small text-white-50 fst-italic" id="modalDescripcion"></p>
+        </div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body p-3 text-center">
+        <img
+          id="modalImagen"
+          src=""
+          alt="Imagen ampliada"
+          class="img-fluid rounded-3"
+          style="max-height: 65vh; object-fit: contain;"
+        />
+      </div>
+
+      <!-- RF-68: Botón eliminar, visible solo si puede_eliminar -->
+      <div class="modal-footer border-0 pt-0 px-4 pb-3 justify-content-end" id="modalFooterEliminar" style="display:none !important">
+        <form id="formEliminarImagen" method="POST" action="">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger rounded-pill px-4">
+            <i class="bi bi-trash-fill me-1"></i> Eliminar foto
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Subir imagen (RF-65) ═══════════════════════ -->
+<div class="modal fade" id="modalSubirImagen" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-image-fill me-2 text-success"></i>
+          Agregar imagen
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formSubirImagen" method="POST" action="{% url 'galeria:subir_imagen' viaje.id %}" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Zona de drop -->
+          <label for="inputImagen" class="subir-drop-zone mb-3">
+            <i class="bi bi-cloud-arrow-up-fill fs-2 text-success"></i>
+            <span class="small text-muted mt-1">Haz clic o arrastra una imagen aquí</span>
+            <span class="small text-muted">JPEG, PNG o HEIC</span>
+            <input
+              type="file"
+              id="inputImagen"
+              name="imagen"
+              accept="image/jpeg,image/png,image/heic,.heic,.heif"
+              class="d-none"
+              required
+            />
+          </label>
+
+          <!-- Preview -->
+          <div id="previewWrap" class="text-center mb-3" style="display:none !important">
+            <img id="previewImg" src="" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;" />
+          </div>
+
+          <!-- Fecha tomada (RF-66) -->
+          <label for="fechaTomada" class="form-label fw-semibold small">
+            Fecha en que se tomó <span class="text-muted fw-normal">(opcional)</span>
+          </label>
+          <input
+            type="date"
+            id="fechaTomada"
+            name="fecha_tomada"
+            class="form-control rounded-3 mb-3"
+          />
+
+          <!-- Descripción -->
+          <label for="descripcionImg" class="form-label fw-semibold small">
+            Pie de foto <span class="text-muted fw-normal">(opcional)</span>
+          </label>
+          <input
+            type="text"
+            id="descripcionImg"
+            name="descripcion"
+            class="form-control rounded-3"
+            placeholder="Ej. Atardecer en la playa..."
+            maxlength="255"
+          />
+        </form>
+      </div>
+
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formSubirImagen" class="btn btn-success rounded-pill px-4">
+          <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subir
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════ -->
+<script>
+  // ── Modal: Ver imagen ampliada ───────────────────────────
+  document.getElementById("modalVerImagen")
+    .addEventListener("show.bs.modal", function (event) {
+      const card = event.relatedTarget;
+
+      document.getElementById("modalImagen").src         = card.dataset.imagenUrl;
+      document.getElementById("modalAutorNombre").textContent = card.dataset.autor;
+      document.getElementById("modalFechaSubida").textContent = card.dataset.fecha;
+
+      const desc = card.dataset.descripcion;
+      const descEl = document.getElementById("modalDescripcion");
+      descEl.textContent = desc;
+      descEl.style.display = desc ? "" : "none";
+
+      // RF-68: mostrar botón eliminar solo si el usuario puede
+      const footerEl = document.getElementById("modalFooterEliminar");
+      if (card.dataset.puedeEliminar === "true") {
+        footerEl.style.setProperty("display", "flex", "important");
+        document.getElementById("formEliminarImagen").action =
+          `/galeria/imagen/${card.dataset.imagenId}/eliminar/`;
+      } else {
+        footerEl.style.setProperty("display", "none", "important");
+      }
+    });
+
+  // ── Preview al seleccionar archivo ──────────────────────
+  document.getElementById("inputImagen").addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const previewWrap = document.getElementById("previewWrap");
+    const previewImg  = document.getElementById("previewImg");
+
+    // HEIC no tiene preview nativo en navegadores; mostramos nombre
+    if (file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
+      previewImg.src = "";
+      previewImg.alt = file.name;
+      previewWrap.style.setProperty("display", "block", "important");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      previewImg.src = e.target.result;
+      previewWrap.style.setProperty("display", "block", "important");
+    };
+    reader.readAsDataURL(file);
+  });
+</script>
+
+{% endblock %}
