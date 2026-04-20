@@ -67,6 +67,17 @@
                         </div>
                     {% endif %}
                 </div>
+
+                    <a href="{% url 'p_ver_mis_viajes' %}" 
+                    class="btn rounded-circle d-flex align-items-center justify-content-center me-1"
+                    style="width:38px;height:38px;background:rgba(255,255,255,.2);">
+                        <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                    </a>
+
+
+
                 <p class="text-white fw-bold mb-0 flex-grow-1" style="font-size:15px;">{{ viaje.nombre }}</p>
                 <button class="btn rounded-circle d-flex align-items-center justify-content-center"
                         style="width:42px;height:42px;background:rgba(255,255,255,.2);"
