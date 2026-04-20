@@ -111,9 +111,9 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-3">
+                    <div class="d-flex gap-3 text-center">
                         <button type="submit" class="btn-save text-uppercase">Guardar Actividad</button>
-                        <button type="button" class="btn-cancel text-uppercase">Cancelar</button>
+                        <a href="{% url 'actividades:lista' viaje.id %}" class="btn-cancel text-uppercase text-decoration-none d-flex align-items-center justify-content-center">Cancelar</a>
                     </div>
                 </form>
             </div>

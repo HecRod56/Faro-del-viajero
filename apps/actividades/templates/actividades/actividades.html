@@ -1,0 +1,315 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+     /* ==========================================
+        VARIABLES Y ESTILOS DEL MÓDULO ACTIVIDADES
+        ========================================== */
+    :root {
+        --turquesa: #0E9E8E;
+        --texto-oscuro: #1A2E35;
+        --fondo-gris: #F2F2F0;
+        --borde-gris: #E4E4E2;
+        --dorado: #F5C518;
+        --naranja: #E8721C;
+    }
+
+    body { background-color: var(--fondo-gris); }
+
+    /* Sub-Navbar del Viaje */
+    .trip-subnav {
+        background-color: white; border-bottom: 1px solid var(--borde-gris);
+        position: sticky; top: 85px; z-index: 1020;
+    }
+    .breadcrumb-item a { color: var(--turquesa); font-weight: 600; text-decoration: none; }
+    .breadcrumb-item.active { color: var(--texto-oscuro); font-weight: 700; }
+    
+    .nav-tabs-custom { border-bottom: none; gap: 20px; }
+    .nav-tabs-custom .nav-link {
+        color: #888; font-weight: 600; border: none; padding: 12px 0; font-size: 15px;
+        border-bottom: 3px solid transparent; transition: all 0.2s; cursor: pointer;
+    }
+    .nav-tabs-custom .nav-link:hover { color: var(--turquesa); }
+    .nav-tabs-custom .nav-link.active {
+        color: var(--turquesa); border-bottom-color: var(--turquesa); font-weight: 700;
+    }
+
+    /* Controles Superiores */
+    .btn-proponer {
+        background-color: var(--naranja); color: white; border-radius: 24px; font-weight: 700;
+        padding: 10px 20px; border: none; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-proponer:hover { background-color: #d66415; transform: translateY(-2px); color: white;}
+    
+    .view-toggle {
+        background-color: white; border: 1.5px solid var(--borde-gris); border-radius: 24px;
+        display: flex; overflow: hidden; font-weight: 600; font-size: 14px;
+    }
+    .view-toggle-btn {
+        padding: 8px 16px; cursor: pointer; transition: all 0.2s; color: #888;
+    }
+    .view-toggle-btn.active { background-color: rgba(14, 158, 142, 0.1); color: var(--turquesa); font-weight: 700; }
+
+    /* ==========================================
+       DISEÑO DEL TIMELINE (Línea de tiempo)
+       ========================================== */
+    .day-header {
+        font-size: 18px; font-weight: 800; color: var(--texto-oscuro);
+        margin-top: 40px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .day-header span.badge-date {
+        background-color: white; border: 1.5px solid var(--borde-gris); border-radius: 8px;
+        padding: 6px 12px; font-size: 14px; color: var(--texto-oscuro);
+    }
+    .day-destination { color: #888; font-weight: 600; font-size: 15px; }
+
+    /* Tarjetas de Actividad */
+    .activity-card {
+        background-color: white; border: 1.5px solid var(--borde-gris); border-radius: 16px;
+        padding: 20px; margin-bottom: 16px; display: flex; gap: 20px; align-items: center;
+        transition: all 0.2s; text-decoration: none; color: inherit;
+        position: relative; overflow: hidden;
+    }
+    .activity-card:hover {
+        border-color: var(--turquesa); transform: translateX(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    }
+    
+    /* Indicador de hora */
+    .time-col {
+        min-width: 70px; text-align: right; border-right: 2px dashed var(--borde-gris); padding-right: 20px;
+    }
+    .time-text { font-size: 20px; font-weight: 800; color: var(--texto-oscuro); line-height: 1; }
+    .time-ampm { font-size: 12px; font-weight: 700; color: #888; }
+
+    /* Contenido */
+    .content-col { flex-grow: 1; }
+    .activity-title { font-size: 17px; font-weight: 700; color: var(--texto-oscuro); margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .activity-location { font-size: 14px; color: #666; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    
+    /* Avatares y meta */
+    .meta-col { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 100px; }
+    .avatar-mini { width: 32px; height: 32px; border-radius: 50%; background-color: var(--dorado); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .participants-count { font-size: 13px; font-weight: 700; color: #888; background: var(--fondo-gris); padding: 4px 10px; border-radius: 12px; }
+    
+    /* Badges */
+    .badge-pending { background-color: rgba(245, 197, 24, 0.15); color: #b58f00; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(245, 197, 24, 0.3); }
+
+    /* Empty State */
+    .empty-day-card {
+        background-color: transparent; border: 2px dashed var(--borde-gris); border-radius: 16px;
+        padding: 30px; text-align: center; color: #888; font-weight: 600; transition: border-color 0.2s; cursor: pointer;
+    }
+    .empty-day-card:hover { border-color: var(--naranja); color: var(--naranja); background-color: rgba(232, 114, 28, 0.02); }
+
+    /* ==========================================
+       SECCIÓN DE VOTACIÓN (NUEVO)
+       ========================================== */
+    .voting-section { margin-bottom: 40px; }
+    .voting-header { font-size: 18px; font-weight: 800; color: var(--texto-oscuro); margin-bottom: 16px; }
+    
+    .vote-card {
+        background-color: white; border: 1.5px solid var(--naranja); border-radius: 16px;
+        padding: 20px; box-shadow: 0 8px 20px rgba(232, 114, 28, 0.08);
+        position: relative; overflow: hidden;
+    }
+    /* Cinta decorativa en la esquina */
+    .vote-card::before {
+        content: "NUEVO"; position: absolute; top: 12px; right: -25px;
+        background: var(--naranja); color: white; font-size: 10px; font-weight: 800;
+        padding: 4px 25px; transform: rotate(45deg); letter-spacing: 1px;
+    }
+
+    .vote-title { font-size: 16px; font-weight: 800; color: var(--texto-oscuro); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
+    .vote-meta { font-size: 13px; color: #666; font-weight: 500; display: flex; align-items: center; gap: 6px; margin-bottom: 15px; }
+    
+    /* Barra de progreso de votos */
+    .vote-progress-container { background-color: var(--fondo-gris); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+    .vote-progress-bar { background-color: var(--turquesa); height: 100%; transition: width 0.3s ease; }
+    .vote-stats { font-size: 12px; font-weight: 700; color: #888; display: flex; justify-content: space-between; margin-bottom: 20px; }
+
+    /* Botones de Voto */
+    .btn-vote {
+        border-radius: 20px; font-weight: 700; padding: 10px; font-size: 14px;
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-vote-yes { background-color: transparent; border: 2px solid var(--turquesa); color: var(--turquesa); }
+    .btn-vote-yes:hover { background-color: var(--turquesa); color: white; }
+    
+    .btn-vote-no { background-color: transparent; border: 2px solid #dc3545; color: #dc3545; }
+    .btn-vote-no:hover { background-color: #dc3545; color: white; }
+</style>
+
+<div class="trip-subnav pt-3 pb-0 shadow-sm">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2" style="font-size: 13px;">
+                <li class="breadcrumb-item"><a href="#">Mis Viajes</a></li>
+                <li class="breadcrumb-item"><a href="#">{{ viaje.nombre }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Actividades</li>
+            </ol>
+        </nav>
+        <ul class="nav nav-tabs-custom d-flex">
+            <li class="nav-item"><span class="nav-link">Resumen</span></li>
+            <li class="nav-item"><span class="nav-link active">Actividades</span></li>
+            <li class="nav-item"><span class="nav-link">Gastos</span></li>
+            <li class="nav-item"><span class="nav-link">Integrantes ({{ total_integrantes }})</span></li>
+        </ul>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="view-toggle">
+            <div class="view-toggle-btn active">● Por día</div>
+            <div class="view-toggle-btn">○ Lista</div>
+        </div>
+        <a href="{% url 'actividades:proponer_actividad' viaje.id %}" class="btn-proponer shadow-sm" style="text-decoration: none;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            PROPONER ACTIVIDAD
+        </a>
+    </div>
+
+    {% if actividades_pendientes %}
+    <div class="voting-section">
+        <div class="voting-header">🗳️ Propuestas pendientes de voto</div>
+        <div class="row">
+            {% for act in actividades_pendientes %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="vote-card">
+                    <div class="vote-title">
+                        {{ act.titulo }}
+                        <button class="btn btn-link text-danger p-0" style="font-size: 12px; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ act.id }}">
+                            Eliminar
+                        </button>
+                    </div>
+                    <div class="vote-meta">
+                        <div class="avatar-mini bg-turquesa" style="width: 20px; height: 20px; font-size: 9px;">{{ act.creador.first_name|slice:":1"|upper }}</div>
+                        Propuesto por {{ act.creador.first_name }} para el {{ act.fecha|date:"d M" }}
+                    </div>
+                    
+                    <div class="vote-progress-container">
+                        <div class="vote-progress-bar" style="width: calc({{ act.votos_a_favor }} / {{ total_integrantes }} * 100%);"></div>
+                    </div>
+                    <div class="vote-stats">
+                        <span>{{ act.votos_totales }}/{{ total_integrantes }} Votos emitidos</span>
+                        <span class="text-naranja">{{ act.votos_a_favor }} a favor</span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="{% url 'actividades:votar' act.id %}" class="w-50 m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="voto" value="SI">
+                            <button type="submit" class="btn btn-vote btn-vote-yes w-100">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                                ¡Sí, vamos!
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'actividades:votar' act.id %}" class="w-50 m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="voto" value="NO">
+                            <button type="submit" class="btn btn-vote btn-vote-no w-100">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                                Paso
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="deleteModal{{ act.id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 30px; padding: 30px; border: none;">
+                        <div class="modal-body text-center">
+                            <div class="mb-4">
+                                <div style="background: #E9ECEF; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <svg width="32" height="32" fill="none" stroke="#4A5568" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold mb-4" style="color: #1A2E35; font-style: italic;">¿ELIMINAR ACTIVIDAD?</h3>
+                            <div class="mb-4" style="border: 2px solid #E53E3E; border-radius: 15px; padding: 20px;">
+                                <h4 class="fw-bold mb-0" style="color: #E53E3E;">“{{ act.titulo }}”</h4>
+                            </div>
+                            <p class="text-muted mb-5">Esta acción es irreversible. Se eliminarán todos los participantes, horarios y detalles asociados a esta actividad.</p>
+                            <form method="POST" action="{% url 'actividades:eliminar' act.id %}">
+                                {% csrf_token %}
+                                <div class="d-flex gap-3">
+                                    <button type="button" class="btn" data-bs-dismiss="modal" style="background: #E9ECEF; color: #6C757D; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">CANCELAR</button>
+                                    <button type="submit" class="btn" style="background: #C53030; color: white; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">ELIMINAR</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <hr class="my-4" style="border-color: var(--borde-gris);">
+    {% endif %}
+
+    {% if actividades_aprobadas %}
+        <div class="day-header">
+            <span class="badge-date">📅 Itinerario Oficial</span>
+        </div>
+
+        {% for act in actividades_aprobadas %}
+        <div class="activity-card">
+            <div class="time-col">
+                <div class="time-text">{{ act.hora|date:"h:i" }}</div>
+                <div class="time-ampm">{{ act.hora|date:"A" }}</div>
+            </div>
+            <div class="content-col">
+                <div class="activity-title">{{ act.titulo }}</div>
+                <div class="activity-location">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ act.ubicacion|default:"Por definir" }}
+                </div>
+            </div>
+            <div class="meta-col">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-mini bg-turquesa" title="Organizado por {{ act.creador.first_name }}">{{ act.creador.first_name|slice:":1"|upper }}</div>
+                    <div class="participants-count">{{ act.votos_a_favor }}/{{ total_integrantes }}</div>
+                </div>
+                <button class="btn btn-link text-danger p-0 mt-2" style="font-size: 13px; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ act.id }}">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteModal{{ act.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 30px; padding: 30px; border: none;">
+                    <div class="modal-body text-center">
+                        <div class="mb-4">
+                            <div style="background: #E9ECEF; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                <svg width="32" height="32" fill="none" stroke="#4A5568" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-4" style="color: #1A2E35; font-style: italic;">¿ELIMINAR ACTIVIDAD?</h3>
+                        <div class="mb-4" style="border: 2px solid #E53E3E; border-radius: 15px; padding: 20px;">
+                            <h4 class="fw-bold mb-0" style="color: #E53E3E;">“{{ act.titulo }}”</h4>
+                        </div>
+                        <p class="text-muted mb-5">Esta acción es irreversible. Se eliminarán todos los participantes, horarios y detalles asociados a esta actividad.</p>
+                        <form method="POST" action="{% url 'actividades:eliminar' act.id %}">
+                            {% csrf_token %}
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn" data-bs-dismiss="modal" style="background: #E9ECEF; color: #6C757D; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">CANCELAR</button>
+                                <button type="submit" class="btn" style="background: #C53030; color: white; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">ELIMINAR</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-day-card mt-5">
+            <div class="mb-2 fs-4">🍃</div>
+            El itinerario aún está vacío.<br>
+            <a href="{% url 'actividades:proponer_actividad' viaje.id %}" class="text-naranja text-decoration-underline mt-1 d-inline-block">+ Proponer la primera actividad</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
