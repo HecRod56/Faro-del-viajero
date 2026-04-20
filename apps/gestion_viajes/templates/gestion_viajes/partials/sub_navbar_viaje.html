@@ -117,9 +117,7 @@
         <a href="#gastos" class="sub-nav-link {% if request.resolver_match.url_name == 'gastos' %}active{% endif %}">
             Gastos
         </a>
-        <a href="#chat" class="sub-nav-link {% if request.resolver_match.url_name == 'chat' %}active{% endif %}">
-            Chat
-        </a>
+        <a href="{% url 'chat:chat_viaje' viaje.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'chat_viaje' %}active{% endif %}">Chat</a>
         <a href="#galeria" class="sub-nav-link {% if request.resolver_match.url_name == 'galeria' %}active{% endif %}">
             Galería
         </a>

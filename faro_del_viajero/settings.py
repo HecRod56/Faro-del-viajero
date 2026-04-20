@@ -13,15 +13,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import sys
-from dotenv import load_dotenv
 from decouple import config, Csv
-from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Cargar variables de entorno
-load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 #Buscar carpetas dentro de la carpeta de 'apps'
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -30,18 +25,14 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-faro-viajero-2026-escom'
-DEBUG = True
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
-# Constante para mensajes de django
-MESSAGE_TAGS = {
-    messages.ERROR: 'danger',
-}
+
 
 # Application definition
 
@@ -56,8 +47,11 @@ INSTALLED_APPS = [
     #APPS PROYECTO FARO_DEL_VIAJERO
     'apps.core',
     'apps.autenticado',
-    'gestion_viajes',
-    'integrantes',
+    'apps.gestion_viajes',
+    'apps.integrantes',
+    'actividades',
+    'chat',
+    'galeria',
     ]
 
 MIDDLEWARE = [
@@ -97,7 +91,7 @@ WSGI_APPLICATION = 'faro_del_viajero.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'faro_viajero'),
+        'NAME': os.environ.get('DB_NAME', 'faro_viajero_db'),
         'USER': os.environ.get('DB_USER', 'faro_user'),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''), # Toma el password de tu .env
         'HOST': os.environ.get('DB_HOST', 'localhost'),
@@ -142,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'America/Mexico_City'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -179,12 +173,3 @@ Luego, puedes usarlo en tus vistas o servicios:
     response = requests.get(f"{settings.API_URL}/endpoint", headers={"Authorization": f"Bearer {settings.API_KEY}"})
     data = response.json()
 """
-# CONFIGURACIÓN DE CORREO (Usando python-decouple)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-# El nombre que aparecerá en la bandeja de entrada
-DEFAULT_FROM_EMAIL = 'Faro del Viajero <no-reply@faro_del_viajero@gmail.com>'
