@@ -588,12 +588,13 @@
                     <td style="text-align: right; font-weight: 700; color: #EF4444;">-${{ gasto.cantidad }}</td>
                     <td style="text-align: center;">
                         {% if request.user.is_authenticated and request.user == gasto.pagado_por.usuario or rol_usuario == 'organizador' %}
-                            <a href="{% url 'p_eliminar_gasto' gasto.id %}" 
-                               class="delete-link"
-                               onclick="return confirm('¿Estás seguro de que quieres eliminar este gasto?');"
-                               style="font-size: 0.7rem;">
+                            <button type="button"
+                               class="delete-link delete-gasto-btn"
+                               data-gasto-id="{{ gasto.id }}"
+                               data-concepto="{{ gasto.concepto }}"
+                               style="font-size: 0.7rem; background: none; border: none; cursor: pointer; padding: 0;">
                                 🗑️ Eliminar
-                            </a>
+                            </button>
                         {% endif %}
                     </td>
                 </tr>
@@ -656,6 +657,233 @@
            class="delete-link"
            onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar viaje</a>
     </div>
+
+    <!-- ══ TOAST DE NOTIFICACIÓN (ESTILO GMAIL) ══ -->
+    <div id="undo-toast" style="
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: #323232;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
+        display: none;
+        z-index: 1000;
+        align-items: center;
+        gap: 16px;
+        max-width: 400px;
+        animation: slideInLeft 0.3s ease-out;
+    ">
+        <span id="toast-message">Gasto eliminado</span>
+        <button id="undo-btn" style="
+            background: #4FC3F7;
+            color: #323232;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        " onmouseover="this.style.background='#29B6F6'" onmouseout="this.style.background='#4FC3F7'">
+            Deshacer
+        </button>
+    </div>
+
+    <style>
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+
+        .toast-exit {
+            animation: slideOutLeft 0.3s ease-out forwards !important;
+        }
+    </style>
+
+    <script>
+        // Sistema de deshacer eliminación de gastos (estilo Gmail)
+        const undoToast = document.getElementById('undo-toast');
+        const toastMessage = document.getElementById('toast-message');
+        const undoBtn = document.getElementById('undo-btn');
+        
+        let currentDeletedGasto = null;
+        let undoTimeout = null;
+        let isUndoing = false;
+
+        // Agregar listeners a todos los botones de eliminar
+        document.querySelectorAll('.delete-gasto-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const gastoId = this.dataset.gastoId;
+                const concepto = this.dataset.concepto;
+                
+                // Iniciar la eliminación
+                eliminarGastoConUndo(gastoId, concepto, this);
+            });
+        });
+
+        function eliminarGastoConUndo(gastoId, concepto, button) {
+            // Desactivar el botón temporalmente
+            button.disabled = true;
+            const originalText = button.textContent;
+            button.innerHTML = '⏳ Eliminando...';
+
+            // Realizar la eliminación via AJAX
+            fetch('{% url "p_eliminar_gasto_ajax" 999 %}'.replace('999', gastoId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Guardar los datos para posible restauración
+                    currentDeletedGasto = data.gasto_data;
+                    
+                    // Eliminar la fila de la tabla
+                    const row = button.closest('tr');
+                    row.style.opacity = '0.5';
+                    row.style.textDecoration = 'line-through';
+                    
+                    // Mostrar el toast
+                    toastMessage.textContent = `"${concepto}" eliminado`;
+                    undoToast.style.display = 'flex';
+                    
+                    // Limpiar timeout anterior si existe
+                    if (undoTimeout) {
+                        clearTimeout(undoTimeout);
+                    }
+                    
+                    // Auto-confirmar eliminación después de 5 segundos
+                    undoTimeout = setTimeout(() => {
+                        confirmarEliminacionPermanente(row);
+                    }, 5000);
+                    
+                    // Configurar evento para deshacer
+                    undoBtn.onclick = () => deshacerEliminacion(row);
+                } else {
+                    // Error en la eliminación
+                    alert('Error al eliminar el gasto: ' + (data.error || 'Error desconocido'));
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor');
+                button.disabled = false;
+                button.textContent = originalText;
+            });
+        }
+
+        function deshacerEliminacion(row) {
+            if (!currentDeletedGasto || isUndoing) return;
+            
+            isUndoing = true;
+            undoBtn.disabled = true;
+            undoBtn.textContent = 'Restaurando...';
+
+            // Restaurar via AJAX
+            fetch('{% url "p_restaurar_gasto_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    gasto_data: currentDeletedGasto
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Restaurar la fila visualmente
+                    row.style.opacity = '1';
+                    row.style.textDecoration = 'none';
+                    
+                    // Ocultar el toast con animación
+                    undoToast.classList.add('toast-exit');
+                    
+                    setTimeout(() => {
+                        undoToast.style.display = 'none';
+                        undoToast.classList.remove('toast-exit');
+                        isUndoing = false;
+                    }, 300);
+                    
+                    // Limpiar timeout
+                    if (undoTimeout) {
+                        clearTimeout(undoTimeout);
+                    }
+                    
+                    currentDeletedGasto = null;
+                } else {
+                    alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
+                    isUndoing = false;
+                    undoBtn.disabled = false;
+                    undoBtn.textContent = 'Deshacer';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor');
+                isUndoing = false;
+                undoBtn.disabled = false;
+                undoBtn.textContent = 'Deshacer';
+            });
+        }
+
+        function confirmarEliminacionPermanente(row) {
+            // Ocultar el toast
+            undoToast.classList.add('toast-exit');
+            
+            setTimeout(() => {
+                undoToast.style.display = 'none';
+                undoToast.classList.remove('toast-exit');
+            }, 300);
+            
+            // Recargar la página para sincronizar
+            location.reload();
+        }
+
+        // Función auxiliar para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
 
 </div>
 {% endblock %}

@@ -5,6 +5,9 @@ from django.db.models import Sum # Importamos Sum para hacer matemáticas
 from django.contrib.auth import get_user_model # Importa esto al principio
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+import json
 
 # 1. Página de inicio del módulo
 def pagina_inicio(request):
@@ -266,6 +269,83 @@ def eliminar_gasto(request, gasto_id):
             messages.error(request, "No eres parte de este viaje.")
     
     return redirect('p_detalle_viaje', viaje_id=viaje.id)
+
+# 8.2 Vista AJAX para eliminar un gasto y devolver los datos
+@require_http_methods(["POST"])
+def eliminar_gasto_ajax(request, gasto_id):
+    """Elimina un gasto y devuelve sus datos en JSON para poder restaurarlo"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'No autenticado'}, status=401)
+    
+    gasto = get_object_or_404(Gasto, id=gasto_id)
+    viaje = gasto.viaje
+    
+    # Verificar permisos
+    participante = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
+    
+    if not participante:
+        return JsonResponse({'error': 'No eres parte de este viaje'}, status=403)
+    
+    if gasto.pagado_por.usuario != request.user and participante.rol != 'organizador':
+        return JsonResponse({'error': 'No tienes permiso para eliminar este gasto'}, status=403)
+    
+    # Guardar los datos del gasto antes de eliminarlo
+    gasto_data = {
+        'id': gasto.id,
+        'concepto': gasto.concepto,
+        'cantidad': str(gasto.cantidad),
+        'categoria': gasto.categoria,
+        'pagado_por_id': gasto.pagado_por.id,
+        'viaje_id': viaje.id,
+        'fecha': str(gasto.fecha),
+    }
+    
+    # Eliminar el gasto
+    gasto.delete()
+    
+    return JsonResponse({
+        'success': True,
+        'message': 'Gasto eliminado',
+        'gasto_data': gasto_data
+    })
+
+# 8.3 Vista AJAX para restaurar un gasto eliminado
+@require_http_methods(["POST"])
+def restaurar_gasto_ajax(request):
+    """Restaura un gasto que fue eliminado recientemente"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'No autenticado'}, status=401)
+    
+    try:
+        data = json.loads(request.body)
+        gasto_data = data.get('gasto_data')
+        
+        if not gasto_data:
+            return JsonResponse({'error': 'Datos de gasto no proporcionados'}, status=400)
+        
+        # Obtener el viaje
+        viaje = get_object_or_404(Viaje, id=gasto_data['viaje_id'])
+        
+        # Obtener el participante que pagó
+        participante = get_object_or_404(Participante, id=gasto_data['pagado_por_id'])
+        
+        # Recrear el gasto
+        gasto = Gasto.objects.create(
+            viaje=viaje,
+            pagado_por=participante,
+            concepto=gasto_data['concepto'],
+            cantidad=gasto_data['cantidad'],
+            categoria=gasto_data['categoria']
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Gasto restaurado correctamente',
+            'gasto_id': gasto.id
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 # 9. Vista para añadir un participante (por ahora simplificado)
 
