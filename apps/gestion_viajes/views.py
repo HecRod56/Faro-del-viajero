@@ -3,6 +3,8 @@ from .models import Viaje, Gasto, Participante# Importamos tu modelo para escrib
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum # Importamos Sum para hacer matemáticas
 from django.contrib.auth import get_user_model # Importa esto al principio
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 # 1. Página de inicio del módulo
 def pagina_inicio(request):
@@ -85,40 +87,73 @@ def pagina_viajes_planeados(request):
 
 # 5. Vista para mostrar el detalle de un viaje específico
 def pagina_detalle_viaje(request, viaje_id):
+    # 1. Obtenemos el viaje o lanzamos 404
     viaje = get_object_or_404(Viaje, id=viaje_id)
     
-    # Verifica si el usuario logueado ya está en la lista de participantes
-    es_participante = viaje.participantes.filter(usuario=request.user).exists() if request.user.is_authenticated else False
+    # 2. --- BLOQUE DE SEGURIDAD RNF-06 (Control de Acceso) ---
+    # Verificamos si el usuario es participante antes de calcular nada
+    if request.user.is_authenticated:
+        participante_actual = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
+        
+        if not participante_actual:
+            from django.contrib import messages
+            messages.error(request, "Acceso denegado: No eres integrante de este viaje.")
+            return redirect('p_ver_mis_viajes')
+        
+        es_participante = True
+        rol_usuario = participante_actual.rol
+    else:
+        # Si no está autenticado, lo mandamos al login o lista
+        return redirect('login') 
 
-    # ESTA LÍNEA ES LA CLAVE: Trae a los amigos de la base de datos
-    participantes_list = viaje.participantes.all() 
+    # 3. LÓGICA DE CÁLCULOS (Presupuesto y Gastos)
+    # Traemos a todos los participantes para la lista lateral
+    participantes_list = viaje.participantes.all()
     
-    total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+    # Obtener al organizador del viaje
+    organizador = participantes_list.filter(rol='organizador').first() 
+    
+    # Matemáticas de gastos
+    total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
     presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
 
-    # Se estima la duracion del viaje en dias 
-    duracion = duracion_viaje((viaje.fecha_fin-viaje.fecha_inicio).days)
-
-    # Logica para la barra del presupuesto gastado
-    total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
-    presupuesto_restante = viaje.presupuesto_estimado - total_gastado
-
+    # Porcentaje para la barra de progreso
     if viaje.presupuesto_estimado and viaje.presupuesto_estimado > 0:
-        porcentaje_gastado = (total_gastado / viaje.presupuesto_estimado) * 100
-        porcentaje_gastado = min(porcentaje_gastado, 100)  # tope en 100%
+        porcentaje_gastado = min((total_gastado / viaje.presupuesto_estimado) * 100, 100)
     else:
-        porcentaje_gastado = 0
+        porcentaje_gastado = 0  
 
-   
+    # 4. CÁLCULO DE DURACIÓN
+    # Usamos tu función auxiliar duracion_viaje
+    duracion = duracion_viaje((viaje.fecha_fin - viaje.fecha_inicio).days)
 
+    # 5. REGLAS DE NEGOCIO PARA REGISTRO DE GASTOS
+    puede_registrar_gasto = True
+    razon_no_puede_registrar = ""
+    
+    # Regla 1: Estado finalizado
+    if viaje.estado == 'finalizado':
+        puede_registrar_gasto = False
+        razon_no_puede_registrar = "No puedes registrar gastos en un viaje finalizado."
+    
+    # Regla 2: Presupuesto agotado
+    elif presupuesto_restante < 0:
+        puede_registrar_gasto = False
+        razon_no_puede_registrar = "Presupuesto excedido. No se permiten más gastos."
+
+    # 6. RENDERIZADO FINAL
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
-        'participantes': participantes_list, # <--- Verifica que diga 'participantes'
+        'participantes': participantes_list,
+        'organizador': organizador,
         'es_participante': es_participante,
         'total_gastado': total_gastado,
         'presupuesto_restante': presupuesto_restante,
         'duracion_viaje_dias': duracion, 
-        'porcentaje_gastado': porcentaje_gastado
+        'porcentaje_gastado': porcentaje_gastado,
+        'puede_registrar_gasto': puede_registrar_gasto,
+        'razon_no_puede_registrar': razon_no_puede_registrar,
+        'rol_usuario': rol_usuario # Útil para mostrar/ocultar botones en el HTML
     })
 
 #5.1 Calculo de la duracion de un viaje 
@@ -174,21 +209,65 @@ def registrar_gasto(request, viaje_id):
         cantidad = request.POST.get('cantidad')
         categoria = request.POST.get('categoria')
         
-        # Creamos el gasto ligado a este viaje
-        Gasto.objects.create(
-            viaje=viaje,
-            concepto=concepto,
-            cantidad=cantidad,
-            categoria=categoria
-        )
+        # VALIDACIÓN 1: El estado del viaje no puede ser "finalizado"
+        if viaje.estado == 'finalizado':
+            # Redirigimos sin guardar el gasto
+            return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        
+        # VALIDACIÓN 2: Verificar que el presupuesto no esté en cifras negativas
+        total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+        presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
+        
+        # Si la suma de este gasto + lo ya gastado excede el presupuesto
+        if presupuesto_restante < 0:
+            return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        
+        # VALIDACIÓN 3: El usuario debe ser participante del viaje
+        if request.user.is_authenticated:
+            participante = Participante.objects.filter(
+                viaje=viaje,
+                usuario=request.user
+            ).first()
+            
+            if not participante:
+                return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        
+            # Si pasa todas las validaciones, creamos el gasto ligado a este viaje y al participante
+            Gasto.objects.create(
+                viaje=viaje,
+                pagado_por=participante,
+                concepto=concepto,
+                cantidad=cantidad,
+                categoria=categoria
+            )
         
         # Regresamos a la misma página de detalle para ver el gasto reflejado
         return redirect('p_detalle_viaje', viaje_id=viaje.id)
     
     return redirect('p_detalle_viaje', viaje_id=viaje.id)
 
-# 9. Vista para añadir un participante (por ahora simplificado)
+# 8.1 Vista para eliminar un gasto
+def eliminar_gasto(request, gasto_id):
+    gasto = get_object_or_404(Gasto, id=gasto_id)
+    viaje = gasto.viaje
+    
+    # Verificar que el usuario sea el que registró el gasto o un organizador
+    if request.user.is_authenticated:
+        participante = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
+        
+        if participante:
+            # Permite eliminar si es quien registró el gasto o si es organizador
+            if gasto.pagado_por.usuario == request.user or participante.rol == 'organizador':
+                gasto.delete()
+                messages.success(request, "Gasto eliminado correctamente.")
+            else:
+                messages.error(request, "No tienes permiso para eliminar este gasto.")
+        else:
+            messages.error(request, "No eres parte de este viaje.")
+    
+    return redirect('p_detalle_viaje', viaje_id=viaje.id)
 
+# 9. Vista para añadir un participante (por ahora simplificado)
 
 def añadir_participante(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
@@ -199,13 +278,27 @@ def añadir_participante(request, viaje_id):
     if not user.is_authenticated:
         user = User.objects.first() 
 
-    if user: # Si encontramos un usuario (ya sea el logueado o el primero de la DB)
-        if not Participante.objects.filter(viaje=viaje, usuario=user).exists():
-            Participante.objects.create(
-                viaje=viaje,
-                usuario=user,
-                rol='integrante'
-            )
+    if user:
+        # 1. Contar cuántos participantes tiene ya este viaje
+        cantidad_actual = Participante.objects.filter(viaje=viaje).count()
+
+        # 2. Validar si ya existe el usuario en el viaje
+        ya_es_participante = Participante.objects.filter(viaje=viaje, usuario=user).exists()
+
+        if not ya_es_participante:
+            # 3. Validar capacidad máxima
+            if cantidad_actual < viaje.capacidad_max:
+                Participante.objects.create(
+                    viaje=viaje,
+                    usuario=user,
+                    rol='integrante'
+                )
+                messages.success(request, "¡Te has unido al viaje con éxito!")
+            else:
+                # Si llega aquí, es porque alguien intentó entrar por URL y el viaje está lleno
+                messages.error(request, "Lo sentimos, este viaje ya alcanzó su capacidad máxima.")
+        else:
+            messages.info(request, "Ya formas parte de este viaje.")
     
     return redirect('p_detalle_viaje', viaje_id=viaje.id)
 
