@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'apps.autenticado',
     'apps.gestion_viajes',
     'apps.integrantes',
-    'actividades',
+    'apps.actividades',
     'chat',
     'galeria',
     ]

@@ -19,7 +19,7 @@ urlpatterns = [
     path('viajes/integrantes/', include('apps.integrantes.urls')),  # ← cambiado
     path('', include('apps.autenticado.urls')),
     path('viajes/', include('apps.gestion_viajes.urls')),
-    path('', include('actividades.urls')),
+    path('actividades/', include('apps.actividades.urls')),
     path('', include('chat.urls')),
     path('', include('galeria.urls')),
 ]
