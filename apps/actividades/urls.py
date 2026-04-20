@@ -12,5 +12,7 @@ urlpatterns = [
     path('votar/<int:actividad_id>/', views.votar_actividad, name='votar'),
     # Ruta para eliminar una actividad
     path('eliminar/<int:actividad_id>/', views.eliminar_actividad, name='eliminar'),
+    # Ruta para ver el detalle de una actividad
+    path('detalle/<int:actividad_id>/', views.detalle_actividad, name='detalle'),
 ]
 

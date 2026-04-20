@@ -1,0 +1,214 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* ==========================================
+       VARIABLES Y ESTILOS DEL MÓDULO ACTIVIDADES
+       ========================================== */
+    :root {
+        --turquesa: #0E9E8E;
+        --texto-oscuro: #1A2E35;
+        --fondo-gris: #F2F2F0;
+        --borde-gris: #E4E4E2;
+        --dorado: #F5C518;
+        --naranja: #E8721C;
+        --magenta: #C4265E;
+    }
+
+    body { background-color: var(--fondo-gris); }
+
+    /* Navegación y Breadcrumb */
+    .trip-subnav {
+        background-color: white; border-bottom: 1px solid var(--borde-gris);
+        position: sticky; top: 85px; z-index: 1020;
+    }
+    .breadcrumb-item a { color: var(--turquesa); font-weight: 600; text-decoration: none; }
+    .breadcrumb-item.active { color: var(--texto-oscuro); font-weight: 700; }
+
+    /* Tarjeta Principal de Detalle */
+    .detail-card {
+        background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        border: 1px solid var(--borde-gris); overflow: hidden; padding: 40px; margin-bottom: 40px;
+    }
+
+    /* Badges de Estado */
+    .badge-pending { 
+        background-color: rgba(245, 197, 24, 0.15); color: #b58f00; 
+        font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 12px; border: 1px solid rgba(245, 197, 24, 0.3);
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .badge-confirmed { 
+        background-color: rgba(14, 158, 142, 0.1); color: var(--turquesa); 
+        font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 12px; border: 1px solid rgba(14, 158, 142, 0.2);
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    /* Filas de Información (Icono + Texto) */
+    .info-row { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+    .info-icon-box {
+        width: 44px; height: 44px; border-radius: 12px; background: var(--fondo-gris);
+        display: flex; align-items: center; justify-content: center; color: var(--texto-oscuro); flex-shrink: 0;
+        font-size: 20px;
+    }
+    .info-content h6 { font-size: 13px; font-weight: 700; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-content p { font-size: 16px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 0; line-height: 1.5; }
+    
+    .desc-box { background-color: rgba(14, 158, 142, 0.03); border-left: 4px solid var(--turquesa); padding: 16px 20px; border-radius: 0 12px 12px 0; margin-bottom: 30px; }
+    .desc-box p { font-size: 15px; color: #555; font-weight: 500; margin: 0; line-height: 1.6; }
+
+    /* Sección Logística y Participantes */
+    .section-title { font-size: 16px; font-weight: 800; color: var(--texto-oscuro); margin-bottom: 16px; }
+    
+    .avatar-wrapper { display: flex; align-items: center; gap: 12px; }
+    .avatar-lg { width: 40px; height: 40px; border-radius: 50%; background-color: var(--naranja); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    
+    /* Grupo de Avatares superpuestos */
+    .avatar-group { display: flex; align-items: center; }
+    .avatar-group .avatar-sm { 
+        width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+        font-size: 12px; font-weight: 700; color: white; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-left: -10px; transition: transform 0.2s;
+    }
+    .avatar-group .avatar-sm:first-child { margin-left: 0; }
+    .avatar-group .avatar-sm:hover { transform: translateY(-3px); z-index: 10; }
+    .participants-count-badge { background: var(--fondo-gris); color: #888; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 12px; margin-left: 10px; }
+
+    /* Botones */
+    .btn-primary-custom {
+        background: var(--turquesa); color: white; border: none; border-radius: 28px;
+        padding: 14px 24px; font-size: 15px; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+    }
+    .btn-primary-custom:hover { background: #0b8a7c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14, 158, 142, 0.2); color: white; }
+    
+    .btn-outline-custom {
+        background: transparent; color: #555; border: 2px solid var(--borde-gris); border-radius: 28px;
+        padding: 12px 24px; font-size: 15px; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+    }
+    .btn-outline-custom:hover { background: #e2e8f0; color: var(--texto-oscuro); }
+
+    .btn-ausencia { color: #dc3545; font-weight: 600; font-size: 14px; text-decoration: none; padding: 6px 12px; border-radius: 16px; background: rgba(220, 53, 69, 0.05); transition: background 0.2s; }
+    .btn-ausencia:hover { background: rgba(220, 53, 69, 0.1); color: #bd2130; }
+</style>
+
+<div class="trip-subnav pt-3 pb-3 shadow-sm mb-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0" style="font-size: 14px;">
+                <li class="breadcrumb-item"><a href="#">Mis Viajes</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'actividades:lista' actividad.viaje.id %}">{{ actividad.viaje.nombre|default:"Detalle del Viaje" }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'actividades:lista' actividad.viaje.id %}">Actividades</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ actividad.titulo }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            
+            <div class="detail-card">
+                
+                <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+                    <h1 class="fw-bold text-oscuro mb-0" style="font-size: 32px; letter-spacing: -0.5px; max-width: 70%;">
+                        {{ actividad.titulo }}
+                    </h1>
+                    
+                    {% if actividad.estado == 'APROBADA' %}
+                    <div class="badge-confirmed">
+                        ✅ Confirmada
+                    </div>
+                    {% else %}
+                    <div class="badge-pending">
+                        ⏳ Pendiente aprobación
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="desc-box">
+                    <p>{{ actividad.descripcion|default:"No hay detalles adicionales para esta actividad." }}</p>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon-box">📅</div>
+                    <div class="info-content">
+                        <h6>Fecha y Hora</h6>
+                        <p>{{ actividad.fecha|date:"l d M Y" }} · {{ actividad.hora|time:"h:i A" }}</p>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon-box">📍</div>
+                    <div class="info-content">
+                        <h6>Ubicación</h6>
+                        <p>{{ actividad.ubicacion|default:"Por definir" }}</p>
+                        {% if actividad.ubicacion %}
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ actividad.ubicacion }}" target="_blank" class="text-turquesa fw-bold" style="font-size: 13px; text-decoration: none;">Ver en el mapa ↗</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr class="my-5" style="border-color: var(--borde-gris);">
+
+                <div class="row g-5">
+                    
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h5 class="section-title">Organizador</h5>
+                            <div class="avatar-wrapper">
+                                <div class="avatar-lg bg-turquesa">{{ actividad.creador.first_name|slice:":1"|upper }}{{ actividad.creador.last_name|slice:":1"|upper }}</div>
+                                <div>
+                                    <p class="mb-0 fw-bold text-oscuro">{{ actividad.creador.get_full_name|default:actividad.creador.username }}</p>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">Responsable</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="section-title">Transporte</h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fs-4">🚕</span>
+                                <p class="mb-0 fw-bold text-oscuro">A coordinar</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="section-title">Participantes a favor</h5>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-group">
+                                <div class="avatar-sm bg-turquesa" style="z-index: 4;" title="Participante">👤</div>
+                            </div>
+                            <span class="participants-count-badge">{{ actividad.votos_a_favor }} / {{ total_integrantes }}</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <a href="#" class="btn-ausencia">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="me-1"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                Marcar mi ausencia
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="my-5" style="border-color: var(--borde-gris);">
+
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <a href="#" class="btn-primary-custom flex-grow-1">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        EDITAR ACTIVIDAD
+                    </a>
+                    <a href="{% url 'actividades:lista' actividad.viaje.id %}" class="btn-outline-custom flex-grow-1">
+                        Volver al itinerario
+                    </a>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

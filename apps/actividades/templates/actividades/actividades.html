@@ -254,7 +254,7 @@
         </div>
 
         {% for act in actividades_aprobadas %}
-        <div class="activity-card">
+        <a href="{% url 'actividades:detalle' act.id %}" class="activity-card text-decoration-none">
             <div class="time-col">
                 <div class="time-text">{{ act.hora|date:"h:i" }}</div>
                 <div class="time-ampm">{{ act.hora|date:"A" }}</div>
@@ -275,7 +275,7 @@
                     Eliminar
                 </button>
             </div>
-        </div>
+        </a>
 
         <div class="modal fade" id="deleteModal{{ act.id }}" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">

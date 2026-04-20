@@ -133,3 +133,17 @@ def eliminar_actividad(request, actividad_id):
         messages.success(request, f"La actividad '{nombre_borrado}' ha sido eliminada.")
         
     return redirect('actividades:lista', viaje_id=viaje_id)
+
+@login_required
+def detalle_actividad(request, actividad_id):
+    # Buscamos la actividad en la base de datos
+    actividad = get_object_or_404(Actividad, id=actividad_id)
+    
+    # Calculamos el total de integrantes para los porcentajes/badges
+    total_integrantes = actividad.viaje.integrantes.count() if hasattr(actividad.viaje, 'integrantes') else 6
+    
+    context = {
+        'actividad': actividad,
+        'total_integrantes': total_integrantes,
+    }
+    return render(request, 'actividades/actividad_detalle.html', context)
