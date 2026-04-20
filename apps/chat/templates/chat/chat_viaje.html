@@ -56,37 +56,40 @@
         <!-- Ventana de chat completa -->
         <div class="chat-bg rounded-4 d-flex flex-column shadow-sm border overflow-hidden position-relative h-100">
 
-            <!-- Header -->
-            <div class="chat-item-active px-3 py-2 d-flex align-items-center gap-3 chat-header">
-                <div class="rounded-3 overflow-hidden flex-shrink-0" style="width:40px;height:40px;">
-                    {% if viaje.imagen_destino %}
-                        <img src="{{ viaje.imagen_destino.url }}" class="w-100 h-100 object-fit-cover">
-                    {% else %}
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center fw-bold text-white" style="background:rgba(255,255,255,.3);">
-                            {{ viaje.destino|first }}
-                        </div>
-                    {% endif %}
-                </div>
+<div class="chat-item-active px-3 py-2 d-flex align-items-center gap-3 chat-header">
+    
+    <!-- 1. Boton back -->
+    <a href="{% url 'p_ver_mis_viajes' %}" 
+       class="btn rounded-circle d-flex align-items-center justify-content-center me-1"
+       style="width:38px;height:38px;background:rgba(255,255,255,.2);">
+        <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+    </a>
 
-                    <a href="{% url 'p_ver_mis_viajes' %}" 
-                    class="btn rounded-circle d-flex align-items-center justify-content-center me-1"
-                    style="width:38px;height:38px;background:rgba(255,255,255,.2);">
-                        <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                            <polyline points="15 18 9 12 15 6"/>
-                        </svg>
-                    </a>
-
-
-
-                <p class="text-white fw-bold mb-0 flex-grow-1" style="font-size:15px;">{{ viaje.nombre }}</p>
-                <button class="btn rounded-circle d-flex align-items-center justify-content-center"
-                        style="width:42px;height:42px;background:rgba(255,255,255,.2);"
-                        onclick="document.getElementById('menuOpciones').classList.toggle('d-none')">
-                    <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
-                    </svg>
-                </button>
+    <!-- 2. Imagen/inicial del viaje -->
+    <div class="rounded-3 overflow-hidden flex-shrink-0" style="width:40px;height:40px;">
+        {% if viaje.imagen_destino %}
+            <img src="{{ viaje.imagen_destino.url }}" class="w-100 h-100 object-fit-cover">
+        {% else %}
+            <div class="w-100 h-100 d-flex align-items-center justify-content-center fw-bold text-white" style="background:rgba(255,255,255,.3);">
+                {{ viaje.destino|first }}
             </div>
+        {% endif %}
+    </div>
+
+    <!-- 3. Nombre del viaje -->
+    <p class="text-white fw-bold mb-0 flex-grow-1" style="font-size:15px;">{{ viaje.nombre }}</p>
+
+    <!-- 4. Boton ··· -->
+    <button class="btn rounded-circle d-flex align-items-center justify-content-center"
+            style="width:42px;height:42px;background:rgba(255,255,255,.2);"
+            onclick="document.getElementById('menuOpciones').classList.toggle('d-none')">
+        <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
+        </svg>
+    </button>
+</div>
 
             <!-- Menú ··· -->
             <div id="menuOpciones" class="d-none position-absolute bg-white rounded-4 shadow border" style="top:56px;right:12px;width:210px;z-index:20;">
