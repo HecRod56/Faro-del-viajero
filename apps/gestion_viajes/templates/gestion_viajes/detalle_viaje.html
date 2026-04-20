@@ -676,7 +676,24 @@
         max-width: 400px;
         animation: slideInLeft 0.3s ease-out;
     ">
-        <span id="toast-message">Gasto eliminado</span>
+        <div style="flex: 1;">
+            <div id="toast-message">Gasto eliminado</div>
+            <div id="timer-bar" style="
+                height: 2px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 1px;
+                margin-top: 8px;
+                overflow: hidden;
+            ">
+                <div id="timer-progress" style="
+                    height: 100%;
+                    background: #4FC3F7;
+                    border-radius: 1px;
+                    width: 100%;
+                    transition: width 0.1s linear;
+                "></div>
+            </div>
+        </div>
         <button id="undo-btn" style="
             background: #4FC3F7;
             color: #323232;
@@ -687,6 +704,7 @@
             cursor: pointer;
             font-size: 0.875rem;
             transition: background 0.2s;
+            white-space: nowrap;
         " onmouseover="this.style.background='#29B6F6'" onmouseout="this.style.background='#4FC3F7'">
             Deshacer
         </button>
@@ -725,10 +743,13 @@
         const undoToast = document.getElementById('undo-toast');
         const toastMessage = document.getElementById('toast-message');
         const undoBtn = document.getElementById('undo-btn');
+        const timerProgress = document.getElementById('timer-progress');
         
         let currentDeletedGasto = null;
         let undoTimeout = null;
+        let timerInterval = null;
         let isUndoing = false;
+        const UNDO_DELAY = 5000; // 5 segundos
 
         // Agregar listeners a todos los botones de eliminar
         document.querySelectorAll('.delete-gasto-btn').forEach(btn => {
@@ -772,15 +793,36 @@
                     toastMessage.textContent = `"${concepto}" eliminado`;
                     undoToast.style.display = 'flex';
                     
-                    // Limpiar timeout anterior si existe
+                    // Reiniciar la barra de progreso
+                    timerProgress.style.width = '100%';
+                    
+                    // Limpiar timeout e intervalo anterior si existe
                     if (undoTimeout) {
                         clearTimeout(undoTimeout);
                     }
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                    }
+                    
+                    // Iniciar el contador regresivo de la barra
+                    let timeRemaining = UNDO_DELAY;
+                    timerInterval = setInterval(() => {
+                        timeRemaining -= 100;
+                        const percentage = (timeRemaining / UNDO_DELAY) * 100;
+                        timerProgress.style.width = percentage + '%';
+                        
+                        if (timeRemaining <= 0) {
+                            clearInterval(timerInterval);
+                        }
+                    }, 100);
                     
                     // Auto-confirmar eliminación después de 5 segundos
                     undoTimeout = setTimeout(() => {
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
+                        }
                         confirmarEliminacionPermanente(row);
-                    }, 5000);
+                    }, UNDO_DELAY);
                     
                     // Configurar evento para deshacer
                     undoBtn.onclick = () => deshacerEliminacion(row);
@@ -805,6 +847,14 @@
             isUndoing = true;
             undoBtn.disabled = true;
             undoBtn.textContent = 'Restaurando...';
+            
+            // Limpiar timers
+            if (undoTimeout) {
+                clearTimeout(undoTimeout);
+            }
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
 
             // Restaurar via AJAX
             fetch('{% url "p_restaurar_gasto_ajax" %}', {
@@ -832,11 +882,6 @@
                         undoToast.classList.remove('toast-exit');
                         isUndoing = false;
                     }, 300);
-                    
-                    // Limpiar timeout
-                    if (undoTimeout) {
-                        clearTimeout(undoTimeout);
-                    }
                     
                     currentDeletedGasto = null;
                 } else {
