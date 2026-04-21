@@ -51,7 +51,7 @@ def pagina_crear_viaje(request):
             )
         
         # Una vez guardado, redirigimos a la lista de viajes para confirmar
-        return redirect('p_ver_mis_viajes')
+        return redirect('gestion_viajes:p_ver_mis_viajes')
 
     # Si entran por primera vez (GET), solo mostramos el formulario
     return render(request, 'gestion_viajes/crear_viaje.html')
@@ -101,7 +101,7 @@ def pagina_detalle_viaje(request, viaje_id):
         if not participante_actual:
             from django.contrib import messages
             messages.error(request, "Acceso denegado: No eres integrante de este viaje.")
-            return redirect('p_ver_mis_viajes')
+            return redirect('gestion_viajes:p_ver_mis_viajes')
         
         es_participante = True
         rol_usuario = participante_actual.rol
@@ -192,7 +192,7 @@ def pagina_editar_viaje(request, viaje_id):
         viaje.estado = request.POST.get('estado') # Agregamos estado por si quieren cambiarlo
         
         viaje.save() # Guardamos los cambios en Postgres
-        return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
     # Si es GET, enviamos el objeto 'viaje' para rellenar los inputs
     return render(request, 'gestion_viajes/editar_viaje.html', {'viaje': viaje})
@@ -201,7 +201,7 @@ def pagina_editar_viaje(request, viaje_id):
 def eliminar_viaje(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
     viaje.delete() # ¡Adiós registro!
-    return redirect('p_ver_mis_viajes')
+    return redirect('gestion_viajes:p_ver_mis_viajes')
 
 # 8. Vista para registrar un nuevo gasto
 def registrar_gasto(request, viaje_id):
@@ -215,7 +215,7 @@ def registrar_gasto(request, viaje_id):
         # VALIDACIÓN 1: El estado del viaje no puede ser "finalizado"
         if viaje.estado == 'finalizado':
             # Redirigimos sin guardar el gasto
-            return redirect('p_detalle_viaje', viaje_id=viaje.id)
+            return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
         
         # VALIDACIÓN 2: Verificar que el presupuesto no esté en cifras negativas
         total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
@@ -223,7 +223,7 @@ def registrar_gasto(request, viaje_id):
         
         # Si la suma de este gasto + lo ya gastado excede el presupuesto
         if presupuesto_restante < 0:
-            return redirect('p_detalle_viaje', viaje_id=viaje.id)
+            return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
         
         # VALIDACIÓN 3: El usuario debe ser participante del viaje
         if request.user.is_authenticated:
@@ -233,7 +233,7 @@ def registrar_gasto(request, viaje_id):
             ).first()
             
             if not participante:
-                return redirect('p_detalle_viaje', viaje_id=viaje.id)
+                return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
         
             # Si pasa todas las validaciones, creamos el gasto ligado a este viaje y al participante
             Gasto.objects.create(
@@ -245,9 +245,9 @@ def registrar_gasto(request, viaje_id):
             )
         
         # Regresamos a la misma página de detalle para ver el gasto reflejado
-        return redirect('p_detalle_viaje', viaje_id=viaje.id)
+        return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
     
-    return redirect('p_detalle_viaje', viaje_id=viaje.id)
+    return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
 # 8.1 Vista para eliminar un gasto
 def eliminar_gasto(request, gasto_id):
@@ -268,7 +268,7 @@ def eliminar_gasto(request, gasto_id):
         else:
             messages.error(request, "No eres parte de este viaje.")
     
-    return redirect('p_detalle_viaje', viaje_id=viaje.id)
+    return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
 # 8.2 Vista AJAX para eliminar un gasto y devolver los datos
 @require_http_methods(["POST"])
@@ -380,7 +380,7 @@ def añadir_participante(request, viaje_id):
         else:
             messages.info(request, "Ya formas parte de este viaje.")
     
-    return redirect('p_detalle_viaje', viaje_id=viaje.id)
+    return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
 
 

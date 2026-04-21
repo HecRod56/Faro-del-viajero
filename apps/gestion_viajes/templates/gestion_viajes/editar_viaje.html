@@ -124,9 +124,9 @@
     
     <div class="breadcrumb-sticky-container">
         <nav class="breadcrumb-nav">
-            <a href="{% url 'p_ver_mis_viajes' %}">Mis viajes</a>
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
             <span class="mx-2">&gt;</span>
-            <a href="{% url 'p_detalle_viaje' viaje.id %}">Detalle</a>
+            <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">Detalle</a>
             <span class="mx-2">&gt;</span>
             <span class="current">Editar viaje</span>
         </nav>
@@ -213,7 +213,7 @@
                             </div>
 
                             <div class="col-12 d-flex justify-content-end gap-3 mt-4">
-                                <a href="{% url 'p_detalle_viaje' viaje.id %}" class="btn-cancel">Cancelar</a>
+                                <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-cancel">Cancelar</a>
                                 <button type="submit" class="btn-save">Guardar Cambios</button>
                             </div>
                         </div>
