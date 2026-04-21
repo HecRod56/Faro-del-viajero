@@ -301,13 +301,13 @@ padding-bottom: 32px;
           <p>"Organiza tu viaje grupal con la precisión de una joya."</p>
 
           <div class="welcome-banner__actions">
-            <button class="btn btn-primary">
+            <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn btn-primary text-decoration-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
               Crear nuevo viaje
-            </button>
+            </a>
           </div>
         </div>
 
@@ -343,9 +343,9 @@ padding-bottom: 32px;
               Crea un viaje, define destino y agrega participantes.
             </p>
 
-            <button class="feature-card__link link-green">
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="feature-card__link link-green">
               Gestionar ahora →
-            </button>
+            </a>
           </div>
 
           <!-- Card 2 -->
@@ -367,9 +367,9 @@ padding-bottom: 32px;
               Planifica cada día con horarios y actividades.
             </p>
 
-            <button class="feature-card__link link-pink">
+            <a href="#" class="feature-card__link link-pink">
               Ver plan →
-            </button>
+            </a>
           </div>
 
           <!-- Card 3 -->
@@ -389,9 +389,9 @@ padding-bottom: 32px;
               Controla pagos y deudas automáticamente.
             </p>
 
-            <button class="feature-card__link link-amber">
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="feature-card__link link-amber">
               Gestionar →
-            </button>
+            </a>
           </div>
 
         </div>

@@ -14,7 +14,6 @@ from pathlib import Path
 import os
 import sys
 from decouple import config, Csv
-from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,10 +32,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
-# Constante para mensajes de django
-MESSAGE_TAGS = {
-    messages.ERROR: 'danger',
-}
+
 
 # Application definition
 
@@ -140,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'America/Mexico_City'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -177,12 +173,3 @@ Luego, puedes usarlo en tus vistas o servicios:
     response = requests.get(f"{settings.API_URL}/endpoint", headers={"Authorization": f"Bearer {settings.API_KEY}"})
     data = response.json()
 """
-# CONFIGURACIÓN DE CORREO (Usando python-decouple)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-# El nombre que aparecerá en la bandeja de entrada
-DEFAULT_FROM_EMAIL = 'Faro del Viajero <no-reply@faro_del_viajero@gmail.com>'
