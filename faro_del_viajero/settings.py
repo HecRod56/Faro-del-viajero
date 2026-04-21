@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'apps.integrantes',
     'actividades',
     'chat',
-    'galeria',
+    'apps.galeria',
     ]
 
 MIDDLEWARE = [
