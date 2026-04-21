@@ -121,8 +121,18 @@
         <a href="#galeria" class="sub-nav-link {% if request.resolver_match.url_name == 'galeria' %}active{% endif %}">
             Galería
         </a>
-        <a href="#" class="sub-nav-link">
-            Integrantes <span class="integrantes-badge">{{ viaje.participantes.count }}</span>
+        {# Integrantes — CORRECCIÓN: usa viaje_actual en lugar de viaje #}
+        {% url 'integrantes:lista' id_viaje=viaje_actual.id as integrantes_url %}
+        {% if integrantes_url %}
+        <a href="{{ integrantes_url }}"
+           class="sub-nav-link {% if request.resolver_match.url_name == 'lista' and request.resolver_match.namespace == 'integrantes' %}active{% endif %}">
+            Integrantes
+            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
+        </a>
+        {% else %}
+        <a href="#integrantes" class="sub-nav-link">
+            Integrantes
+            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
         </a>
     </div>
 </div>
