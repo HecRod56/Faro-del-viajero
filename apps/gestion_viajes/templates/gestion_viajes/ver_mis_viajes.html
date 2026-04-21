@@ -1,4 +1,37 @@
 {% extends "core/base.html" %}
+{% block subnav %}
+<style>
+    /* Hacemos que esta barra específica también sea sticky */
+    .sticky-breadcrumb {
+        background-color: #fff;
+        border-bottom: 1px solid #E5E7EB;
+        padding: 1rem 1.5rem;
+        position: sticky;
+        top: 80px; /* Se pega al tope de la ventana */
+        z-index: 40;
+    }
+    
+    .breadcrumb-simple {
+        font-size: 0.75rem;
+        color: #9CA3AF;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-current {
+        color: #1e293b;
+        font-weight: 700;
+    }
+</style>
+
+<div class="sticky-breadcrumb">
+    <nav class="breadcrumb-simple">
+        <span class="breadcrumb-current">Mis viajes</span>
+    </nav>
+</div>
+{% endblock %}
+
 {% block content %}
 <style>
     body {
@@ -118,7 +151,14 @@
 </style>
 
 <div class="container py-4 px-3">
-    <p class="text-muted mb-1" style="font-size: 0.875rem;">Mis viajes</p>
+    {% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" 
+         style="padding: 15px; background-color: #f44336; color: white; margin-bottom: 20px; border-radius: 8px;">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold mb-0" style="font-size: 2.25rem; color: #374151;">Mis viajes</h1>

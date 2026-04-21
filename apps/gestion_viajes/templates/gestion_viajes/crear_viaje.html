@@ -1,8 +1,54 @@
 {% extends "core/base.html" %}
 {% load static %}
+{% block subnav %}
+     <div class="breadcrumb-sticky-container">
+        <nav class="breadcrumb-nav">
+            <a href="{% url 'p_ver_mis_viajes' %}">Mis viajes</a>
+            <span style="margin: 0 8px;">&gt;</span>
+            <span class="current">Crear viaje</span>
+        </nav>
+    </div>
+{% endblock %}
+
 {% block content %}
 
     <style>
+        /*======BREADCRUMB======*/
+        .breadcrumb-sticky-container {
+            background-color: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 1rem 1.5rem;
+            position: -webkit-sticky; /* Soporte para Safari */
+            position: sticky;
+            top: 80px;
+            z-index: 1020; /* Por debajo del navbar principal pero sobre el contenido */
+        }
+
+        .breadcrumb-nav {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-nav a {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-nav a:hover { 
+            color: var(--teal); 
+            text-decoration: underline; 
+        }
+
+        .breadcrumb-nav span.current {
+            color: #9CA3AF;
+            font-weight: 700;
+        }
+        /*======FIN BREADCRUMB======*/
+
         :root {
             --teal: #149B7E;
             --teal-light: #EBFBFA;
@@ -168,17 +214,13 @@
     </style>
 
     <div class="container py-4 px-3">
-        <nav class="mb-3">
-            <span><a href="{% url 'p_ver_mis_viajes' %}" class="breadcrumb-link">Mis viajes</a></span>
-            <span class="text-muted mx-1">&gt;</span>
-            <span class="text-muted" style="font-size:0.75rem;">Crear viaje</span>
-        </nav>
 
         <form method="POST">
-            {% csrf_token %} <div class="d-flex justify-content-between align-items-center mb-4">
+            {% csrf_token %} 
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Crear nuevo viaje</h1>
                 <div class="d-flex gap-3">
-                    <a href="{% url 'p_inicio' %}" class="btn-cancel">Cancelar</a>
+                    <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Cancelar</a>
                     <button type="submit" class="btn-save">Guardar viaje</button>
                 </div>
             </div>
@@ -251,6 +293,9 @@
                                 <label class="fw-bold mb-1">Fecha de fin <span class="text-danger">*</span></label>
                                 <input type="date" name="fecha_fin" class="form-control input-field" required>
                             </div>
+                            <div id="errores-fechas" class="d-none mt-2 p-2 rounded-3" 
+                                 style="background-color:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:0.75rem;">
+                            </div>
                             <div class="col-12 col-md-6">
                                 <label class="fw-bold mb-1">Máx. integrantes <span class="text-danger">*</span></label>
                                 <input type="number" name="capacidad_max" min="2" placeholder="ej. 10" class="form-control input-field" required>
@@ -306,6 +351,54 @@
     </div>
 
     <script>
+const hoy = new Date();
+const yyyy = hoy.getFullYear();
+const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+const dd = String(hoy.getDate()).padStart(2, '0');
+const fechaHoy = `${yyyy}-${mm}-${dd}`;
+
+const fechaInicio = document.querySelector('[name="fecha_inicio"]');
+const fechaFin = document.querySelector('[name="fecha_fin"]');
+
+fechaInicio.min = fechaHoy;
+fechaFin.min = fechaHoy;
+
+function validarFechas() {
+    let errores = [];
+
+    if (fechaInicio.value && fechaInicio.value < fechaHoy) {
+        errores.push("• La fecha de inicio no puede ser menor a hoy.");
+        fechaInicio.classList.add("is-invalid");
+    } else {
+        fechaInicio.classList.remove("is-invalid");
+    }
+
+    if (fechaFin.value && fechaFin.value < fechaHoy) {
+        errores.push("• La fecha de fin no puede ser menor a hoy.");
+        fechaFin.classList.add("is-invalid");
+    } else {
+        fechaFin.classList.remove("is-invalid");
+    }
+
+    if (fechaInicio.value && fechaFin.value && fechaFin.value < fechaInicio.value) {
+        errores.push("• La fecha de fin no puede ser menor a la fecha de inicio.");
+        fechaFin.classList.add("is-invalid");
+    }
+
+    const contenedor = document.getElementById("errores-fechas");
+    if (errores.length > 0) {
+        contenedor.innerHTML = errores.map(e => `<p class="mb-1">${e}</p>`).join("");
+        contenedor.classList.remove("d-none");
+    } else {
+        contenedor.innerHTML = "";
+        contenedor.classList.add("d-none");
+    }
+}
+
+fechaInicio.addEventListener("change", validarFechas);
+fechaFin.addEventListener("change", validarFechas);
+
+
         const estadosMap = {
             "Aguascalientes": "MX-AGU",
             "Baja California": "MX-BCN",

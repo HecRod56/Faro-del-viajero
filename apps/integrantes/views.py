@@ -2,18 +2,23 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from apps.gestion_viajes.models import Viaje, Participante
 from apps.autenticado.models import CustomUser
+from django.contrib import messages
 
 @login_required
 def lista_integrantes(request, id_viaje, id_usuario=None):
     viaje = get_object_or_404(Viaje, id=id_viaje)
     participantes = Participante.objects.filter(viaje=viaje).select_related('usuario')
 
-    # ¿El usuario actual es organizador?
-    es_organizador_actual = Participante.objects.filter(
+    participacion = Participante.objects.filter(
         viaje=viaje,
-        usuario=request.user,
-        rol='organizador'
-    ).exists()
+        usuario=request.user
+    ).first()
+
+    if not participacion:
+        messages.error(request, "El viaje que intenta acceder no existe o no tiene acceso.")
+        return redirect('core:home')
+
+    es_organizador_actual = participacion.rol == 'organizador'
 
     # Construir la lista para el template
     integrantes = []

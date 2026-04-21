@@ -1,0 +1,164 @@
+<h1 style="color:red;">PRUEBA CAMBIO</h1>
+
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .chat-item-active  { background: linear-gradient(135deg, #149B7E, #1BB59A); }
+    .chat-item-inactive { background: linear-gradient(135deg, #7ECECA, #9BD8D0); }
+    .chat-bg {
+        background-image: url('https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=900&auto=format&fit=crop&q=40');
+        background-size: cover;
+        background-position: center;
+    }
+</style>
+
+<main class="container-fluid px-4 py-3">
+    <div class="row g-3" style="height:calc(100vh - 120px); min-height:500px;">
+
+        <!-- IZQUIERDA -->
+        <div class="col-12 col-lg-4 d-flex flex-column gap-3 overflow-auto">
+            {% for v in viajes %}
+            <a href="{% url 'chat:chat_viaje' v.id %}" class="text-decoration-none">
+                <div class="{% if v.id == viaje.id %}chat-item-active{% else %}chat-item-inactive{% endif %} rounded-4 p-3 d-flex align-items-center gap-3 shadow-sm">
+                    <div style="width:48px;height:48px;" class="rounded-3 overflow-hidden">
+                        {% if v.imagen_destino %}
+                            <img src="{{ v.imagen_destino.url }}" class="w-100 h-100 object-fit-cover">
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="text-white fw-bold mb-0">Viaje a {{ v.destino }}</p>
+                        <small class="text-white-50">{{ v.nombre }}</small>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- CHAT -->
+        <div class="col-12 col-lg-8 chat-bg rounded-4 d-flex flex-column shadow-sm border overflow-hidden position-relative">
+
+            <!-- HEADER -->
+            <div class="chat-item-active px-3 py-2 d-flex align-items-center gap-3">
+                <p class="text-white fw-bold mb-0 flex-grow-1">
+                    Viaje a {{ viaje.destino }}
+                </p>
+
+                <button class="btn rounded-circle"
+                        style="background:rgba(255,255,255,.2); width:34px; height:34px;"
+                        onclick="toggleMenu()">
+                    ⋯
+                </button>
+            </div>
+
+            <!-- 🔍 BUSCADOR -->
+            <div id="buscadorChat" class="d-none p-2 bg-white border-bottom">
+                <input type="text" id="inputBuscar" class="form-control" placeholder="Buscar mensaje...">
+            </div>
+
+            <!-- MENSAJES -->
+            <div id="mensajesBox" class="flex-grow-1 px-3 py-3 d-flex flex-column gap-3 overflow-auto">
+                {% for mensaje in mensajes %}
+                    <div class="bg-white rounded-3 p-2 shadow-sm">
+                        <strong>{{ mensaje.usuario.username }}</strong><br>
+                        {{ mensaje.contenido }}
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted">No hay mensajes</div>
+                {% endfor %}
+            </div>
+
+            <!-- INPUT -->
+            <div class="p-3 border-top bg-white">
+                <form method="POST" action="{% url 'chat:enviar_mensaje' viaje.id %}">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <input type="text" name="contenido" class="form-control" placeholder="Escribe..." required>
+                        <button class="btn btn-success">Enviar</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 🔥 MENÚ -->
+            <div id="chat-menu" class="d-none position-absolute bg-white rounded-4 shadow border"
+                 style="top:60px; right:12px; width:230px; z-index:20;">
+
+                <!-- Integrantes -->
+                <a href="{% url 'chat:chat_integrantes' viaje.id %}"
+                   class="d-flex align-items-center gap-2 px-3 py-2 text-decoration-none text-dark border-bottom">
+                    👥 Ver integrantes
+                </a>
+
+                <!-- Buscar -->
+                <button onclick="mostrarBuscador()"
+                        class="w-100 text-start px-3 py-2 border-0 bg-white text-dark border-bottom"
+                        style="cursor:pointer;"
+                        onmouseover="this.style.background='#f3f4f6'"
+                        onmouseout="this.style.background='white'">
+                    🔍 Buscar en el chat
+                </button>
+
+                <!-- Itinerario -->
+                <button onclick="verItinerario()"
+                        class="w-100 text-start px-3 py-2 border-0 bg-white text-dark border-bottom"
+                        style="cursor:pointer;"
+                        onmouseover="this.style.background='#f3f4f6'"
+                        onmouseout="this.style.background='white'">
+                    📅 Ver itinerario
+                </button>
+
+                <!-- Salir -->
+                <form method="POST" action="{% url 'chat:abandonar_viaje' viaje.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="w-100 text-start px-3 py-2 text-danger border-0 bg-white"
+                            style="cursor:pointer;">
+                        🚪 Abandonar viaje
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    window.toggleMenu = function() {
+        document.getElementById('chat-menu').classList.toggle('d-none');
+    }
+
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('chat-menu');
+        if (!e.target.closest('#chat-menu') && !e.target.closest('button')) {
+            menu.classList.add('d-none');
+        }
+    });
+
+    window.mostrarBuscador = function() {
+        document.getElementById('buscadorChat').classList.toggle('d-none');
+    }
+
+    const input = document.getElementById('inputBuscar');
+
+    if (input) {
+        input.addEventListener('input', function() {
+            const texto = this.value.toLowerCase();
+            const mensajes = document.querySelectorAll('#mensajesBox > div');
+
+            mensajes.forEach(m => {
+                m.style.display = m.innerText.toLowerCase().includes(texto) ? '' : 'none';
+            });
+        });
+    }
+
+    window.verItinerario = function() {
+        alert("Aquí irá el itinerario del viaje ✈️");
+    }
+
+});
+</script>
+
+{% endblock %}
