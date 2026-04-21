@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from .mixins import ViajeContextMixin
+from django.views.generic import DetailView
 import json
 
 # 1. Página de inicio del módulo
@@ -382,6 +384,6 @@ def añadir_participante(request, viaje_id):
     
     return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
-
-
-
+class DetalleViajeView(ViajeContextMixin, DetailView):
+    model = Viaje
+    template_name = 'gestion_viajes/detalle.html'
