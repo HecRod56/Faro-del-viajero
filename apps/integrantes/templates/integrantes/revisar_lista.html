@@ -1,0 +1,173 @@
+{% extends "gestion_viajes/base.html" %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'integrantes/lista.css' %}" />
+{% endblock %}
+
+{% block content %}
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+<div class="container mt-4">
+
+  <!-- ── HEADER ──────────────────────────────────────────── -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <h5 class="fw-bold mb-0">Integrantes - {{ viaje.nombre }}</h5>
+      <i class="bi bi-people-fill fs-5 text-success"></i>
+      <span class="fw-semibold text-muted">{{ viaje.cupos_ocupados }}/{{ viaje.cupos_totales }}</span>
+    </div>
+
+    {% if es_organizador_actual %}
+    <a
+      class="btn btn-success btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
+      data-bs-toggle="modal"
+      data-bs-target="#modalAnadirIntegrante"
+      style="cursor: pointer"
+    >
+      <i class="bi bi-plus-lg"></i>
+      Agregar integrante
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- ── IMAGEN DEL VIAJE ───────────────────────────────── -->
+  <div class="position-relative mb-3">
+    <img
+      src="{{ viaje.imagen }}"
+      class="img-fluid rounded-4 w-100"
+      style="height: 180px; object-fit: cover"
+    />
+    <div class="position-absolute top-0 end-0 p-2">
+      <span class="badge bg-white text-dark rounded-pill px-3 shadow-sm">
+        <span class="text-success me-1">●</span>{{ viaje.estado }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── LISTA DE INTEGRANTES ───────────────────────────── -->
+  <div class="bg-light rounded-4 p-3">
+
+    {% for user in integrantes %}
+    <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+
+      <!-- Avatar + Nombre + Rol -->
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <a
+          href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
+        >
+          <div class="avatar-circle">{{ user.nombre|first }}</div>
+        </a>
+        
+        <div class="fw-semibold">
+          {{ user.nombre }}
+          {% if user.es_actual %}
+            <span class="text-muted fw-normal">(Tú)</span>
+          {% endif %}
+        </div>
+        <span class="badge bg-secondary-subtle text-dark rounded-pill px-3">
+          {{ user.rol }}
+        </span>
+      </div>
+
+      <!-- ── Botones de acción ────────────────────────── -->
+      <div class="d-flex align-items-center gap-2">
+
+        <!-- Llamar (visible para todos) -->
+        <a
+          href="tel:{{ user.telefono }}"
+          class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
+          style="width: 36px; height: 36px"
+          title="Llamar a {{ user.nombre }}"
+        >
+          <i class="bi bi-telephone-fill"></i>
+        </a>
+
+        {% if not user.es_organizador %}
+
+          {% if es_organizador_actual %}
+            <!-- Eliminar integrante -->
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger rounded-circle p-0 d-flex align-items-center justify-content-center"
+              style="width: 36px; height: 36px"
+              title="Eliminar a {{ user.nombre }}"
+              data-bs-toggle="modal"
+              data-bs-target="#modalEliminarIntegrante"
+              data-nombre="{{ user.nombre }}"
+              data-url-eliminar="{% url 'integrantes:eliminar' user.id %}"
+            >
+              <i class="bi bi-trash-fill"></i>
+            </button>
+
+            <!-- Asignar organizador (no al usuario actual) -->
+            {% if not user.es_actual %}
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
+              style="width: 36px; height: 36px"
+              title="Asignar como organizador a {{ user.nombre }}"
+              data-bs-toggle="modal"
+              data-bs-target="#modalAsignarOrganizador"
+              data-nombre="{{ user.nombre }}"
+              data-url-asignar="{% url 'integrantes:asignar_organizador' user.id %}"
+            >
+              <i class="bi bi-person-fill-up"></i>
+            </button>
+            {% endif %}
+          {% endif %}
+
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Botón Abandonar (solo integrantes) -->
+    {% if not es_organizador_actual %}
+    <div class="mt-4">
+      <button
+        class="btn btn-danger rounded-pill px-4"
+        data-bs-toggle="modal"
+        data-bs-target="#modalAbandonarViaje"
+      >
+        <i class="bi bi-box-arrow-right me-2"></i>
+        Abandonar este viaje
+      </button>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- ══ MODALES ════════════════════════════════════════════ -->
+{% include "integrantes/modals/_eliminar_integrante.html" %}
+{% include "integrantes/modals/_anadir_integrante.html" %}
+{% include "integrantes/modals/_abandonar_viaje.html" %}
+{% include "integrantes/modals/_asignar_organizador.html" %}
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════ -->
+<script>
+  // Modal: Eliminar — poblar nombre e id en el form
+  document.getElementById("modalEliminarIntegrante")
+    .addEventListener("show.bs.modal", function (event) {
+      const boton  = event.relatedTarget;
+      const nombre = boton.getAttribute("data-nombre");
+      const url    = boton.getAttribute("data-url-eliminar");
+
+      document.getElementById("modalNombreIntegrante").textContent = nombre;
+      document.getElementById("formEliminarIntegrante").action = url;
+    });
+
+  // Modal: Asignar organizador — poblar nombre e id en el form
+  document.getElementById("modalAsignarOrganizador")
+    .addEventListener("show.bs.modal", function (event) {
+      const boton  = event.relatedTarget;
+      const nombre = boton.getAttribute("data-nombre");
+      const url    = boton.getAttribute("data-url-asignar");
+
+      document.getElementById("modalNombreAsignar").textContent = nombre;
+      document.getElementById("formAsignarOrganizador").action = url;
+    });
+</script>
+
+{% endblock %}

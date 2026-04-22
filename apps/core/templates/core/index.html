@@ -1,0 +1,359 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --teal: #2baa8c;
+    --teal-light: #e6f7f3;
+    --teal-dark: #1e8a70;
+    --white: #ffffff;
+    --gray-50: #f7f8fa;
+    --gray-100: #f0f1f3;
+    --gray-300: #d1d5db;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+    --radius: 12px;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    min-height: 100vh;
+    padding-top: 80px; 
+    padding-bottom: 32px;
+}
+
+/* Hero Banner */
+.welcome-banner {
+    position: relative;
+    width: 100%;
+    min-height: 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 36px;
+    animation: fadeUp 0.5s ease both;
+}
+
+.welcome-banner__bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(20, 155, 126, 0.7), rgba(0, 0, 0, 0.5)),
+                url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1353&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+.welcome-banner__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 72px 24px;
+}
+
+.welcome-banner__content h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.18);
+}
+
+.welcome-banner__content p {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.88);
+    font-style: italic;
+    margin-bottom: 32px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.2);
+}
+
+.welcome-banner__actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 13px 28px;
+    border-radius: 50px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary { background: var(--teal); color: var(--white); }
+.btn-primary:hover {
+    background: var(--teal-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(43,170,140,0.45);
+}
+
+/* Section */
+.section-header {
+    margin-bottom: 8px;
+    padding: 0 24px;
+    text-align: center;
+    animation: fadeUp 0.4s 0.1s ease both;
+}
+
+.section-header h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+}
+
+.section-header p {
+    font-size: 0.95rem;
+    color: var(--gray-500);
+    font-style: italic;
+    margin-bottom: 32px;
+}
+
+/* Cards grid */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 0 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+    animation: fadeUp 0.4s 0.2s ease both;
+}
+
+.feature-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 28px 24px 24px;
+    border: 1px solid var(--gray-100);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: all 0.22s ease;
+    position: relative; /* IMPORTANTE para el stretched-link */
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-card:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,0.11);
+    transform: translateY(-3px);
+}
+
+/* NUEVA CLASE: Hace que el link cubra toda la tarjeta */
+.stretched-link::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    content: "";
+}
+
+.feature-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.feature-card__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feature-card__icon svg { width: 26px; height: 26px; }
+
+.icon-green  { background: #d1fae5; }
+.icon-green svg { color: #059669; }
+.icon-pink   { background: #fce7f3; }
+.icon-pink svg { color: #db2777; }
+.icon-amber  { background: #fef3c7; }
+.icon-amber svg { color: #d97706; }
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.badge-green  { color: #059669; }
+.badge-pink   { color: #db2777; }
+.badge-amber  { color: #d97706; }
+
+.feature-card__title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+}
+
+.feature-card__desc {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    line-height: 1.65;
+    margin-bottom: 24px;
+    flex: 1;
+}
+
+.feature-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: gap 0.18s ease;
+}
+
+/* Efecto visual al pasar el mouse por la tarjeta */
+.feature-card:hover .feature-card__link { gap: 10px; }
+
+.link-green  { color: #059669; }
+.link-pink   { color: #db2777; }
+.link-amber  { color: #d97706; }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+    .welcome-banner__content h1 { font-size: 2.2rem; }
+    .btn { width: 100%; justify-content: center; }
+    .cards-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="container-fluid p-0">
+  <div class="row g-0" style="min-height: calc(100vh - 70px);">
+
+    <div class="col-md-6 p-0 d-none d-md-block">
+      <div class="welcome-banner h-100" style="margin:0; min-height:100vh;">
+        <div class="welcome-banner__bg"></div>
+        <div class="welcome-banner__content">
+          <h1>Explora México</h1>
+          <p>"Organiza tu viaje grupal con la precisión de una joya."</p>
+          <div class="welcome-banner__actions">
+            <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Crear nuevo viaje
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 d-flex align-items-center justify-content-center bg-light p-4">
+      <div style="width:100%; max-width:900px;">
+        <div class="section-header">
+          <h2>Gestión Total</h2>
+          <p>Todo lo que necesitas en un solo lugar</p>
+        </div>
+
+<div class="cards-grid">
+
+          <div class="feature-card">
+            <div class="feature-card__top">
+              <div class="feature-card__icon icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              </div>
+              <span class="badge badge-green">Viajes</span>
+            </div>
+
+            <div class="feature-card__title">Mis Viajes</div>
+            <p class="feature-card__desc">
+              Crea un viaje, define destino y agrega participantes.
+            </p>
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="feature-card__link link-green stretched-link">
+              Gestionar ahora →
+            </a>
+          </div>
+
+          <div class="feature-card" style="cursor: default;">
+            <div class="feature-card__top">
+              <div class="feature-card__icon icon-pink">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <span class="badge badge-pink">Logística</span>
+            </div>
+
+            <div class="feature-card__title">Itinerario</div>
+            <p class="feature-card__desc">
+              Planifica cada día con horarios y actividades.
+            </p>
+
+            <a href="#" class="feature-card__link link-pink">
+              Ver plan →
+            </a>
+          </div>
+
+          <div class="feature-card" style="cursor: default;">
+            <div class="feature-card__top">
+              <div class="feature-card__icon icon-amber">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"/>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <span class="badge badge-amber">Finanzas</span>
+            </div>
+
+            <div class="feature-card__title">Gastos</div>
+            <p class="feature-card__desc">
+              Controla pagos y deudas automáticamente.
+            </p>
+
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="feature-card__link link-amber">
+              Gestionar →
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

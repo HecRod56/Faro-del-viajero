@@ -1,0 +1,13 @@
+{% extends "core/base.html" %} 
+{% block content %}
+    {% include "gestion_viajes/navbar_viaje.html" %}
+
+    {% if viaje and viaje.id%}
+        {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+    {% endif %}
+
+    <div class="gestion-viajes-content">
+        {% block viajes_content %}
+        {% endblock %}
+    </div>
+{% endblock %}

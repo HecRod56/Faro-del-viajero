@@ -1,0 +1,460 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block subnav %}
+     <div class="breadcrumb-sticky-container">
+        <nav class="breadcrumb-nav">
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
+            <span style="margin: 0 8px;">&gt;</span>
+            <span class="current">Crear viaje</span>
+        </nav>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        /*======BREADCRUMB======*/
+        .breadcrumb-sticky-container {
+            background-color: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 1rem 1.5rem;
+            position: -webkit-sticky; /* Soporte para Safari */
+            position: sticky;
+            top: 80px;
+            z-index: 1020; /* Por debajo del navbar principal pero sobre el contenido */
+        }
+
+        .breadcrumb-nav {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-nav a {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-nav a:hover { 
+            color: var(--teal); 
+            text-decoration: underline; 
+        }
+
+        .breadcrumb-nav span.current {
+            color: #9CA3AF;
+            font-weight: 700;
+        }
+        /*======FIN BREADCRUMB======*/
+
+        :root {
+            --teal: #149B7E;
+            --teal-light: #EBFBFA;
+            --teal-border: #b2e8e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F3F4F6;
+            color: #1e293b;
+            padding-top: 80px;
+        }
+
+        .input-field {
+            border-radius: 0.75rem;
+            border: 1px solid #D1D5DB;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 155, 126, 0.12);
+        }
+
+        .section-card {
+            background-color: #fff;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #E5E7EB;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--teal);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+        }
+
+        .map-placeholder {
+            background-color: var(--teal-light);
+            border-radius: 1rem;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .organizer-badge {
+            background-color: var(--teal-light);
+            border: 1px solid var(--teal-border);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+        }
+
+        .organizer-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--teal);
+            color: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .add-participant-btn {
+            width: 100%;
+            padding: 0.6rem;
+            border: 2px dashed var(--teal-border);
+            border-radius: 0.75rem;
+            color: var(--teal);
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: transparent;
+            transition: background 0.2s;
+        }
+
+        .add-participant-btn:hover {
+            background-color: var(--teal-light);
+        }
+
+        .btn-cancel {
+            border: 2px solid #D1D5DB;
+            border-radius: 999px;
+            color: #4B5563;
+            font-weight: 700;
+            padding: 0.4rem 2rem;
+            background: transparent;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f3f4f6;
+        }
+
+        .btn-save {
+            background-color: var(--teal); /* Cambiado de gris a teal */
+            color: white;
+            border-radius: 999px;
+            font-weight: 700;
+            padding: 0.4rem 2rem;
+            border: none;
+            cursor: pointer; /* Cambiado de not-allowed a pointer */
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .breadcrumb-link {
+            color: var(--teal);
+            text-decoration: underline;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .map-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .map-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #F3F4F6;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .teal-text { color: var(--teal); }
+
+        label.fw-bold { font-size: 0.875rem; }
+
+        .input-prefix {
+            position: relative;
+        }
+
+        .input-prefix span {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+        }
+
+        .input-prefix input {
+            padding-left: 1.75rem;
+        }
+    </style>
+
+    <div class="container py-4 px-3">
+
+        <form method="POST">
+            {% csrf_token %} 
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Crear nuevo viaje</h1>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-cancel">Cancelar</a>
+                    <button type="submit" class="btn-save">Guardar viaje</button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-12 col-lg-8">
+
+                    <div class="section-card">
+                        <p class="section-label">Información del viaje</p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="fw-bold mb-1">Nombre del viaje <span class="text-danger">*</span></label>
+                                <input type="text" name="nombre" placeholder="ej. Viaje a Cancún con los amigos" class="form-control input-field" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="fw-bold mb-1">Destino - Estado de la República <span class="text-danger">*</span></label>
+                                <select id="destino" name="destino" class="form-select input-field" required>
+                                    <option value="" disabled selected>Selecciona el estado de destino</option>
+                                    <option value="Aguascalientes">Aguascalientes</option>
+                                    <option value="Baja California">Baja California</option>
+                                    <option value="Baja California Sur">Baja California Sur</option>
+                                    <option value="Campeche">Campeche</option>
+                                    <option value="Coahuila">Coahuila</option>
+                                    <option value="Colima">Colima</option>
+                                    <option value="Chiapas">Chiapas</option>
+                                    <option value="Chihuahua">Chihuahua</option>
+                                    <option value="Ciudad de México">Ciudad de México</option>
+                                    <option value="Durango">Durango</option>
+                                    <option value="Guanajuato">Guanajuato</option>
+                                    <option value="Guerrero">Guerrero</option>
+                                    <option value="Hidalgo">Hidalgo</option>
+                                    <option value="Jalisco">Jalisco</option>
+                                    <option value="México">México</option>
+                                    <option value="Michoacán">Michoacán</option>
+                                    <option value="Morelos">Morelos</option>
+                                    <option value="Nayarit">Nayarit</option>
+                                    <option value="Nuevo León">Nuevo León</option>
+                                    <option value="Oaxaca">Oaxaca</option>
+                                    <option value="Puebla">Puebla</option>
+                                    <option value="Querétaro">Querétaro</option>
+                                    <option value="Quintana Roo">Quintana Roo</option>
+                                    <option value="San Luis Potosí">San Luis Potosí</option>
+                                    <option value="Sinaloa">Sinaloa</option>
+                                    <option value="Sonora">Sonora</option>
+                                    <option value="Tabasco">Tabasco</option>
+                                    <option value="Tamaulipas">Tamaulipas</option>
+                                    <option value="Tlaxcala">Tlaxcala</option>
+                                    <option value="Veracruz">Veracruz</option>
+                                    <option value="Yucatán">Yucatán</option>
+                                    <option value="Zacatecas">Zacatecas</option>
+                                    </select>
+                                <p class="text-muted mt-1" style="font-size:0.65rem; font-style:italic;">Solo destinos dentro de la República Mexicana</p>
+                            </div>
+                            <div class="col-12">
+                                <label class="fw-bold mb-1">Descripción <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea name="descripcion" placeholder="¿Qué van a hacer en este viaje? Cuéntale a tu grupo..." class="form-control input-field" rows="3" style="resize:none;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <p class="section-label">Fechas y Capacidad</p>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Fecha de inicio <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha_inicio" class="form-control input-field" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Fecha de fin <span class="text-danger">*</span></label>
+                                <input type="date" name="fecha_fin" class="form-control input-field" required>
+                            </div>
+                            <div id="errores-fechas" class="d-none mt-2 p-2 rounded-3" 
+                                 style="background-color:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:0.75rem;">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Máx. integrantes <span class="text-danger">*</span></label>
+                                <input type="number" name="capacidad_max" min="2" placeholder="ej. 10" class="form-control input-field" required>
+                                <p class="text-muted mt-1" style="font-size:0.65rem; font-style:italic;">Mínimo 2 personas</p>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="fw-bold mb-1">Presupuesto estimado <span class="text-muted fw-normal">(opcional)</span></label>
+                                <div class="input-prefix">
+                                    <span>$</span>
+                                    <input type="number" step="0.01" name="presupuesto_estimado" placeholder="MXN" class="form-control input-field">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <p class="section-label mb-0">
+                                Participantes <span class="text-muted fw-normal" style="text-transform:none; letter-spacing:0;">(opcional)</span>
+                            </p>
+                        </div>
+                        <div class="organizer-badge d-flex align-items-center gap-3 mb-3">
+                            <div class="organizer-avatar">U</div>
+                            <div>
+                                <p class="mb-0 fw-bold" style="font-size:0.875rem;">Usuario Actual (tú)</p>
+                                <p class="mb-0 teal-text" style="font-size:0.65rem; font-weight:600;">Organizador</p>
+                            </div>
+                        </div>
+                        <button type="button" class="add-participant-btn">+ Añadir participante por correo</button>
+                    </div>
+
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <div class="map-card">
+                        <div class="map-card-header">
+                            <span class="teal-text">📍</span>
+                            <span>Destino seleccionado: <span class="teal-text">—</span></span>
+                        </div>
+                        <div class="p-3">
+                            <div class="map-placeholder">
+                                {% include "gestion_viajes/mapa.svg" %}
+                            </div>
+                            <p class="text-center text-muted mt-3 mb-0" style="font-size:0.65rem; font-style:italic;">
+                                ● Selecciona un estado para ver su ubicación en el mapa
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <script>
+const hoy = new Date();
+const yyyy = hoy.getFullYear();
+const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+const dd = String(hoy.getDate()).padStart(2, '0');
+const fechaHoy = `${yyyy}-${mm}-${dd}`;
+
+const fechaInicio = document.querySelector('[name="fecha_inicio"]');
+const fechaFin = document.querySelector('[name="fecha_fin"]');
+
+fechaInicio.min = fechaHoy;
+fechaFin.min = fechaHoy;
+
+function validarFechas() {
+    let errores = [];
+
+    if (fechaInicio.value && fechaInicio.value < fechaHoy) {
+        errores.push("• La fecha de inicio no puede ser menor a hoy.");
+        fechaInicio.classList.add("is-invalid");
+    } else {
+        fechaInicio.classList.remove("is-invalid");
+    }
+
+    if (fechaFin.value && fechaFin.value < fechaHoy) {
+        errores.push("• La fecha de fin no puede ser menor a hoy.");
+        fechaFin.classList.add("is-invalid");
+    } else {
+        fechaFin.classList.remove("is-invalid");
+    }
+
+    if (fechaInicio.value && fechaFin.value && fechaFin.value < fechaInicio.value) {
+        errores.push("• La fecha de fin no puede ser menor a la fecha de inicio.");
+        fechaFin.classList.add("is-invalid");
+    }
+
+    const contenedor = document.getElementById("errores-fechas");
+    if (errores.length > 0) {
+        contenedor.innerHTML = errores.map(e => `<p class="mb-1">${e}</p>`).join("");
+        contenedor.classList.remove("d-none");
+    } else {
+        contenedor.innerHTML = "";
+        contenedor.classList.add("d-none");
+    }
+}
+
+fechaInicio.addEventListener("change", validarFechas);
+fechaFin.addEventListener("change", validarFechas);
+
+
+        const estadosMap = {
+            "Aguascalientes": "MX-AGU",
+            "Baja California": "MX-BCN",
+            "Baja California Sur": "MX-BCS",
+            "Campeche": "MX-CAM",
+            "Coahuila": "MX-COA",
+            "Colima": "MX-COL",
+            "Chiapas": "MX-CHP",
+            "Chihuahua": "MX-CHH",
+            "Ciudad de México": "MX-DIF",
+            "Durango": "MX-DUR",
+            "Guanajuato": "MX-GUA",
+            "Guerrero": "MX-GRO",
+            "Hidalgo": "MX-HID",
+            "Jalisco": "MX-JAL",
+            "México": "MX-MEX",
+            "Michoacán": "MX-MIC",
+            "Morelos": "MX-MOR",
+            "Nayarit": "MX-NAY",
+            "Nuevo León": "MX-NEL",
+            "Oaxaca": "MX-OAX",
+            "Puebla": "MX-PUE",
+            "Querétaro": "MX-QUE",
+            "Quintana Roo": "MX-ROO",
+            "San Luis Potosí": "MX-SLP",
+            "Sinaloa": "MX-SIN",
+            "Sonora": "MX-SON",
+            "Tabasco": "MX-TAB",
+            "Tamaulipas": "MX-TAM",
+            "Tlaxcala": "MX-TLA",
+            "Veracruz": "MX-VER",
+            "Yucatán": "MX-YUC",
+            "Zacatecas": "MX-ZAC"
+        };
+    const select = document.getElementById("destino");
+    const texto = document.getElementById("estadoTexto");
+
+    function limpiarMapa() {
+    document.querySelectorAll("[id^='MX-']").forEach(e => {
+        e.style.fill = "#ffffff";
+    });
+    }
+
+    select.addEventListener("change", function () {
+    const nombreEstado = this.value;
+    const idSVG = estadosMap[nombreEstado];
+
+    limpiarMapa();
+
+    if (idSVG) {
+        const estado = document.getElementById(idSVG);
+        if (estado) {
+        estado.style.fill = "#0E9E8E";
+        }
+    }
+    });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,92 @@
+[
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 1,
+    "fields": {
+      "viaje": 1,
+      "usuario": 1,
+      "rol": "organizador",
+      "fecha_union": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 2,
+    "fields": {
+      "viaje": 1,
+      "usuario": 2,
+      "rol": "integrante",
+      "fecha_union": "2025-01-11T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 3,
+    "fields": {
+      "viaje": 1,
+      "usuario": 3,
+      "rol": "integrante",
+      "fecha_union": "2025-01-12T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 4,
+    "fields": {
+      "viaje": 1,
+      "usuario": 4,
+      "rol": "integrante",
+      "fecha_union": "2025-01-13T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 5,
+    "fields": {
+      "viaje": 1,
+      "usuario": 5,
+      "rol": "integrante",
+      "fecha_union": "2025-01-14T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 6,
+    "fields": {
+      "viaje": 1,
+      "usuario": 6,
+      "rol": "integrante",
+      "fecha_union": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 7,
+    "fields": {
+      "viaje": 2,
+      "usuario": 2,
+      "rol": "organizador",
+      "fecha_union": "2025-02-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 8,
+    "fields": {
+      "viaje": 2,
+      "usuario": 3,
+      "rol": "integrante",
+      "fecha_union": "2025-02-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "gestion_viajes.participante",
+    "pk": 9,
+    "fields": {
+      "viaje": 2,
+      "usuario": 4,
+      "rol": "integrante",
+      "fecha_union": "2025-02-03T10:00:00Z"
+    }
+  }
+]

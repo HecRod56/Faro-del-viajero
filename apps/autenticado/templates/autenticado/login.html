@@ -1,0 +1,217 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+
+{% block content %}
+<style>
+    :root {
+        --turquesa: #0E9E8E;
+        --texto-oscuro: #1A2E35;
+        --fondo-gris: #F2F2F0;
+        --borde-gris: #E4E4E2;
+    }
+
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background-color: var(--fondo-gris);
+    }
+
+    .text-oscuro { color: var(--texto-oscuro); }
+    .text-turquesa { color: var(--turquesa); }
+
+    /* 1. ETIQUETAS MÁS GRANDES */
+    .form-label {
+        color: var(--texto-oscuro);
+        font-weight: 700;
+        font-size: 14px; /* Creció de 13 a 14px */
+        margin-bottom: 8px; /* Un poco más de aire abajo */
+    }
+
+    /* 2. CAMPOS DE TEXTO MÁS AMPLIOS (Gorditos) */
+    .form-control {
+        border: 1.5px solid var(--borde-gris);
+        border-radius: 14px; /* Bordes un poco más suaves */
+        padding: 16px 20px; /* Aumentamos el relleno interno */
+        font-size: 15px; /* Letra más grande al escribir */
+        color: var(--texto-oscuro);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+        border-color: var(--turquesa);
+        box-shadow: 0 0 0 3px rgba(14, 158, 142, 0.1);
+        outline: none;
+    }
+    
+    .form-control.is-invalid { border-color: #dc3545; background-image: none; }
+    .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1); }
+    .invalid-feedback-custom { display: none; color: #dc3545; font-size: 13px; font-weight: 600; margin-top: 6px; text-align: left; }
+    .is-invalid ~ .invalid-feedback-custom { display: block; }
+
+    /* 3. BOTÓN MÁS GRANDE */
+    .btn-primary-custom {
+        background: var(--turquesa); 
+        color: white;
+        border: none;
+        border-radius: 28px; /* Más curvo para coincidir con el tamaño */
+        padding: 16px 24px; /* Botón más alto */
+        font-size: 16px; /* Letra del botón más grande */
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+    }
+    .btn-primary-custom:hover {
+        background: #0b8a7c; 
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(14, 158, 142, 0.2); 
+    }
+
+    /* Ojo de la contraseña ajustado a la nueva altura */
+    .password-toggle {
+        position: absolute;
+        right: 18px;
+        top: 44px; /* Bajó un poco para estar centrado con el input más grande */
+        cursor: pointer;
+        color: #888;
+        font-size: 18px;
+    }
+
+    /* Enlaces y Términos */
+    .auth-links a, .terms-link {
+        color: var(--texto-oscuro);
+        font-size: 14px; /* Creció de 13.5 a 14px */
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .auth-links a:hover, .terms-link:hover { color: var(--turquesa); }
+
+    .alert-custom {
+        border-radius: 14px;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1.5px solid transparent;
+    }
+
+    .alert-error .alert-icon, .alert-error .alert-text {
+        color: #DC3545;
+    }
+
+    .alert-success {
+        background-color: #F0FFF4;
+        border-color: #C6F6D5;
+    }
+
+    .alert-success .alert-icon, .alert-success .alert-text {
+        color: #2F855A;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container-fluid p-0 vh-100 d-flex">
+    <div class="row g-0 w-100 h-100">
+        
+        <div class="d-none d-lg-block col-lg-6 bg-image position-relative" 
+             style="background-image: url('https://images.unsplash.com/photo-1518638150340-f706e86654de?q=80&w=1932&auto=format&fit=crop'); 
+                    background-size: cover; background-position: center;">
+            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, rgba(26, 46, 53, 0) 0%, rgba(26, 46, 53, 0.7) 100%);"></div>
+            <div class="position-absolute bottom-0 start-0 p-5 text-white w-100">
+                <h2 class="fw-bold mb-2">Descubre México.</h2>
+                <p class="fs-6" style="opacity: 0.9;">Tus itinerarios y compañeros de viaje te están esperando.</p>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center bg-white" style="overflow-y: auto;">
+            <div style="width: 100%; max-width: 540px; padding: 40px 30px; text-align: center;">
+                
+                <div class="mb-4 d-flex justify-content-center">
+                    <svg width="65" height="65" viewBox="0 0 200 200">
+                        <rect width="200" height="200" rx="38" fill="#0E9E8E"/>
+                        <g transform="translate(100,100)">
+                            <ellipse cx="-10" cy="10" rx="52" ry="12" fill="none" stroke="white" stroke-width="14" stroke-linecap="round"/>
+                            <path d="M38 -30 L72 -68" stroke="white" stroke-width="14" stroke-linecap="round"/>
+                            <polygon points="72,-68 52,-60 64,-48" fill="white"/>
+                            <rect x="-18" y="-72" width="16" height="28" rx="3" fill="#F5C518"/>
+                            <ellipse cx="-10" cy="-75" rx="13" ry="10" fill="white"/>
+                            <path d="M-10,-10 Q-30,20 -30,50 Q-10,60 10,50 Q10,20 -10,-10Z" fill="white"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <h1 class="text-turquesa fw-bold mb-5" style="font-size: 32px; letter-spacing: -0.5px;">¡Bienvenido de nuevo!</h1>
+               
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert-custom mb-4 alert-{{ message.tags }}">
+                            <span class="alert-icon">
+                                {% if message.tags == 'success' %}✓{% else %}⚠{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" id="loginForm" class="text-start">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4 position-relative">
+                        <label for="email" class="form-label">Correo electrónico *</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="nombre@ejemplo.com" required>
+                        <div class="invalid-feedback-custom">⚠ El correo no está registrado.</div>
+                    </div>
+
+                    <div class="mb-5 position-relative">
+                        <label for="password" class="form-label">Contraseña *</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <span class="password-toggle" id="togglePassword" title="Mostrar/Ocultar contraseña">👁️</span>
+                        <div class="invalid-feedback-custom">⚠ Contraseña incorrecta. Inténtalo de nuevo.</div>
+                    </div>
+
+                    <button type="submit" class="btn-primary-custom mb-4">
+                        INICIAR SESIÓN
+                    </button>
+
+                    <div class="auth-links d-flex justify-content-center gap-3 mb-5">
+                        <a href="{% url 'register' %}">¿Sin cuenta?</a>
+                        <span style="color: #E4E4E2;">|</span>
+                        <a href="{% url 'forgot_password' %}">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </form>
+
+                <div class="mt-4 border-top pt-4">
+                    <a href="#" class="terms-link fw-bold">Términos y condiciones</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+
+    togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    const emailInput = document.getElementById('email');
+    emailInput.addEventListener('blur', function() {
+        if(this.value && (!this.value.includes('@') || !this.value.includes('.'))) {
+            this.classList.add('is-invalid');
+            this.nextElementSibling.textContent = '⚠ Ingresa un formato de correo válido.';
+        } else {
+            this.classList.remove('is-invalid');
+            this.nextElementSibling.textContent = '⚠ El correo no está registrado.'; 
+        }
+    });
+</script>
+{% endblock %}
