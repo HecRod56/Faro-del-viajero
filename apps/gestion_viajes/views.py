@@ -62,27 +62,28 @@ def pagina_crear_viaje(request):
 def pagina_ver_mis_viajes(request):
     user_actual = request.user
     
-    # Si no está logueado, para que no truene, buscamos al primer usuario de la DB
+    # Si no está logueado, obtenemos un usuario por defecto
     if not user_actual.is_authenticated:
         User = get_user_model()
         user_actual = User.objects.first()
 
-    # RF.2-05: Solo traer viajes donde participa este usuario
-    viajes_db = Viaje.objects.filter(participantes__usuario=user_actual)
+    # 1. Definimos la base: Solo viajes donde participa el usuario
+    # Usamos .distinct() por si un usuario aparece duplicado en la relación
+    viajes_db = Viaje.objects.filter(participantes__usuario=user_actual).distinct()
 
-    # Obtenemos el estado desde la URL (ej: ?estado=planeado)
+    # 2. Obtenemos el estado desde la URL
     estado_filtro = request.GET.get('estado')
     
+    # 3. Si hay filtro, lo encadenamos a la base que ya tenemos
     if estado_filtro:
-        # Filtramos los viajes por ese estado
-        viajes_db = Viaje.objects.filter(estado=estado_filtro)
-    else:
-        # Si no hay filtro, mostramos todos
-        viajes_db = Viaje.objects.all()
+        viajes_db = viajes_db.filter(estado=estado_filtro)
         
+    # ¡YA NO NECESITAS EL ELSE! 
+    # Si no hay filtro, 'viajes_db' sigue conteniendo los viajes del usuario.
+
     return render(request, 'gestion_viajes/ver_mis_viajes.html', {
         'viajes': viajes_db,
-        'filtro_actual': estado_filtro  # Pasamos esto para saber qué botón iluminar
+        'filtro_actual': estado_filtro
     })
 
 # 4. Vista para ver solo los viajes con estado 'planeado'
