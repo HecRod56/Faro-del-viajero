@@ -4,6 +4,103 @@
 
 {% block content %}
 <style>
+    /* ── Sub-Navbar Viaje ── */
+    .sub-navbar-viaje {
+        background-color: #fff;
+        border-bottom: 1px solid #E5E7EB;
+        padding: 1rem 1.5rem 0 1.5rem;
+        position: sticky;
+        top: 80px;
+        z-index: 40;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sub-navbar-container {
+        max-width: 1100px;
+        width: 100%;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .sub-nav-link {
+        position: relative;
+        color: #6B7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.75rem 0;
+        transition: color 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .sub-nav-link:hover {
+        color: #149B7E;
+    }
+
+    .sub-nav-link.active {
+        color: #149B7E;
+        font-weight: 600;
+    }
+
+    .sub-nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #149B7E;
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* ── Breadcrumb (Migas de Pan) ── */
+    .breadcrumb-viaje {
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+        color: #9CA3AF;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .breadcrumb-item {
+        color: #149B7E;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .breadcrumb-current {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    .integrantes-badge {
+        background-color: #EBFBFA;
+        color: #149B7E;
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .sub-navbar-container {
+            gap: 1rem;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .sub-nav-link {
+            font-size: 0.8rem;
+        }
+    }
+
     .chat-item-active   { background: linear-gradient(135deg, #149B7E, #1BB59A); }
     .chat-bg {
         {% if viaje_actual.imagen_destino %}
@@ -30,23 +127,41 @@
 </style>
 
 <!-- Subnav -->
-<div class="bg-white border-bottom px-4">
-    <div class="container-fluid">
-        <nav class="d-flex gap-2 align-items-center py-2" style="font-size:11px; font-weight:700;">
-            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="text-decoration-none" style="color:#149B7E;">Mis viajes</a>
-            <span class="text-muted">›</span>
-            <span class="text-muted">{{ viaje_actual.nombre }}</span>
-            <span class="text-muted">›</span>
-            <span class="text-muted">Chat</span>
-        </nav>
-        <div class="d-flex gap-4">
-            <span class="text-muted pb-2" style="font-size:13px; cursor:pointer;">Resumen</span>
-            <span class="text-muted pb-2" style="font-size:13px; cursor:pointer;">Actividades</span>
-            <span class="text-muted pb-2" style="font-size:13px; cursor:pointer;">Gastos</span>
-            <span class="fw-bold pb-2 border-bottom border-2" style="font-size:13px; color:#149B7E; border-color:#149B7E !important;">Chat</span>
-            <span class="text-muted pb-2" style="font-size:13px; cursor:pointer;">Galería</span>
-            <span class="text-muted pb-2" style="font-size:13px; cursor:pointer;">Integrantes</span>
-        </div>
+<div class="sub-navbar-viaje">
+    <nav class="breadcrumb-viaje">
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="breadcrumb-item">Mis viajes</a>
+        <span>&gt;</span>
+        <span class="breadcrumb-item">{{ viaje_actual.get_estado_display|default:"Planeados" }}</span>
+        <span>&gt;</span>
+        <span class="breadcrumb-current">{{ viaje_actual.nombre }}</span>
+    </nav>
+
+    <div class="sub-navbar-container">
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}" class="sub-nav-link">
+            Resumen
+        </a>
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}#actividades" class="sub-nav-link">
+            Actividades
+        </a>
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}#gastos" class="sub-nav-link">
+            Gastos
+        </a>
+        <a href="{% url 'chat:chat_viaje' viaje_actual.id %}" class="sub-nav-link active">Chat</a>
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}#galeria" class="sub-nav-link">
+            Galería
+        </a>
+        {% url 'integrantes:lista' id_viaje=viaje_actual.id as integrantes_url %}
+        {% if integrantes_url %}
+        <a href="{{ integrantes_url }}" class="sub-nav-link">
+            Integrantes
+            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
+        </a>
+        {% else %}
+        <a href="#integrantes" class="sub-nav-link">
+            Integrantes
+            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
+        </a>
+        {% endif %}
     </div>
 </div>
 
