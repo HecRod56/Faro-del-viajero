@@ -63,7 +63,7 @@ def proponer_actividad(request, viaje_id):
             )
             nueva_actividad.save()
             messages.success(request, f'¡Actividad "{titulo}" guardada con éxito!')
-            return redirect(f'/viajes/detalle/{viaje.id}/')
+            return redirect(f'/actividades/viaje/{viaje.id}/')
 
         except (IntegrityError, ValueError, TypeError) as e:
             print(f"DEBUG ERROR: {e}")

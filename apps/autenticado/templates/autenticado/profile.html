@@ -25,6 +25,13 @@
     .info-label { font-size: 13px; font-weight: 700; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     .info-value { font-size: 16px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 20px; }
 
+    .info-value.email-fix { 
+        font-size: 14px; 
+        word-break: break-all; 
+        line-height: 1.2; 
+        margin-top: 5px;
+    }
+
     .form-control, .form-select {
         border: 1.5px solid var(--borde-gris); border-radius: 14px; padding: 14px 20px; font-size: 15px;
         color: var(--texto-oscuro); font-weight: 600;
@@ -68,7 +75,7 @@
                     <div class="row px-2">
                         <div class="col-sm-6">
                             <div class="info-label">Correo electrónico</div>
-                            <div class="info-value">{{ user.email }}</div>
+                            <div class="info-value email-fix">{{ user.email }}</div>
                         </div>
                         <div class="col-sm-6">
                             <div class="info-label">Teléfono</div>
@@ -76,7 +83,9 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="info-label">Fecha de Nacimiento</div>
-                            <div class="info-value">{{ user.date_of_birth|date:"d / m / Y"|default:"No registrada" }}</div>
+                            <p class="text-muted mb-0">
+                                {{ user.dob|date:"d/m/Y"|default:"Fecha no registrada" }}
+                            </p>
                         </div>
                         <div class="col-sm-6">
                             <div class="info-label">Moneda Preferida</div>
@@ -86,22 +95,23 @@
 
                     <hr class="my-4" style="border-color: var(--borde-gris);">
                     <h6 class="fw-bold mb-3">Mis viajes activos</h6>
-                    <a href="#" class="trip-mini-card">
-                        <div class="trip-icon">🏝️</div>
-                        <div>
-                            <h6 class="fw-bold mb-0 text-oscuro">Cancún con amigos</h6>
-                            <small class="text-muted">12 - 18 Abril</small>
+                    {% if viajes %}
+                        {% for viaje in viajes %}
+                        <a href="{% url 'p_detalle_viaje' viaje.id %}" class="trip-mini-card">
+                            <div class="trip-icon">{% if viaje.icono %}{{ viaje.icono }}{% else %}🌎{% endif %}</div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-oscuro">{{ viaje.nombre }}</h6>
+                                <small class="text-muted">{{ viaje.fecha_inicio|date:"d M" }} - {{ viaje.fecha_fin|date:"d M" }}</small>
+                            </div>
+                            <div class="ms-auto"><svg width="20" height="20" fill="none" stroke="#ccc" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3 border rounded-3 bg-light">
+                            <p class="text-muted small mb-0">No estás en ningún viaje activo.</p>
                         </div>
-                        <div class="ms-auto"><svg width="20" height="20" fill="none" stroke="#ccc" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
-                    </a>
-                    <a href="#" class="trip-mini-card">
-                        <div class="trip-icon">🏺</div>
-                        <div>
-                            <h6 class="fw-bold mb-0 text-oscuro">Ruta Oaxaca</h6>
-                            <small class="text-muted">Planeando...</small>
-                        </div>
-                        <div class="ms-auto"><svg width="20" height="20" fill="none" stroke="#ccc" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
-                    </a>
+                    {% endif %}
+                    
 
                     <div class="mt-5">
                         <button class="btn-primary-custom mb-4" onclick="toggleEditMode()">
@@ -110,7 +120,7 @@
                         </button>
                         
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{% url 'forgot_password' %}" class="text-turquesa fw-bold text-decoration-none" style="font-size: 14px;">Cambiar contraseña</a>
+                            <a href="{% url 'cambiar_password' %}" class="text-primary small">Cambiar contraseña</a>
                         <form method="post" action="{% url 'logout' %}" class="m-0 p-0">
                             {% csrf_token %}
                             <button type="submit" class="btn-danger-link" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 6px;">
@@ -162,7 +172,7 @@
                         <div class="row mb-4">
                             <div class="col-6">
                                 <label class="form-label">Fecha Nacimiento</label>
-                                <input type="date" name="dob" class="form-control" value="{{ user.date_of_birth|date:'Y-m-d' }}" required>
+                                <input type="text" name="dob" class="form-control" placeholder="DD/MM/AAAA" value="{{ user.dob|date:'d/m/Y' }}" required>
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Moneda</label>
