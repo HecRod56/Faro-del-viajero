@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
-
 class GaleriaConfig(AppConfig):
-    name = 'galeria'
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.galeria'

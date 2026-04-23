@@ -44,6 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    #CLOUDINARY
+    'cloudinary_storage',
+    'cloudinary',
+
     #APPS PROYECTO FARO_DEL_VIAJERO
     'apps.core',
     'apps.autenticado',
@@ -51,7 +55,7 @@ INSTALLED_APPS = [
     'apps.integrantes',
     'actividades',
     'chat',
-    'galeria',
+    'apps.galeria',
     ]
 
 MIDDLEWARE = [
@@ -87,6 +91,17 @@ WSGI_APPLICATION = 'faro_del_viajero.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+
+#CRENDECIALES DE CLOUDINARY
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY':    config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
+
+#USAR CLOUDINARY COMO ESTANDAR PARA BACKEND DE ARCHIVOS
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 """
 DATABASES = {

@@ -118,9 +118,19 @@
             Gastos
         </a>
         <a href="{% url 'chat:chat_viaje' viaje.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'chat_viaje' %}active{% endif %}">Chat</a>
-        <a href="#galeria" class="sub-nav-link {% if request.resolver_match.url_name == 'galeria' %}active{% endif %}">
+
+        {% url 'galeria:ver_galeria' id_viaje=viaje_actual.id as galeria_url %}
+        {% if galeria_url %}
+        <a href="{{ galeria_url }}"
+           class="sub-nav-link {% if request.resolver_match.url_name == 'ver_galeria' and request.resolver_match.namespace == 'galeria' %}active{% endif %}">
             Galería
         </a>
+        {% else %}
+        <a href="#integrantes" class="sub-nav-link">
+            Galería
+        </a>
+        {% endif %}
+
         {# Integrantes — CORRECCIÓN: usa viaje_actual en lugar de viaje #}
         {% url 'integrantes:lista' id_viaje=viaje_actual.id as integrantes_url %}
         {% if integrantes_url %}
