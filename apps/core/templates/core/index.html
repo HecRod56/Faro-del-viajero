@@ -23,13 +23,12 @@
 }
 
 body {
-font-family: 'Inter', sans-serif;
-background: var(--gray-50);
-color: var(--gray-900);
-min-height: 100vh;
-/* Respetamos el espacio de arriba, y dejamos 32px abajo */
-padding-top: 80px; 
-padding-bottom: 32px;
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    min-height: 100vh;
+    padding-top: 80px; 
+    padding-bottom: 32px;
 }
 
 /* Hero Banner */
@@ -52,10 +51,6 @@ padding-bottom: 32px;
                 url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1353&q=80');
     background-size: cover;
     background-position: center;
-}
-
-.welcome-banner__overlay {
-    display: none;
 }
 
 .welcome-banner__content {
@@ -105,25 +100,11 @@ padding-bottom: 32px;
     white-space: nowrap;
 }
 
-.btn-primary {
-    background: var(--teal);
-    color: var(--white);
-}
+.btn-primary { background: var(--teal); color: var(--white); }
 .btn-primary:hover {
     background: var(--teal-dark);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(43,170,140,0.45);
-}
-
-.btn-outline {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    border: 2px solid rgba(255,255,255,0.7);
-    backdrop-filter: blur(6px);
-}
-.btn-outline:hover {
-    background: rgba(255,255,255,0.28);
-    border-color: #fff;
 }
 
 /* Section */
@@ -166,12 +147,10 @@ padding-bottom: 32px;
     padding: 28px 24px 24px;
     border: 1px solid var(--gray-100);
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    cursor: pointer;
     transition: all 0.22s ease;
-    position: relative;
+    position: relative; /* IMPORTANTE para el stretched-link */
     display: flex;
     flex-direction: column;
-    gap: 0;
 }
 
 .feature-card:hover {
@@ -179,7 +158,17 @@ padding-bottom: 32px;
     transform: translateY(-3px);
 }
 
-/* Top row: icon + badge */
+/* NUEVA CLASE: Hace que el link cubra toda la tarjeta */
+.stretched-link::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    content: "";
+}
+
 .feature-card__top {
     display: flex;
     align-items: flex-start;
@@ -197,12 +186,8 @@ padding-bottom: 32px;
     flex-shrink: 0;
 }
 
-.feature-card__icon svg {
-    width: 26px;
-    height: 26px;
-}
+.feature-card__icon svg { width: 26px; height: 26px; }
 
-/* Icon color variants */
 .icon-green  { background: #d1fae5; }
 .icon-green svg { color: #059669; }
 .icon-pink   { background: #fce7f3; }
@@ -221,9 +206,9 @@ padding-bottom: 32px;
     text-transform: uppercase;
 }
 
-.badge-green  { color: #059669; background: transparent; }
-.badge-pink   { color: #db2777; background: transparent; }
-.badge-amber  { color: #d97706; background: transparent; }
+.badge-green  { color: #059669; }
+.badge-pink   { color: #db2777; }
+.badge-amber  { color: #d97706; }
 
 .feature-card__title {
     font-family: 'Sora', sans-serif;
@@ -248,41 +233,24 @@ padding-bottom: 32px;
     font-size: 0.875rem;
     font-weight: 600;
     text-decoration: none;
-    cursor: pointer;
     transition: gap 0.18s ease;
-    background: none;
-    border: none;
-    padding: 0;
 }
 
-.feature-card__link:hover { gap: 10px; }
+/* Efecto visual al pasar el mouse por la tarjeta */
+.feature-card:hover .feature-card__link { gap: 10px; }
 
 .link-green  { color: #059669; }
 .link-pink   { color: #db2777; }
 .link-amber  { color: #d97706; }
 
-/* Animations */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Highlight pulse on CTA button */
-@keyframes pulse-glow {
-    0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.9), 0 6px 20px rgba(43,170,140,0.45); }
-    50%  { box-shadow: 0 0 0 16px rgba(255,255,255,0), 0 6px 20px rgba(43,170,140,0.45); }
-    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0), 0 6px 20px rgba(43,170,140,0.45); }
-}
-
-.btn-primary.highlight {
-    animation: pulse-glow 0.8s ease 2;
-    transform: translateY(-2px);
-}
-
 @media (max-width: 640px) {
     .welcome-banner__content h1 { font-size: 2.2rem; }
-    .welcome-banner__actions { flex-direction: column; align-items: center; }
-    .btn { width: 100%; justify-content: center; max-width: 280px; }
+    .btn { width: 100%; justify-content: center; }
     .cards-grid { grid-template-columns: 1fr; }
 }
 </style>
@@ -290,43 +258,33 @@ padding-bottom: 32px;
 <div class="container-fluid p-0">
   <div class="row g-0" style="min-height: calc(100vh - 70px);">
 
-    <!-- LADO IZQUIERDO: HERO MODERNO -->
     <div class="col-md-6 p-0 d-none d-md-block">
       <div class="welcome-banner h-100" style="margin:0; min-height:100vh;">
-        
         <div class="welcome-banner__bg"></div>
-
         <div class="welcome-banner__content">
           <h1>Explora México</h1>
           <p>"Organiza tu viaje grupal con la precisión de una joya."</p>
-
           <div class="welcome-banner__actions">
-            <button class="btn btn-primary">
+            <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn btn-primary">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
               Crear nuevo viaje
-            </button>
+            </a>
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- LADO DERECHO: CARDS MODERNAS -->
     <div class="col-md-6 d-flex align-items-center justify-content-center bg-light p-4">
-
       <div style="width:100%; max-width:900px;">
-
         <div class="section-header">
           <h2>Gestión Total</h2>
           <p>Todo lo que necesitas en un solo lugar</p>
         </div>
 
-        <div class="cards-grid">
+<div class="cards-grid">
 
-          <!-- Card 1 -->
           <div class="feature-card">
             <div class="feature-card__top">
               <div class="feature-card__icon icon-green">
@@ -342,14 +300,12 @@ padding-bottom: 32px;
             <p class="feature-card__desc">
               Crea un viaje, define destino y agrega participantes.
             </p>
-
-            <button class="feature-card__link link-green">
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="feature-card__link link-green stretched-link">
               Gestionar ahora →
-            </button>
+            </a>
           </div>
 
-          <!-- Card 2 -->
-          <div class="feature-card">
+          <div class="feature-card" style="cursor: default;">
             <div class="feature-card__top">
               <div class="feature-card__icon icon-pink">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -367,13 +323,12 @@ padding-bottom: 32px;
               Planifica cada día con horarios y actividades.
             </p>
 
-            <button class="feature-card__link link-pink">
+            <a href="#" class="feature-card__link link-pink">
               Ver plan →
-            </button>
+            </a>
           </div>
 
-          <!-- Card 3 -->
-          <div class="feature-card">
+          <div class="feature-card" style="cursor: default;">
             <div class="feature-card__top">
               <div class="feature-card__icon icon-amber">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -389,14 +344,14 @@ padding-bottom: 32px;
               Controla pagos y deudas automáticamente.
             </p>
 
-            <button class="feature-card__link link-amber">
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="feature-card__link link-amber">
               Gestionar →
-            </button>
+            </a>
           </div>
 
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
 </div>

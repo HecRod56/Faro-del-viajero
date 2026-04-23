@@ -1,7 +1,111 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
-from .models import FotoGaleria
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseForbidden
+from django.contrib.auth.decorators import login_required
+from collections import defaultdict
+ 
+from apps.gestion_viajes.models import Viaje, Participante
+from apps.galeria.models import ImagenGaleria
 
+def _get_participante_o_403(viaje, usuario):
+    """
+    Devuelve el Participante si el usuario pertenece al viaje.
+    Lanza 403 si no es integrante (RNF-27).
+    """
+    try:
+        return Participante.objects.get(viaje=viaje, usuario=usuario)
+    except Participante.DoesNotExist:
+        return None
+ 
+ 
+# ── RF-66: Ver galería agrupada por fecha ───────────────────
+@login_required
+def ver_galeria(request, id_viaje):
+    viaje = get_object_or_404(Viaje, id=id_viaje)
+ 
+    # RNF-27: solo integrantes del viaje
+    participante = _get_participante_o_403(viaje, request.user)
+    if not participante:
+        return HttpResponseForbidden("No eres integrante de este viaje.")
+ 
+    # Traer todas las imágenes ordenadas
+    imagenes = (
+        ImagenGaleria.objects
+        .filter(viaje=viaje)
+        .select_related("subida_por__usuario")
+        .order_by("-fecha_tomada", "-fecha_subida")
+    )
+ 
+    # Anotar puede_eliminar en cada imagen para usarlo en el template
+    for img in imagenes:
+        img.puede_eliminar = img.puede_eliminar(request.user)
+ 
+    # Agrupar por fecha_tomada (si es None, usar la fecha_subida)
+    grupos = defaultdict(list)
+    for img in imagenes:
+        clave = img.fecha_tomada or img.fecha_subida.date()
+        grupos[clave].append(img)
+ 
+    # Ordenar las claves de más reciente a más antigua
+    grupos_por_fecha = dict(sorted(grupos.items(), reverse=True))
+ 
+    return render(request, "galeria/galeria.html", {
+        "viaje": viaje,
+        "grupos_por_fecha": grupos_por_fecha,
+        "es_organizador": participante.rol == "organizador",
+    })
+ 
+ 
+# ── RF-65: Subir imagen ─────────────────────────────────────
+@login_required
+def subir_imagen(request, id_viaje):
+    viaje = get_object_or_404(Viaje, id=id_viaje)
+ 
+    # RNF-27
+    participante = _get_participante_o_403(viaje, request.user)
+    if not participante:
+        return HttpResponseForbidden("No eres integrante de este viaje.")
+ 
+    if request.method != "POST":
+        return redirect("galeria:ver_galeria", id_viaje=id_viaje)
+ 
+    archivo     = request.FILES.get("imagen")
+    fecha_tomada = request.POST.get("fecha_tomada") or None
+    descripcion  = request.POST.get("descripcion", "").strip()
+ 
+    if not archivo:
+        # Podrías agregar un mensaje con django.contrib.messages aquí
+        return redirect("galeria:ver_galeria", id_viaje=id_viaje)
+ 
+    ImagenGaleria.objects.create(
+        viaje=viaje,
+        subida_por=participante,
+        imagen=archivo,          # Cloudinary lo sube automáticamente
+        fecha_tomada=fecha_tomada or None,
+        descripcion=descripcion,
+    )
+ 
+    return redirect("galeria:ver_galeria", id_viaje=id_viaje)
+ 
+ 
+# ── RF-68: Eliminar imagen ──────────────────────────────────
+@login_required
+def eliminar_imagen(request, id_imagen):
+    imagen = get_object_or_404(
+        ImagenGaleria.objects.select_related("viaje", "subida_por__usuario"),
+        id=id_imagen,
+    )
+ 
+    # RF-68: solo el autor o el organizador pueden eliminar
+    if not imagen.puede_eliminar(request.user):
+        return HttpResponseForbidden("No tienes permiso para eliminar esta imagen.")
+ 
+    if request.method != "POST":
+        return redirect("galeria:ver_galeria", id_viaje=imagen.viaje.id)
+ 
+    id_viaje = imagen.viaje.id
+    imagen.delete()   # Cloudinary borra el archivo automáticamente con django-cloudinary-storage
+ 
+    return redirect("galeria:ver_galeria", id_viaje=id_viaje)
 
 def galeria_mock(request, id_viaje, usuario_id=1):
     """

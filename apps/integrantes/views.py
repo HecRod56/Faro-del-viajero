@@ -154,7 +154,7 @@ def anadir_integrante(request, id_viaje):
     if request.method != 'POST':
         return redirect('integrantes:lista', id_viaje=id_viaje)
 
-    from autenticado.models import CustomUser
+    from apps.autenticado.models import CustomUser
 
     correo = request.POST.get('correo')
     viaje  = get_object_or_404(Viaje, id=id_viaje)

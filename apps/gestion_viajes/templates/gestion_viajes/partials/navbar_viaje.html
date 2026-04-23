@@ -1,0 +1,13 @@
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="{% url 'home' %}" class="logo">Faro del Viajero</a>
+
+        <a href="{% url 'mis_viajes' %}" class="nav-link">Mis viajes</a>
+        <a href="{% url 'buscar_destinos' %}" class="nav-link">Buscar destinos</a>
+    </div>
+
+    <div class="navbar-right">
+        <a href="{% url 'notificaciones' %}">🔔</a>
+        <a href="{% url 'perfil' %}">👤</a>
+    </div>
+</nav>

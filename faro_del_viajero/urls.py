@@ -21,5 +21,6 @@ urlpatterns = [
     path('viajes/', include('apps.gestion_viajes.urls')),
     path('actividades/', include('apps.actividades.urls')),
     path('', include('chat.urls')),
+    path('chat/', include('chat.urls')),
     path('', include('galeria.urls')),
 ]
