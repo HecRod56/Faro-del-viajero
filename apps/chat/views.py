@@ -1,3 +1,6 @@
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.gestion_viajes.mixins import ViajeContextMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from apps.gestion_viajes.models import Viaje, Participante
@@ -12,20 +15,25 @@ def lista_chats(request):
         print(f"Viaje: {v.nombre} | Último msg: {v.ultimo_msg}")
     return render(request, 'chat/lista_chats.html', {'viajes': viajes})
 
-@login_required
-def chat_viaje(request, viaje_id):
-    viaje = get_object_or_404(Viaje, id=viaje_id)
-    viajes = Viaje.objects.filter(participantes__usuario=request.user)
-    for v in viajes:
-        v.ultimo_msg = MensajeChat.objects.filter(viaje=v).last()
-    mensajes = MensajeChat.objects.filter(viaje=viaje)
-    integrantes = Participante.objects.filter(viaje=viaje)
-    return render(request, 'chat/chat_viaje.html', {
-        'viaje': viaje,
-        'viajes': viajes,
-        'mensajes': mensajes,
-        'integrantes': integrantes,
-    })
+class ChatViajeView(LoginRequiredMixin, ViajeContextMixin, TemplateView):
+    template_name = 'chat/chat_viaje.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # self.viaje ya existe gracias al Mixin
+        
+        # Obtenemos la lista de viajes para la barra lateral
+        viajes = Viaje.objects.filter(participantes__usuario=self.request.user)
+        for v in viajes:
+            v.ultimo_msg = MensajeChat.objects.filter(viaje=v).last()
+            
+        context.update({
+            'viajes': viajes,
+            'mensajes': MensajeChat.objects.filter(viaje=self.viaje),
+            'integrantes': Participante.objects.filter(viaje=self.viaje),
+            # 'viaje_actual' ya lo pone el Mixin automáticamente
+        })
+        return context
 
 @login_required
 def chat_integrantes(request, viaje_id):

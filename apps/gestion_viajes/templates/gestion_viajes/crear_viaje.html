@@ -3,7 +3,7 @@
 {% block subnav %}
      <div class="breadcrumb-sticky-container">
         <nav class="breadcrumb-nav">
-            <a href="{% url 'p_ver_mis_viajes' %}">Mis viajes</a>
+            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
             <span style="margin: 0 8px;">&gt;</span>
             <span class="current">Crear viaje</span>
         </nav>
@@ -220,7 +220,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Crear nuevo viaje</h1>
                 <div class="d-flex gap-3">
-                    <a href="{% url 'p_ver_mis_viajes' %}" class="btn-cancel">Cancelar</a>
+                    <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-cancel">Cancelar</a>
                     <button type="submit" class="btn-save">Guardar viaje</button>
                 </div>
             </div>

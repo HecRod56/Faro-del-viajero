@@ -162,20 +162,20 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold mb-0" style="font-size: 2.25rem; color: #374151;">Mis viajes</h1>
-        <a href="{% url 'p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear nuevo viaje</a>
+        <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear nuevo viaje</a>
     </div>
 
     <div class="d-flex gap-2 mb-5 overflow-auto pb-2 flex-nowrap">
-        <a href="{% url 'p_ver_mis_viajes' %}" class="filter-btn text-decoration-none {% if not filtro_actual %}active{% endif %}">Todos</a>
-        <a href="{% url 'p_ver_mis_viajes' %}?estado=planeado" class="filter-btn text-decoration-none {% if filtro_actual == 'planeado' %}active{% endif %}">Planeados</a>
-        <a href="{% url 'p_ver_mis_viajes' %}?estado=en curso" class="filter-btn text-decoration-none {% if filtro_actual == 'en curso' %}active{% endif %}">En curso</a>
-        <a href="{% url 'p_ver_mis_viajes' %}?estado=finalizado" class="filter-btn text-decoration-none {% if filtro_actual == 'finalizado' %}active{% endif %}">Finalizados</a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="filter-btn text-decoration-none {% if not filtro_actual %}active{% endif %}">Todos</a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=planeado" class="filter-btn text-decoration-none {% if filtro_actual == 'planeado' %}active{% endif %}">Planeados</a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=en curso" class="filter-btn text-decoration-none {% if filtro_actual == 'en curso' %}active{% endif %}">En curso</a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=finalizado" class="filter-btn text-decoration-none {% if filtro_actual == 'finalizado' %}active{% endif %}">Finalizados</a>
     </div>
 
     <div class="row g-4">
         {% for viaje in viajes %}
             <div class="col-12 col-md-6 col-lg-4">
-                <a href="{% url 'p_detalle_viaje' viaje.id %}" class="text-decoration-none">
+                <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="text-decoration-none">
                     <div class="trip-card {% if viaje.estado == 'en curso' %}en-curso{% elif viaje.estado == 'finalizado' %}finalizado{% endif %}">
                         
                         <div class="card-header-band {% if viaje.estado == 'en curso' %}card-gradient-2{% elif viaje.estado == 'finalizado' %}card-gradient-3{% else %}card-gradient-1{% endif %}">
@@ -224,7 +224,7 @@
                 <div class="bg-white p-5 rounded-4 shadow-sm">
                     <h3 class="fw-bold text-muted">Aún no tienes viajes registrados</h3>
                     <p class="text-muted mb-4">Comienza a planear tu próxima aventura ahora mismo.</p>
-                    <a href="{% url 'p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear mi primer viaje</a>
+                    <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear mi primer viaje</a>
                 </div>
             </div>
         {% endfor %}

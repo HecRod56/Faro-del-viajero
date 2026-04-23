@@ -100,7 +100,7 @@
 
 <div class="sub-navbar-viaje">
     <nav class="breadcrumb-viaje">
-        <a href="{% url 'p_detalle_viaje' viaje.id%}" class="breadcrumb-item">Mis viajes</a> 
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id%}" class="breadcrumb-item">Mis viajes</a> 
         <span>&gt;</span> 
         <span class="breadcrumb-item">{{ viaje.get_estado_display|default:"Planeados" }}</span> 
         <span>&gt;</span> 
@@ -108,7 +108,7 @@
     </nav>
 
     <div class="sub-navbar-container">
-        <a href="{% url 'p_detalle_viaje' viaje.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'p_detalle_viaje' %}active{% endif %}">
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="sub-nav-link {% if request.resolver_match.url_name == 'p_detalle_viaje' %}active{% endif %}">
             Resumen
         </a>
         <a href="#actividades" class="sub-nav-link {% if request.resolver_match.url_name == 'actividades' %}active{% endif %}">
@@ -121,8 +121,19 @@
         <a href="#galeria" class="sub-nav-link {% if request.resolver_match.url_name == 'galeria' %}active{% endif %}">
             Galería
         </a>
-        <a href="#" class="sub-nav-link">
-            Integrantes <span class="integrantes-badge">{{ viaje.participantes.count }}</span>
+        {# Integrantes — CORRECCIÓN: usa viaje_actual en lugar de viaje #}
+        {% url 'integrantes:lista' id_viaje=viaje_actual.id as integrantes_url %}
+        {% if integrantes_url %}
+        <a href="{{ integrantes_url }}"
+           class="sub-nav-link {% if request.resolver_match.url_name == 'lista' and request.resolver_match.namespace == 'integrantes' %}active{% endif %}">
+            Integrantes
+            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
         </a>
+        {% else %}
+        <a href="#integrantes" class="sub-nav-link">
+            Integrantes
+            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
+        </a>
+        {% endif %}
     </div>
 </div>
