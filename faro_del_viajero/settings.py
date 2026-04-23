@@ -138,13 +138,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
+USE_L10N = False
+
 USE_TZ = True
+
+DATE_INPUT_FORMATS = ['%d/%m/%Y']
 
 
 # Static files (CSS, JavaScript, Images)
@@ -185,4 +189,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 # El nombre que aparecerá en la bandeja de entrada
-DEFAULT_FROM_EMAIL = 'Faro del Viajero <no-reply@faro_del_viajero@gmail.com>'
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')

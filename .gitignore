@@ -2,6 +2,7 @@
 venv/
 ENV/
 env/
+.venv/
 
 # Archivos de Python
 *.pyc

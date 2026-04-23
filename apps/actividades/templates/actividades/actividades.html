@@ -183,6 +183,10 @@
                         </button>
                         {% endif %}
                         
+                        <a href="{% url 'actividades:detalle' act.id %}" style="text-decoration: none; color: inherit;">
+                            {{ act.titulo }} ↗
+                        </a>
+                        <button class="btn btn-link text-danger p-0" ...>Eliminar</button>
                     </div>
                     <div class="vote-meta">
                         <div class="avatar-mini bg-turquesa" style="width: 20px; height: 20px; font-size: 9px;">{{ act.creador.first_name|slice:":1"|upper }}</div>
