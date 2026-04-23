@@ -12,19 +12,18 @@ class Actividad(models.Model):
     # Relación con el viaje
     viaje = models.ForeignKey(Viaje, on_delete=models.CASCADE, related_name='actividades')
     
-    # Relación con el usuario (Mantenemos tu lógica de "creador")
+    # Mantenemos el creador con CASCADE para asegurar la integridad referencial
     creador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
-    # Campos combinados (Tu "titulo" + Su "descripcion")
+    # Combinamos lo mejor de ambos: tu título y su descripción
     titulo = models.CharField(max_length=150)
-    descripcion = models.TextField(blank=True, null=True) # Aporte de tu compañera
+    descripcion = models.TextField(blank=True, null=True)
     ubicacion = models.CharField(max_length=200, blank=True, null=True)
     
-    # Mantenemos fecha y hora separados para que tu Modal funcione perfecto
+    # Mantenemos fecha y hora separados para tu lógica de formularios
     fecha = models.DateField()
     hora = models.TimeField()
     
-    # Lógica de estados y votación
     estado = models.CharField(max_length=15, choices=ESTADOS, default='VOTACION')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
@@ -39,7 +38,6 @@ class Actividad(models.Model):
     def votos_totales(self):
         return self.votos.count()
 
-
 class VotoActividad(models.Model):
     OPCIONES = (
         ('SI', 'A Favor'),
@@ -51,5 +49,5 @@ class VotoActividad(models.Model):
     fecha_voto = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Evita que un usuario vote dos veces en la misma actividad
+        # Un usuario solo puede votar una vez por actividad
         unique_together = ('actividad', 'usuario')

@@ -3,9 +3,9 @@
 
 {% block content %}
 <style>
-     /* ==========================================
-        VARIABLES Y ESTILOS DEL MÓDULO ACTIVIDADES
-        ========================================== */
+    /* ==========================================
+       VARIABLES Y ESTILOS DEL MÓDULO ACTIVIDADES
+       ========================================== */
     :root {
         --turquesa: #0E9E8E;
         --texto-oscuro: #1A2E35;
@@ -103,7 +103,7 @@
     .empty-day-card:hover { border-color: var(--naranja); color: var(--naranja); background-color: rgba(232, 114, 28, 0.02); }
 
     /* ==========================================
-       SECCIÓN DE VOTACIÓN (NUEVO)
+       SECCIÓN DE VOTACIÓN
        ========================================== */
     .voting-section { margin-bottom: 40px; }
     .voting-header { font-size: 18px; font-weight: 800; color: var(--texto-oscuro); margin-bottom: 16px; }
@@ -113,7 +113,6 @@
         padding: 20px; box-shadow: 0 8px 20px rgba(232, 114, 28, 0.08);
         position: relative; overflow: hidden;
     }
-    /* Cinta decorativa en la esquina */
     .vote-card::before {
         content: "NUEVO"; position: absolute; top: 12px; right: -25px;
         background: var(--naranja); color: white; font-size: 10px; font-weight: 800;
@@ -123,12 +122,10 @@
     .vote-title { font-size: 16px; font-weight: 800; color: var(--texto-oscuro); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
     .vote-meta { font-size: 13px; color: #666; font-weight: 500; display: flex; align-items: center; gap: 6px; margin-bottom: 15px; }
     
-    /* Barra de progreso de votos */
     .vote-progress-container { background-color: var(--fondo-gris); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
     .vote-progress-bar { background-color: var(--turquesa); height: 100%; transition: width 0.3s ease; }
     .vote-stats { font-size: 12px; font-weight: 700; color: #888; display: flex; justify-content: space-between; margin-bottom: 20px; }
 
-    /* Botones de Voto */
     .btn-vote {
         border-radius: 20px; font-weight: 700; padding: 10px; font-size: 14px;
         flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
@@ -179,9 +176,13 @@
                 <div class="vote-card">
                     <div class="vote-title">
                         {{ act.titulo }}
+                        
+                        {% if request.user == act.creador %}
                         <button class="btn btn-link text-danger p-0" style="font-size: 12px; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ act.id }}">
                             Eliminar
                         </button>
+                        {% endif %}
+                        
                     </div>
                     <div class="vote-meta">
                         <div class="avatar-mini bg-turquesa" style="width: 20px; height: 20px; font-size: 9px;">{{ act.creador.first_name|slice:":1"|upper }}</div>
@@ -217,6 +218,7 @@
                 </div>
             </div>
 
+            {% if request.user == act.creador %}
             <div class="modal fade" id="deleteModal{{ act.id }}" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content" style="border-radius: 30px; padding: 30px; border: none;">
@@ -242,6 +244,8 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
+
             {% endfor %}
         </div>
     </div>
@@ -249,67 +253,66 @@
     {% endif %}
 
     {% if actividades_aprobadas %}
-        <div class="day-header">
-            <span class="badge-date">📅 Itinerario Oficial</span>
-        </div>
+        
+        {% regroup actividades_aprobadas by fecha as actividades_por_dia %}
 
-        {% for act in actividades_aprobadas %}
-        <a href="{% url 'actividades:detalle' act.id %}" class="activity-card text-decoration-none">
-            <div class="time-col">
-                <div class="time-text">{{ act.hora|date:"h:i" }}</div>
-                <div class="time-ampm">{{ act.hora|date:"A" }}</div>
+        {% for dia in actividades_por_dia %}
+            
+            <div class="day-header">
+                <span class="badge-date" style="text-transform: capitalize;">📅 {{ dia.grouper|date:"l d M Y" }}</span>
             </div>
-            <div class="content-col">
-                <div class="activity-title">{{ act.titulo }}</div>
-                <div class="activity-location">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {{ act.ubicacion|default:"Por definir" }}
-                </div>
-            </div>
-            <div class="meta-col">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="avatar-mini bg-turquesa" title="Organizado por {{ act.creador.first_name }}">{{ act.creador.first_name|slice:":1"|upper }}</div>
-                    <div class="participants-count">{{ act.votos_a_favor }}/{{ total_integrantes }}</div>
-                </div>
-                <button class="btn btn-link text-danger p-0 mt-2" style="font-size: 13px; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ act.id }}">
-                    Eliminar
-                </button>
-            </div>
-        </a>
 
-        <div class="modal fade" id="deleteModal{{ act.id }}" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 30px; padding: 30px; border: none;">
-                    <div class="modal-body text-center">
-                        <div class="mb-4">
-                            <div style="background: #E9ECEF; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                                <svg width="32" height="32" fill="none" stroke="#4A5568" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+            {% for act in dia.list %}
+                <a href="{% url 'actividades:detalle' act.id %}" class="activity-card text-decoration-none">
+                    <div class="time-col">
+                        <div class="time-text">{{ act.hora|date:"h:i" }}</div>
+                        <div class="time-ampm">{{ act.hora|date:"A" }}</div>
+                    </div>
+                    <div class="content-col">
+                        <div class="activity-title">{{ act.titulo }}</div>
+                        <div class="activity-location">📍 {{ act.ubicacion|default:"Por definir" }}</div>
+                    </div>
+                    <div class="meta-col">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-mini bg-turquesa">{{ act.creador.first_name|slice:":1"|upper }}</div>
+                            <div class="participants-count">{{ act.votos_a_favor }}/{{ total_integrantes }}</div>
+                        </div>
+                        
+                        {% if request.user == act.creador %}
+                        <button class="btn btn-link text-danger p-0 mt-2" style="font-size: 13px; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ act.id }}" onclick="event.preventDefault();">
+                            Eliminar
+                        </button>
+                        {% endif %}
+                    </div>
+                </a>
+
+                {% if request.user == act.creador %}
+                <div class="modal fade" id="deleteModal{{ act.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="border-radius: 30px; padding: 30px; border: none;">
+                            <div class="modal-body text-center">
+                                <h3 class="fw-bold mb-4" style="color: #1A2E35;">¿ELIMINAR ACTIVIDAD?</h3>
+                                <div class="mb-4" style="border: 2px solid #E53E3E; border-radius: 15px; padding: 20px;">
+                                    <h4 class="fw-bold mb-0" style="color: #E53E3E;">“{{ act.titulo }}”</h4>
+                                </div>
+                                <form method="POST" action="{% url 'actividades:eliminar' act.id %}">
+                                    {% csrf_token %}
+                                    <div class="d-flex gap-3">
+                                        <button type="button" class="btn" data-bs-dismiss="modal" style="background: #E9ECEF; color: #6C757D; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">CANCELAR</button>
+                                        <button type="submit" class="btn" style="background: #C53030; color: white; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">ELIMINAR</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                        <h3 class="fw-bold mb-4" style="color: #1A2E35; font-style: italic;">¿ELIMINAR ACTIVIDAD?</h3>
-                        <div class="mb-4" style="border: 2px solid #E53E3E; border-radius: 15px; padding: 20px;">
-                            <h4 class="fw-bold mb-0" style="color: #E53E3E;">“{{ act.titulo }}”</h4>
-                        </div>
-                        <p class="text-muted mb-5">Esta acción es irreversible. Se eliminarán todos los participantes, horarios y detalles asociados a esta actividad.</p>
-                        <form method="POST" action="{% url 'actividades:eliminar' act.id %}">
-                            {% csrf_token %}
-                            <div class="d-flex gap-3">
-                                <button type="button" class="btn" data-bs-dismiss="modal" style="background: #E9ECEF; color: #6C757D; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">CANCELAR</button>
-                                <button type="submit" class="btn" style="background: #C53030; color: white; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">ELIMINAR</button>
-                            </div>
-                        </form>
                     </div>
                 </div>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
+                {% endif %}
+            {% endfor %} {% endfor %} {% else %}
         <div class="empty-day-card mt-5">
             <div class="mb-2 fs-4">🍃</div>
             El itinerario aún está vacío.<br>
             <a href="{% url 'actividades:proponer_actividad' viaje.id %}" class="text-naranja text-decoration-underline mt-1 d-inline-block">+ Proponer la primera actividad</a>
         </div>
     {% endif %}
-
 </div>
 {% endblock %}

@@ -8,7 +8,7 @@ from apps.gestion_viajes.models import Viaje
 from .models import Actividad, VotoActividad
 
 # ==========================================
-# VISTAS DE Andy (Adaptadas al nuevo modelo)
+# VISTAS DE PROPOSICIÓN Y EDICIÓN
 # ==========================================
 def proponer_actividad(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
@@ -53,10 +53,10 @@ def proponer_actividad(request, viaje_id):
             # Creamos el objeto con los campos del modelo unificado
             nueva_actividad = Actividad(
                 viaje=viaje,
-                titulo=titulo, # Antes nombre
-                creador_id=int(responsable_id), # Antes responsable_id
+                titulo=titulo, 
+                creador_id=int(responsable_id), 
                 descripcion=request.POST.get('descripcion'),
-                fecha=fecha, # Antes fecha_hora
+                fecha=fecha, 
                 hora=hora,
                 ubicacion=request.POST.get('ubicacion'),
                 estado='VOTACION' # Inicia en votación por defecto
@@ -76,16 +76,19 @@ def editar_actividad(request):
     # datos de act especifica
     return render(request, 'actividades/editar_actividad.html')
 
+
 # ==========================================
-# TUS VISTAS (Línea de tiempo y Votación)
+# VISTAS DE LÍNEA DE TIEMPO, VOTACIÓN Y DETALLES
 # ==========================================
 @login_required
 def lista_actividades(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
     
+    # Separamos las actividades según su estado
     actividades_pendientes = Actividad.objects.filter(viaje=viaje, estado='VOTACION').order_by('fecha', 'hora')
     actividades_aprobadas = Actividad.objects.filter(viaje=viaje, estado='APROBADA').order_by('fecha', 'hora')
     
+    # Calculamos el total de integrantes para los porcentajes
     total_integrantes = viaje.integrantes.count() if hasattr(viaje, 'integrantes') else 6
 
     context = {
@@ -94,22 +97,25 @@ def lista_actividades(request, viaje_id):
         'actividades_aprobadas': actividades_aprobadas,
         'total_integrantes': total_integrantes,
     }
+    # Asegúrate de que el nombre de este template coincida con tu archivo HTML real
     return render(request, 'actividades/actividades.html', context)
 
 @login_required
 def votar_actividad(request, actividad_id):
     if request.method == 'POST':
         actividad = get_object_or_404(Actividad, id=actividad_id)
-        tipo_voto = request.POST.get('voto')
+        tipo_voto = request.POST.get('voto') # Esperamos 'SI' o 'NO'
         
+        # Registramos o actualizamos el voto
         VotoActividad.objects.update_or_create(
             actividad=actividad,
             usuario=request.user,
             defaults={'voto': tipo_voto}
         )
 
+        # LÓGICA DE APROBACIÓN AUTOMÁTICA
         total_integrantes = actividad.viaje.integrantes.count() if hasattr(actividad.viaje, 'integrantes') else 6
-        votos_necesarios = (total_integrantes // 2) + 1
+        votos_necesarios = (total_integrantes // 2) + 1 # Mitad más uno
         
         if actividad.votos_a_favor >= votos_necesarios:
             actividad.estado = 'APROBADA'
