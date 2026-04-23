@@ -4,59 +4,6 @@
 
 {% block content %}
 <style>
-    /* ── Sub-Navbar Viaje ── */
-    .sub-navbar-viaje {
-        background-color: #fff;
-        border-bottom: 1px solid #E5E7EB;
-        padding: 1rem 1.5rem 0 1.5rem;
-        position: sticky;
-        top: 80px;
-        z-index: 40;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sub-navbar-container {
-        max-width: 1100px;
-        width: 100%;
-        padding: 0 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .sub-nav-link {
-        position: relative;
-        color: #6B7280;
-        font-size: 0.875rem;
-        font-weight: 500;
-        text-decoration: none;
-        padding: 0.75rem 0;
-        transition: color 0.3s ease;
-        white-space: nowrap;
-    }
-
-    .sub-nav-link:hover {
-        color: #149B7E;
-    }
-
-    .sub-nav-link.active {
-        color: #149B7E;
-        font-weight: 600;
-    }
-
-    .sub-nav-link.active::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background-color: #149B7E;
-        border-radius: 3px 3px 0 0;
-    }
-
     /* ── Breadcrumb (Migas de Pan) ── */
     .breadcrumb-viaje {
         font-size: 0.75rem;
@@ -126,44 +73,8 @@
     .chat-header { position: relative; z-index: 1; }
 </style>
 
-<!-- Subnav -->
-<div class="sub-navbar-viaje">
-    <nav class="breadcrumb-viaje">
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="breadcrumb-item">Mis viajes</a>
-        <span>&gt;</span>
-        <span class="breadcrumb-item">{{ viaje_actual.get_estado_display|default:"Planeados" }}</span>
-        <span>&gt;</span>
-        <span class="breadcrumb-current">{{ viaje_actual.nombre }}</span>
-    </nav>
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
-    <div class="sub-navbar-container">
-        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}" class="sub-nav-link">
-            Resumen
-        </a>
-        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}#actividades" class="sub-nav-link">
-            Actividades
-        </a>
-        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}#gastos" class="sub-nav-link">
-            Gastos
-        </a>
-        <a href="{% url 'chat:chat_viaje' viaje_actual.id %}" class="sub-nav-link active">Chat</a>
-        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje_actual.id %}#galeria" class="sub-nav-link">
-            Galería
-        </a>
-        {% url 'integrantes:lista' id_viaje=viaje_actual.id as integrantes_url %}
-        {% if integrantes_url %}
-        <a href="{{ integrantes_url }}" class="sub-nav-link">
-            Integrantes
-            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
-        </a>
-        {% else %}
-        <a href="#integrantes" class="sub-nav-link">
-            Integrantes
-            <span class="integrantes-badge">{{ viaje_actual.participantes.count }}</span>
-        </a>
-        {% endif %}
-    </div>
-</div>
 
 <main class="container-fluid px-4 py-3">
     <div style="height:calc(100vh - 220px); min-height:500px;">

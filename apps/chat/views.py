@@ -20,18 +20,20 @@ class ChatViajeView(LoginRequiredMixin, ViajeContextMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # self.viaje ya existe gracias al Mixin
         
-        # Obtenemos la lista de viajes para la barra lateral
+        # El Mixin 'ViajeContextMixin' debería estar poniendo self.viaje o self.viaje_actual
+        # Nos aseguramos de tener el objeto viaje disponible
+        viaje_obj = getattr(self, 'viaje', getattr(self, 'viaje_actual', None))
+        
         viajes = Viaje.objects.filter(participantes__usuario=self.request.user)
         for v in viajes:
             v.ultimo_msg = MensajeChat.objects.filter(viaje=v).last()
             
         context.update({
+            'viaje': viaje_obj, # <--- ESTO ES LO QUE ESTABA FALTANDO
             'viajes': viajes,
-            'mensajes': MensajeChat.objects.filter(viaje=self.viaje),
-            'integrantes': Participante.objects.filter(viaje=self.viaje),
-            # 'viaje_actual' ya lo pone el Mixin automáticamente
+            'mensajes': MensajeChat.objects.filter(viaje=viaje_obj),
+            'integrantes': Participante.objects.filter(viaje=viaje_obj),
         })
         return context
 
