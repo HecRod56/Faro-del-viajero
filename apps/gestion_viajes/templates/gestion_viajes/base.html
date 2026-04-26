@@ -1,6 +1,10 @@
 {% extends "core/base.html" %} 
+{%load static}
 {% block content %}
-    {% include "gestion_viajes/navbar_viaje.html" %}
+    <link rel="stylesheet" href="{% static/core/css/styles.css %}">
+    <link rel="stylesheet" href="{% static/gestion_viajes/css/viajes_styles.css %}">
+    
+    {% include "gestion_viajes/partials/navbar_viaje.html" %}
 
     {% if viaje and viaje.id%}
         {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
