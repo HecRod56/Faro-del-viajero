@@ -1,17 +1,18 @@
-{% extends "core/base.html" %} 
-{%load static}
+{% extends "core/base.html" %}
+{% load static %}
+
 {% block content %}
-    <link rel="stylesheet" href="{% static/core/css/styles.css %}">
-    <link rel="stylesheet" href="{% static/gestion_viajes/css/viajes_styles.css %}">
-    
+    <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'gestion_viajes/css/viajes_styles.css' %}">
+
     {% include "gestion_viajes/partials/navbar_viaje.html" %}
 
-    {% if viaje and viaje.id%}
+    {% if viaje and viaje.id %}
         {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
     {% endif %}
 
     <div class="gestion-viajes-content">
-        {% block viajes_content %}
-        {% endblock %}
+        {% block viajes_content %} 
+            {% endblock %}
     </div>
 {% endblock %}
