@@ -1,0 +1,209 @@
+/* static/autenticado/css/auth-shared.css */
+
+/* ==========================================
+   Layout compartido de auth (login/register)
+   ========================================== */
+.auth-image-panel {
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-image-overlay {
+    background: linear-gradient(180deg, rgba(26, 46, 53, 0) 0%, rgba(26, 46, 53, 0.7) 100%);
+}
+
+.auth-form-wrapper {
+    width: 100%;
+    max-width: 540px;
+    padding: 40px 30px;
+}
+
+/* ==========================================
+   Formularios (compartidos)
+   ========================================== */
+.form-label {
+    color: var(--color-heading);
+    font-weight: var(--font-weight-bold);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.form-control,
+.form-select {
+    border: 1.5px solid #E4E4E2;
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 15px;
+    color: var(--color-heading);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(14, 158, 142, 0.1);
+    outline: none;
+}
+
+.form-control.is-invalid {
+    border-color: var(--color-danger);
+    background-image: none;
+}
+
+.form-control.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+}
+
+/* ==========================================
+   Botón principal de auth (versión grande)
+   ========================================== */
+.btn-auth {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: 28px;
+    padding: 16px 24px;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.btn-auth:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14, 158, 142, 0.2);
+}
+
+.btn-auth:disabled {
+    background: #a8d5d1;
+    cursor: not-allowed;
+}
+
+/* Botón secundario "Atrás" en flujos auth */
+.btn-auth-back {
+    border-radius: 28px;
+    padding: 16px 24px;
+    border: 2px solid #E4E4E2;
+    color: #555;
+    font-weight: var(--font-weight-bold);
+    background-color: var(--color-white);
+}
+
+/* ==========================================
+   Toggle contraseña
+   ========================================== */
+.password-toggle {
+    position: absolute;
+    right: 18px;
+    top: 44px;
+    cursor: pointer;
+    color: #888;
+    font-size: 18px;
+}
+
+/* ==========================================
+   Mensajes de error / feedback
+   ========================================== */
+.invalid-feedback-custom,
+.error-feedback {
+    display: none;
+    color: var(--color-danger);
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+    margin-top: 6px;
+    text-align: left;
+}
+
+.is-invalid ~ .invalid-feedback-custom {
+    display: block;
+}
+
+/* ==========================================
+   Enlaces auxiliares
+   ========================================== */
+.auth-links a,
+.terms-link {
+    color: var(--color-heading);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-links a:hover,
+.terms-link:hover {
+    color: var(--color-primary);
+}
+
+.auth-links-divider {
+    color: #E4E4E2;
+}
+
+/* ==========================================
+   Alertas personalizadas
+   ========================================== */
+.alert-custom {
+    border-radius: 14px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid transparent;
+}
+
+.alert-error .alert-icon,
+.alert-error .alert-text {
+    color: var(--color-danger);
+}
+
+.alert-success {
+    background-color: #F0FFF4;
+    border-color: #C6F6D5;
+}
+
+.alert-success .alert-icon,
+.alert-success .alert-text {
+    color: #2F855A;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* ==========================================
+   Texto sobre el panel de imagen
+   ========================================== */
+.auth-image-content {
+    padding: 3rem !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.auth-image-title {
+    font-size: 2.5rem;
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.auth-image-subtitle {
+    font-size: 1.15rem;
+    font-weight: var(--font-weight-regular);
+    opacity: 0.95;
+    line-height: 1.5;
+    max-width: 480px;
+}
+
+/* También subimos la opacidad del overlay para que el texto se lea mejor */
+.auth-image-overlay {
+    background: linear-gradient(180deg, 
+        rgba(26, 46, 53, 0) 0%, 
+        rgba(26, 46, 53, 0.5) 50%,
+        rgba(26, 46, 53, 0.85) 100%);
+}
+
+.auth-image-title,
+.auth-image-subtitle {
+    color: var(--color-white);
+}
