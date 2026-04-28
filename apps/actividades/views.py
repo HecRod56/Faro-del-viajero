@@ -4,6 +4,9 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 
+from django.contrib.auth import get_user_model
+
+
 from apps.gestion_viajes.models import Viaje
 from .models import Actividad, VotoActividad
 
@@ -72,9 +75,51 @@ def proponer_actividad(request, viaje_id):
 
     return render(request, 'actividades/proponer_actividad.html', context)
 
-def editar_actividad(request):
-    # datos de act especifica
-    return render(request, 'actividades/editar_actividad.html')
+
+
+
+def editar_actividad(request, id):
+    actividad = get_object_or_404(Actividad, id=id)
+    User = get_user_model()
+    usuarios = User.objects.all()
+
+    participantes = actividad.viaje.participantes.all()
+
+    if request.method == "POST":
+        actividad.titulo = request.POST.get("nombre_actividad")
+        actividad.fecha = request.POST.get("fecha")
+        actividad.hora = request.POST.get("hora")
+        actividad.ubicacion = request.POST.get("ubicacion")
+        actividad.descripcion = request.POST.get("descripcion")
+        actividad.hospedaje = request.POST.get("hospedaje")
+
+        # Transporte
+        actividad.transporte = request.POST.get("categoria")
+        actividad.otro_transporte = request.POST.get("otro_transporte_detalle")
+
+        # Responsable
+        responsable_id = request.POST.get("responsable")
+        if responsable_id:
+            actividad.responsable_id = int(responsable_id)
+
+
+        actividad.save()
+
+        messages.success(
+            request,
+            f"Los cambios en '{actividad.titulo}' fueron guardados correctamente."
+        )
+
+        return redirect('actividades:detalle_actividad', actividad_id=actividad.id)
+
+    return render(request, 'actividades/editar_actividad.html', {
+        'actividad': actividad,
+        'usuarios': usuarios,
+        'participantes': participantes
+    })
+        
+
+
 
 
 # ==========================================

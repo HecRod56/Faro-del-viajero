@@ -1,0 +1,186 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .card-actividad { border-radius: 30px; border: none; box-shadow: 0 4px 25px rgba(0,0,0,0.05); padding: 40px; }
+    .nota-banner { background-color: #f1f2f5; border-radius: 15px; padding: 15px 20px; font-weight: 600; font-size: 14px; }
+    .form-label { color: #1A2E35; font-weight: 700; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; }
+    .form-control, .form-select { border: 1.5px solid #E4E4E2; border-radius: 12px; padding: 12px 15px; }
+    .participante-badge { border-radius: 20px; padding: 8px 18px; font-weight: 600; border: 1.5px solid #0E9E8E; color: #0E9E8E; background: white; margin-right: 8px; cursor: pointer; }
+    .participante-badge.selected { background: #D1F2EB; }
+    .btn-save { background: #0E9E8E; color: white; border-radius: 15px; padding: 15px; font-weight: 700; border: none; flex: 1; }
+    .btn-cancel { background: #E9ECEF; color: #6C757D; border-radius: 15px; padding: 15px; font-weight: 700; border: none; flex: 1; }
+</style>
+
+<div style="max-width: 900px; margin: 40px auto;">
+
+  <!-- Card -->
+  <div style="background: var(--color-white); padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+    <h2 style="margin-bottom: 20px;">✏️ Editar Actividad</h2>
+
+    <form id="form-editar-actividad" method="POST">
+      {% csrf_token %}
+
+      <!-- Nombre -->
+      <div style="margin-bottom: 15px;">
+        <label><strong>NOMBRE DE LA ACTIVIDAD *</strong></label>
+        <input type="text" name="nombre_actividad"
+               value="{{ actividad.titulo }}"
+               style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+      </div>
+
+      <!-- Fecha y Hora -->
+      <div style="display:flex; gap:15px; margin-bottom:15px;">
+
+        <div style="flex:1;">
+          <label><strong>FECHA *</strong></label>
+          <input type="date" name="fecha"
+                 value="{{ actividad.fecha|date:'Y-m-d' }}"
+                 style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+        </div>
+
+        <div style="flex:1;">
+          <label><strong>HORA *</strong></label>
+          <input type="time" name="hora"
+                 value="{{ actividad.hora|time:'H:i' }}"
+                 style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+        </div>
+
+      </div>
+
+      <!-- Ubicación con icono -->
+      <div style="margin-bottom:15px;">
+        <label><strong>UBICACIÓN *</strong></label>
+        <div style="position: relative;">
+          <input type="text" name="ubicacion"
+                 value="{{ actividad.ubicacion }}"
+                 style="width:100%; padding:10px 40px 10px 10px; border:1px solid #ccc; border-radius:6px;">
+          
+          <span style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+            📍
+          </span>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div style="margin-bottom: 15px;">
+        <label><strong>DESCRIPCIÓN *</strong></label>
+        <textarea name="descripcion"
+                  style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">{{ actividad.descripcion }}</textarea>
+      </div>
+
+      <!-- Responsable -->
+       <div class="mb-4">
+                        <label class="form-label">Responsable <span class="text-danger">*</span></label>
+                        <select name="responsable" class="form-select" required>
+                            {% for p in participantes %}
+                                {% if es_lista_usuarios %}
+                                    {# Caso 1: p es un objeto User directamente #}
+                                    <option value="{{ p.id }}" selected>
+                                        {{ p.get_full_name|default:p.username }} (Tú)
+                                    </option>
+                                {% else %}
+                                    {# Caso 2: p es un objeto Participante, entramos a su usuario #}
+                                    <option value="{{ p.usuario.id }}" {% if p.usuario == user %}selected{% endif %}>
+                                        {{ p.usuario.get_full_name|default:p.usuario.username }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+    <!-- Participantes -->                
+                    <div class="mb-4">
+                        <label class="form-label d-block">Participantes (Todos seleccionados por defecto)</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for p in participantes %}
+                                <span class="participante-badge selected">
+                                    {% if es_lista_usuarios %}
+                                        {# Quitamos el span extra que estaba aquí #}
+                                        {{ p.get_full_name|default:p.username }} (Tú)
+                                    {% else %}
+                                        {# Quitamos el span extra que estaba aquí también #}
+                                        {{ p.usuario.get_full_name|default:p.usuario.username }} {% if p.usuario == user %}(Tú){% endif %}
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+      <!-- Transporte -->
+      
+                    <div class="row mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label">Transporte</label>
+                            <select id="selectorTransporte" name="categoria" class="form-select mb-2">
+                                    <option value="-">-</option>
+                                    <option value="Avión" {% if actividad.transporte == "Avión" %}selected{% endif %}>Avión</option>
+                                    <option value="Bus" {% if actividad.transporte == "Bus" %}selected{% endif %}>Bus</option>
+                                    <option value="Taxi" {% if actividad.transporte == "Taxi" %}selected{% endif %}>Taxi</option>
+                                    <option value="Otro" {% if actividad.transporte == "Otro" %}selected{% endif %}>Otro</option>
+                            </select>
+                            
+                            <div id="contenedorOtroTransporte" style="display: none;">
+                                <label class="form-label" style="font-size: 0.7rem;">Especifique el transporte <span class="text-danger">*</span></label>
+                                <textarea name="otro_transporte_detalle" id="inputOtro" class="form-control" placeholder="Ej. Lancha, Rafting, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+      <!-- Hospedaje -->
+      <div style="margin-bottom:25px;">
+        <label><strong>HOSPEDAJE</strong></label>
+        <input type="text" name="hospedaje"
+               value="{{ actividad.hospedaje }}"
+               placeholder="Escriba el nombre del lugar de hospedaje..."
+               style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+      </div>
+
+      <!-- Botones -->
+      <div style="display:flex; gap:15px;">
+
+        <button type="button"
+        class="btn-save"
+        data-bs-toggle="modal"
+        data-bs-target="#guardarModal">
+    Guardar Cambios
+    </button>
+       <a href="{% url 'actividades:lista' actividad.viaje.id %}" class="btn-cancel">Cancelar</a>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("confirmarGuardar");
+
+    if (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelector("form").submit();
+        });
+    }
+});
+</script>
+
+<script>
+  const selector = document.getElementById("selectorTransporte");
+  const contenedor = document.getElementById("contenedorOtroTransporte");
+
+  selector.addEventListener("change", function() {
+    if (this.value === "Otro") {
+      contenedor.style.display = "block";
+    } else {
+      contenedor.style.display = "none";
+    }
+  });
+</script>
+
+<!--Esto es lo del modal (guardar_cambios.html)-->
+{% include "actividades/guardar_cambios.html" %}
+{% endblock %}
