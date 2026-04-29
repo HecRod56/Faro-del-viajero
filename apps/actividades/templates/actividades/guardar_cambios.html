@@ -1,22 +1,16 @@
 <div class="modal fade" id="guardarModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 30px; padding: 30px; border: none;">
+        <div class="modal-content delete-modal-content">
             <div class="modal-body text-center">
 
                 <div class="mb-4">
-                    <div style="background: #E9ECEF; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                        💾
-                    </div>
+                    <div class="delete-modal-icon">💾</div>
                 </div>
 
-                <h3 class="fw-bold mb-4" style="color: #1A2E35; font-style: italic;">
-                    ¿GUARDAR CAMBIOS?
-                </h3>
+                <h3 class="fw-bold mb-4 delete-modal-title">¿GUARDAR CAMBIOS?</h3>
 
-                <div class="mb-4" style="border: 2px solid #0E9E8E; border-radius: 15px; padding: 20px;">
-                    <h4 class="fw-bold mb-0" style="color: #0E9E8E;">
-                        “{{ actividad.titulo }}”
-                    </h4>
+                <div class="mb-4 save-modal-name">
+                    <h4>"{{ actividad.titulo }}"</h4>
                 </div>
 
                 <p class="text-muted mb-5">
@@ -24,15 +18,8 @@
                 </p>
 
                 <div class="d-flex gap-3">
-                    <button type="button" class="btn-cancel"
-                        data-bs-dismiss="modal"
-                        style="background: #E9ECEF; border-radius: 15px; padding: 12px; flex: 1; border: none; font-weight: 700;">
-                        CANCELAR
-                    </button>
-
-<button type="submit" form="form-editar-actividad">
-    Sí, guardar
-</button>
+                    <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">CANCELAR</button>
+                    <button type="submit" class="btn btn-modal-save" form="form-editar-actividad">Sí, guardar</button>
                 </div>
 
             </div>

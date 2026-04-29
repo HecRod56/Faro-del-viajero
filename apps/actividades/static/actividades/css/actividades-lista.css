@@ -1,0 +1,306 @@
+/* static/actividades/css/actividades-lista.css */
+
+/* ==========================================
+   Botón proponer actividad
+   ========================================== */
+.btn-proponer {
+    background-color: #E8721C;
+    color: var(--color-white);
+    border-radius: 24px;
+    font-weight: var(--font-weight-bold);
+    padding: 10px 20px;
+    border: none;
+    transition: transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn-proponer:hover {
+    background-color: #d66415;
+    transform: translateY(-2px);
+    color: var(--color-white);
+}
+
+/* ==========================================
+   Toggle de vista (Por día / Lista)
+   ========================================== */
+.view-toggle {
+    background-color: var(--color-white);
+    border: 1.5px solid #E4E4E2;
+    border-radius: 24px;
+    display: flex;
+    overflow: hidden;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-small);
+}
+
+.view-toggle-btn {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #888;
+}
+
+.view-toggle-btn.active {
+    background-color: rgba(14, 158, 142, 0.1);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+/* ==========================================
+   Timeline - Encabezado de día
+   ========================================== */
+.day-header {
+    font-size: var(--font-size-h3);
+    font-weight: 800;
+    color: var(--color-heading);
+    margin-top: 40px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.day-header .badge-date {
+    background-color: var(--color-white);
+    border: 1.5px solid #E4E4E2;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: var(--font-size-small);
+    color: var(--color-heading);
+    text-transform: capitalize;
+}
+
+/* ==========================================
+   Timeline - Tarjetas de actividad
+   ========================================== */
+.activity-card {
+    background-color: var(--color-white);
+    border: 1.5px solid #E4E4E2;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.activity-card:hover {
+    border-color: var(--color-primary);
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+/* Columna de hora */
+.time-col {
+    min-width: 70px;
+    text-align: right;
+    border-right: 2px dashed #E4E4E2;
+    padding-right: 20px;
+}
+
+.time-text {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-heading);
+    line-height: 1;
+}
+
+.time-ampm {
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    color: #888;
+}
+
+/* Columna de contenido */
+.content-col {
+    flex-grow: 1;
+}
+
+.activity-title {
+    font-size: 17px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.activity-location {
+    font-size: var(--font-size-small);
+    color: #666;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Columna meta (avatares + conteo) */
+.meta-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    min-width: 100px;
+}
+
+.participants-count {
+    font-size: 13px;
+    font-weight: var(--font-weight-bold);
+    color: #888;
+    background: var(--color-bg);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* ==========================================
+   Sección de votación
+   ========================================== */
+.voting-section {
+    margin-bottom: 40px;
+}
+
+.voting-header {
+    font-size: var(--font-size-h3);
+    font-weight: 800;
+    color: var(--color-heading);
+    margin-bottom: 16px;
+}
+
+.vote-card {
+    background-color: var(--color-white);
+    border: 1.5px solid #E8721C;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(232, 114, 28, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.vote-card::before {
+    content: "NUEVO";
+    position: absolute;
+    top: 12px;
+    right: -25px;
+    background: #E8721C;
+    color: var(--color-white);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 25px;
+    transform: rotate(45deg);
+    letter-spacing: 1px;
+}
+
+.vote-title {
+    font-size: var(--font-size-body);
+    font-weight: 800;
+    color: var(--color-heading);
+    margin-bottom: 4px;
+}
+
+.vote-meta {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+/* Barra de progreso de votos */
+.vote-progress-container {
+    background-color: var(--color-bg);
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.vote-progress-bar {
+    background-color: var(--color-primary);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.vote-stats {
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* Botones de voto */
+.btn-vote {
+    border-radius: 20px;
+    font-weight: var(--font-weight-bold);
+    padding: 10px;
+    font-size: var(--font-size-small);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-vote-yes {
+    background-color: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-vote-yes:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn-vote-no {
+    background-color: transparent;
+    border: 2px solid var(--color-danger);
+    color: var(--color-danger);
+}
+
+.btn-vote-no:hover {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+}
+
+/* ==========================================
+   Estado vacío
+   ========================================== */
+.empty-day-card {
+    background-color: transparent;
+    border: 2px dashed #E4E4E2;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    color: #888;
+    font-weight: var(--font-weight-semibold);
+    transition: border-color 0.2s;
+    cursor: pointer;
+}
+
+.empty-day-card:hover {
+    border-color: #E8721C;
+    color: #E8721C;
+    background-color: rgba(232, 114, 28, 0.02);
+}
+
+/* ==========================================
+   Utilidad de color naranja
+   ========================================== */
+.text-naranja {
+    color: #E8721C;
+}

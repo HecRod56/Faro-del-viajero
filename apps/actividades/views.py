@@ -134,7 +134,7 @@ def lista_actividades(request, viaje_id):
     actividades_aprobadas = Actividad.objects.filter(viaje=viaje, estado='APROBADA').order_by('fecha', 'hora')
     
     # Calculamos el total de integrantes para los porcentajes
-    total_integrantes = viaje.integrantes.count() if hasattr(viaje, 'integrantes') else 6
+    total_integrantes = viaje.participantes.count()
 
     context = {
         'viaje': viaje,
@@ -159,7 +159,7 @@ def votar_actividad(request, actividad_id):
         )
 
         # LÓGICA DE APROBACIÓN AUTOMÁTICA
-        total_integrantes = actividad.viaje.integrantes.count() if hasattr(actividad.viaje, 'integrantes') else 6
+        total_integrantes = actividad.viaje.participantes.count()
         votos_necesarios = (total_integrantes // 2) + 1 # Mitad más uno
         
         if actividad.votos_a_favor >= votos_necesarios:
@@ -191,7 +191,7 @@ def detalle_actividad(request, actividad_id):
     actividad = get_object_or_404(Actividad, id=actividad_id)
     
     # Calculamos el total de integrantes para los porcentajes/badges
-    total_integrantes = actividad.viaje.integrantes.count() if hasattr(actividad.viaje, 'integrantes') else 6
+    total_integrantes = actividad.viaje.participantes.count()
     
     context = {
         'actividad': actividad,

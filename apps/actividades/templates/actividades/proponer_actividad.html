@@ -1,22 +1,17 @@
 {% extends "core/base.html" %}
+{% load static %}
 
-{% load static %} {% block content %}
-<style>
-    .card-actividad { border-radius: 30px; border: none; box-shadow: 0 4px 25px rgba(0,0,0,0.05); padding: 40px; }
-    .nota-banner { background-color: #f1f2f5; border-radius: 15px; padding: 15px 20px; font-weight: 600; font-size: 14px; }
-    .form-label { color: #1A2E35; font-weight: 700; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; }
-    .form-control, .form-select { border: 1.5px solid #E4E4E2; border-radius: 12px; padding: 12px 15px; }
-    .participante-badge { border-radius: 20px; padding: 8px 18px; font-weight: 600; border: 1.5px solid #0E9E8E; color: #0E9E8E; background: white; margin-right: 8px; cursor: pointer; }
-    .participante-badge.selected { background: #D1F2EB; }
-    .btn-save { background: #0E9E8E; color: white; border-radius: 15px; padding: 15px; font-weight: 700; border: none; flex: 1; }
-    .btn-cancel { background: #E9ECEF; color: #6C757D; border-radius: 15px; padding: 15px; font-weight: 700; border: none; flex: 1; }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'actividades/css/actividades-shared.css' %}">
+<link rel="stylesheet" href="{% static 'actividades/css/actividades-form.css' %}">
+{% endblock %}
 
+{% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card card-actividad bg-white">
-                <h2 class="fw-bold mb-4" style="color: #1A2E35;">Proponer Actividad</h2>
+            <div class="form-card">
+                <h2 class="fw-bold mb-4 text-oscuro">Proponer Actividad</h2>
                 
                 <div class="nota-banner mb-4 d-flex align-items-center">
                     <span class="me-2" style="font-size: 1.5rem;">⚠️</span>
@@ -35,7 +30,7 @@
                             <label class="form-label">Fecha y Hora <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="fechaActividad" name="fecha_hora" class="form-control">
                             
-                            <small id="errorFecha" class="text-danger mt-2" style="display: none; font-size: 0.72rem; font-weight: bold;">
+                            <small id="errorFecha" class="fecha-error">
                                 ⚠️ LA FECHA DEBE ESTAR DENTRO DEL RANGO DEL VIAJE.
                             </small>
                         </div>
@@ -58,12 +53,10 @@
                         <select name="responsable" class="form-select" required>
                             {% for p in participantes %}
                                 {% if es_lista_usuarios %}
-                                    {# Caso 1: p es un objeto User directamente #}
                                     <option value="{{ p.id }}" selected>
                                         {{ p.get_full_name|default:p.username }} (Tú)
                                     </option>
                                 {% else %}
-                                    {# Caso 2: p es un objeto Participante, entramos a su usuario #}
                                     <option value="{{ p.usuario.id }}" {% if p.usuario == user %}selected{% endif %}>
                                         {{ p.usuario.get_full_name|default:p.usuario.username }}
                                     </option>
@@ -78,10 +71,8 @@
                             {% for p in participantes %}
                                 <span class="participante-badge selected">
                                     {% if es_lista_usuarios %}
-                                        {# Quitamos el span extra que estaba aquí #}
                                         {{ p.get_full_name|default:p.username }} (Tú)
                                     {% else %}
-                                        {# Quitamos el span extra que estaba aquí también #}
                                         {{ p.usuario.get_full_name|default:p.usuario.username }} {% if p.usuario == user %}(Tú){% endif %}
                                     {% endif %}
                                 </span>
@@ -100,8 +91,8 @@
                                 <option value="Otro">Otro</option>
                             </select>
                             
-                            <div id="contenedorOtroTransporte" style="display: none;">
-                                <label class="form-label" style="font-size: 0.7rem;">Especifique el transporte <span class="text-danger">*</span></label>
+                            <div id="contenedorOtroTransporte" class="otro-transporte-container">
+                                <label class="form-label otro-transporte-label">Especifique el transporte <span class="text-danger">*</span></label>
                                 <textarea name="otro_transporte_detalle" id="inputOtro" class="form-control" placeholder="Ej. Lancha, Rafting, etc."></textarea>
                             </div>
                         </div>
@@ -111,9 +102,9 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-3 text-center">
-                        <button type="submit" class="btn-save text-uppercase">Guardar Actividad</button>
-                        <a href="{% url 'actividades:lista' viaje.id %}" class="btn-cancel text-uppercase text-decoration-none d-flex align-items-center justify-content-center">Cancelar</a>
+                    <div class="form-buttons-row text-center">
+                        <button type="submit" class="btn-form-save text-uppercase">Guardar Actividad</button>
+                        <a href="{% url 'actividades:lista' viaje.id %}" class="btn-form-cancel text-uppercase d-flex align-items-center justify-content-center">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -122,54 +113,43 @@
 </div>
 
 <script>
-    //FECHA_DE_VIAJES
+    // FECHA_DE_VIAJES
     const inputFecha = document.getElementById('fechaActividad');
     const mensajeError = document.getElementById('errorFecha');
 
     const fechaInicioViaje = new Date("{{ viaje.fecha_inicio|date:'Y-m-d' }}T00:00:00");
     const fechaFinViaje = new Date("{{ viaje.fecha_fin|date:'Y-m-d' }}T23:59:59");
 
-    console.log("Viaje inicia:", fechaInicioViaje);
-
     inputFecha.addEventListener('change', function() {
         const fechaSeleccionada = new Date(this.value);
-
-        // Validamos si la fecha está fuera del rango
         if (fechaSeleccionada < fechaInicioViaje || fechaSeleccionada > fechaFinViaje) {
-            mensajeError.style.display = 'block'; // Mostramos el error
-            this.classList.add('is-invalid');    // Ponemos el borde rojo al input
+            mensajeError.style.display = 'block';
+            this.classList.add('is-invalid');
         } else {
-            mensajeError.style.display = 'none';  // Ocultamos el error
-            this.classList.remove('is-invalid'); // Quitamos el borde rojo
+            mensajeError.style.display = 'none';
+            this.classList.remove('is-invalid');
         }
     });
     
-    //TRANSPORTE
+    // TRANSPORTE
     const selector = document.getElementById('selectorTransporte');
     const contenedorOtro = document.getElementById('contenedorOtroTransporte');
     const inputOtro = document.getElementById('inputOtro');
     const formulario = document.querySelector('form');
 
     selector.addEventListener('change', function() {
-        if (this.value === 'Otro') {
-            contenedorOtro.style.display = 'block';
-        } else {
-            contenedorOtro.style.display = 'none';
-            inputOtro.value = ''; // Limpiar si cambia de opinión
-        }
+        contenedorOtro.style.display = this.value === 'Otro' ? 'block' : 'none';
+        if (this.value !== 'Otro') inputOtro.value = '';
     });
 
-    // VALIDACIÓN AL GUARDAR: Reconfirma antes de mandar al servidor
     formulario.addEventListener('submit', function(e) {
-        // 1. Validar campo "Otro"
         if (selector.value === 'Otro' && inputOtro.value.trim() === "") {
-            e.preventDefault(); // Detiene el envío
+            e.preventDefault();
             alert("⚠️ Si seleccionas 'Otro', debes detallar qué transporte es.");
             inputOtro.focus();
             return;
         }
 
-        // 2. Validar Fecha (opcional, por si ignoró la advertencia roja)
         const fechaSeleccionada = new Date(inputFecha.value);
         if (fechaSeleccionada < fechaInicioViaje || fechaSeleccionada > fechaFinViaje) {
             e.preventDefault();
@@ -178,5 +158,4 @@
         }
     });
 </script>
-
 {% endblock %}
