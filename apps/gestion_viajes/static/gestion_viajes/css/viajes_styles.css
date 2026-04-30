@@ -149,7 +149,7 @@ padding-bottom: 32px;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
     padding: 0 24px;
-    max-width: 1000px;
+    max-width: 100%;
     margin: 0 auto;
     animation: fadeUp 0.4s 0.2s ease both;
 }

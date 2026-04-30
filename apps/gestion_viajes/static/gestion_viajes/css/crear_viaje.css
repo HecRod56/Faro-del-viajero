@@ -17,19 +17,19 @@
         }
 
         .breadcrumb-nav a {
-            color: #1e293b;
+            color: #9CA3AF;
             text-decoration: none;
             font-weight: 600;
             transition: color 0.2s ease;
         }
 
         .breadcrumb-nav a:hover { 
-            color: var(--teal); 
+            color: #1e293b; 
             text-decoration: underline; 
         }
 
         .breadcrumb-nav span.current {
-            color: #9CA3AF;
+            color: var(--teal);
             font-weight: 700;
         }
         /*======FIN BREADCRUMB======*/

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'gestion_viajes/css/ver_mis_viajes.css' %}">
 {% endblock %}
 
-<div class="container py-4 px-3">
+<div class="container-fluid py-4 px-3">
     {% if messages %}
   {% for message in messages %}
     <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" 
