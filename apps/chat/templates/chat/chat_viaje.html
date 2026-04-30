@@ -3,73 +3,7 @@
 {% load tz %}
 
 {% block content %}
-<style>
-    /* ── Estilos Base ── */
-    .breadcrumb-viaje { font-size: 0.75rem; margin-bottom: 0.2rem; color: #9CA3AF; display: flex; align-items: center; gap: 5px; }
-    .breadcrumb-item { color: #149B7E; font-weight: 600; text-decoration: none; }
-    .breadcrumb-current { color: #1e293b; font-weight: 700; }
-    .integrantes-badge { background-color: #EBFBFA; color: #149B7E; border-radius: 999px; padding: 0.15rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-left: 0.25rem; }
-
-    /* ── Personalización del Chat ── */
-    .chat-item-active { 
-        background: linear-gradient(135deg, #149B7E, #1BB59A); 
-        color: #FFFFFF;
-    }
-
-    .chat-bg {
-        background-color: #E6F0EE !important; /* Color sólido consistente */
-        background-image: none !important;    /* Eliminamos la imagen pesada de fondo */
-        position: relative;
-    }
-
-    .chat-messages { 
-        overflow-y: auto; 
-        flex: 1; 
-        position: relative; 
-        z-index: 5; 
-        max-height: calc(100vh - 340px); 
-        min-height: 0; 
-    }
-
-    /* Burbuja Derecha (Tus mensajes) */
-    .msg-bubble-right { 
-        background-color: #1BB59A !important; 
-        color: #FFFFFF !important;
-        border-top-right-radius: 4px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    /* Burbuja Izquierda (Mensajes de otros) */
-    .msg-bubble-left { 
-        background-color: #FFFFFF !important; 
-        color: #333333 !important;
-        border-top-left-radius: 4px !important;
-        border: 1px solid #D1DBD9;
-    }
-
-    /* Estilo para los avisos de fecha y sistema */
-    .chat-date-badge {
-        background: rgba(255,255,255,0.9) !important;
-        color: #6B7280 !important;
-        border: 1px solid #D1DBD9;
-        font-size: 11px;
-        font-weight: 600;
-    }
-
-    .chat-input-bar { 
-        position: relative; 
-        z-index: 10; 
-        background: rgba(255,255,255,.95); 
-        backdrop-filter: blur(4px); 
-    }
-
-    .chat-header { position: relative; z-index: 10; }
-
-    @media (max-width: 768px) {
-        .sub-navbar-container { gap: 1rem; justify-content: flex-start; overflow-x: auto; padding: 0.5rem 1.5rem; }
-        .sub-nav-link { font-size: 0.8rem; }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'chat/css/chat_viaje.css' %}">
 
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
