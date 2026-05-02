@@ -1,0 +1,12 @@
+/* static/autenticado/css/login.css */
+
+/* Imagen de fondo específica del login */
+.login-image-panel {
+    background-image: url('https://images.unsplash.com/photo-1518638150340-f706e86654de?q=80&w=1932&auto=format&fit=crop');
+}
+
+/* Título grande de bienvenida */
+.login-title {
+    font-size: 32px;
+    letter-spacing: -0.5px;
+}

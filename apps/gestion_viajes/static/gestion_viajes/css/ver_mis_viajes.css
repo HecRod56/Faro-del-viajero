@@ -1,0 +1,30 @@
+/* --- Estilos específicos de Tarjetas de Viaje --- */
+.trip-card {
+    background: white;
+    border-radius: 2rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease;
+    height: 100%;
+}
+.trip-card:hover { transform: scale(1.02); }
+
+.card-header-band {
+    height: 192px; padding: 1.5rem; position: relative;
+}
+.card-header-band h2 {
+    position: absolute; bottom: 1.5rem; left: 1.5rem;
+    color: white; font-size: 1.25rem; font-weight: 700; margin: 0;
+}
+
+/* --- Gradientes específicos --- */
+.card-gradient-1 { background: linear-gradient(180deg, #149B7E 0%, #D9DF5B 100%); }
+.card-gradient-2 { background: linear-gradient(180deg, #5EEAD4 0%, #134E4A 100%); }
+.card-gradient-3 { background: linear-gradient(180deg, #A855F7 0%, #FB923C 100%); }
+
+.badge-status {
+    position: absolute; top: 1rem; right: 1rem;
+    background: white; padding: 0.2rem 1rem;
+    border-radius: 999px; font-size: 0.75rem;
+    font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}

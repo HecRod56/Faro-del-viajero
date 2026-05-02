@@ -2,18 +2,7 @@
 {% load static %}
 
 {% block content %}
-<style>
-    .chat-item-active   { background: linear-gradient(135deg, #149B7E, #1BB59A); }
-    .chat-item-inactive { background: linear-gradient(135deg, #7ECECA, #9BD8D0); }
-    .chat-bg {
-        background-image: url('https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=900&auto=format&fit=crop&q=40');
-        background-size: cover;
-        background-position: center;
-    }
-    .members-bg {
-        background: linear-gradient(160deg, #149B7E, #0d6b58);
-    }
-</style>
+<link rel="stylesheet" href="{% static 'chat/css/chat_integrantes.css' %}">
 
 <!-- SUBNAV -->
 <div class="bg-white border-bottom px-4">

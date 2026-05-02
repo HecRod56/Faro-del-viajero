@@ -1,8 +1,10 @@
 <style>
     /* Estilos del diseño de Actividades */
     .trip-subnav { background-color: white; border-bottom: 1px solid #E4E4E2; position: sticky; top: 80px; z-index: 1020; }
-    .breadcrumb-item a { color: #0E9E8E; font-weight: 600; text-decoration: none; }
-    .breadcrumb-item.active { color: #1A2E35; font-weight: 700; }
+    .breadcrumb-item + .breadcrumb-item::before {content: ">";}
+    .breadcrumb-item a { color: #9CA3AF; font-weight: 600; text-decoration: none; transition: color 0.2s ease; }
+    .breadcrumb-item.active { color: #0E9E8E; font-weight: 700; }
+    .breadcrumb-item a:hover { color: #1e293b; text-decoration: underline; }    
     .nav-tabs-custom { border-bottom: none; gap: 20px; display: flex; padding: 0; list-style: none; margin-bottom: 0; }
     .nav-tabs-custom .nav-link {
         color: #888; font-weight: 600; padding: 12px 0; font-size: 15px;
@@ -15,7 +17,7 @@
 
 {% if viaje %}
 <div class="trip-subnav pt-3 pb-0 shadow-sm">
-    <div class="container">
+    <div class="container-fluid">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-2" style="font-size: 13px;">
                 <li class="breadcrumb-item"><a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis Viajes</a></li>
