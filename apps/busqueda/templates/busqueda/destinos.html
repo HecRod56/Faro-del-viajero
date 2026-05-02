@@ -1,0 +1,431 @@
+
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --turquesa: #0E9E8E;
+        --turquesa-oscuro: #0b8a7c;
+        --naranja: #E8721C;
+        --texto-limpio: #1A2E35;
+        --fondo-gris: #F2F2F0;
+    }
+
+    .destinos-hero {
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .destinos-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(14,158,142,0.88) 0%, rgba(0,0,0,0.25) 100%);
+    }
+    .destinos-hero-content {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .search-input-destinos {
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px;
+        padding: 10px 20px 10px 44px;
+        font-size: 14px;
+        font-family: 'Montserrat', sans-serif;
+        width: 100%;
+        transition: all 0.2s;
+        background: white;
+    }
+    .search-input-destinos:focus {
+        outline: none;
+        border-color: var(--turquesa);
+        box-shadow: 0 0 0 3px rgba(14,158,142,0.1);
+    }
+
+    .categoria-btn {
+        border: 2px solid #E2E8F0;
+        border-radius: 50px;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+        background: white;
+        color: #64748B;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .categoria-btn:hover { border-color: var(--turquesa); color: var(--turquesa); }
+    .categoria-btn.active {
+        background: var(--turquesa);
+        border-color: var(--turquesa);
+        color: white;
+    }
+
+    .filtros-panel {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem;
+        border: 1px solid #E2E8F0;
+        position: sticky;
+        top: 100px;
+    }
+    .filtros-panel h6 {
+        font-weight: 700;
+        color: var(--texto-limpio);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+    .filtro-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--texto-limpio);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .pop-badge {
+        display: inline-block;
+        border-radius: 50px;
+        padding: 4px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+        margin-bottom: 4px;
+    }
+    .range-input { accent-color: var(--turquesa); width: 100%; }
+
+    /* Cards */
+    .lugar-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #E2E8F0;
+        transition: all 0.25s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .lugar-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(14,158,142,0.12);
+        border-color: var(--turquesa);
+    }
+    .lugar-card-img {
+        height: 160px;
+        object-fit: cover;
+        width: 100%;
+        display: block;
+    }
+    .lugar-card-img-placeholder {
+        height: 160px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    .lugar-card-body {
+        padding: 1rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .lugar-nombre {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--texto-limpio);
+        margin-bottom: 2px;
+    }
+    .lugar-cat {
+        font-size: 12px;
+        color: #94A3B8;
+        margin-bottom: 8px;
+    }
+    .lugar-precio {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--texto-limpio);
+    }
+    .rating-stars { color: #F59E0B; font-size: 12px; }
+    .badge-ciudad {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: 3px 8px;
+    }
+    .badge-pop {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 50px;
+        padding: 3px 10px;
+    }
+    .img-wrapper { position: relative; }
+
+    .btn-agregar {
+        background: var(--turquesa);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        margin-top: 6px;
+    }
+    .btn-agregar:hover { background: var(--turquesa-oscuro); }
+    .btn-ver-mas {
+        background: white;
+        color: var(--turquesa);
+        border: 2px solid var(--turquesa);
+        border-radius: 50px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        margin-top: 4px;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+    .btn-ver-mas:hover { background: var(--turquesa); color: white; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94A3B8;
+    }
+
+    /* Toast */
+    .toast-faro {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--turquesa);
+        color: white;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+        z-index: 9999;
+        display: none;
+        box-shadow: 0 8px 24px rgba(14,158,142,0.3);
+    }
+</style>
+
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+<!-- Toast de confirmación -->
+<div class="toast-faro" id="toastFaro">✅ Actividad agregada</div>
+
+{% if messages %}
+<div class="container-fluid px-4 pt-2">
+    {% for msg in messages %}
+    <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible" role="alert" style="border-radius:12px;font-size:13px;font-family:'Montserrat',sans-serif;">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main class="container-fluid px-4 py-3">
+
+    <!-- Hero -->
+    <div class="destinos-hero"
+         style="background-image: url('{% if foto_hero %}{{ foto_hero }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=60{% endif %}');">
+        <div class="destinos-hero-content">
+            <p class="text-white mb-1" style="font-size:13px;opacity:0.85;">Sugerencias en</p>
+            <h1 class="text-white fw-bold mb-0" style="font-size:1.8rem;">{{ viaje.destino }}</h1>
+        </div>
+    </div>
+
+
+    <!-- Tabs de categoría -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="?categoria=atracciones{% if busqueda %}&q={{ busqueda }}{% endif %}"
+           class="categoria-btn {% if categoria == 'atracciones' %}active{% endif %}">
+            🏖️ Destinos y Atracciones
+        </a>
+        <a href="?categoria=gastronomia{% if busqueda %}&q={{ busqueda }}{% endif %}"
+           class="categoria-btn {% if categoria == 'gastronomia' %}active{% endif %}">
+            🍽️ Gastronomía
+        </a>
+        <a href="?categoria=hoteles{% if busqueda %}&q={{ busqueda }}{% endif %}"
+           class="categoria-btn {% if categoria == 'hoteles' %}active{% endif %}">
+            🏨 Hoteles
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+ 
+
+    <!-- Leyenda de popularidad -->
+    <div class="col-lg-2 col-md-3">
+        <div class="filtros-panel">
+            <h6>Simbología</h6>
+            <div class="d-flex flex-column gap-2">
+                <span class="pop-badge" style="background:#0E9E8E20;color:#0E9E8E;border-color:#0E9E8E40;">
+                    En Tendencia 🔥
+                </span>
+                <small style="font-size:11px;color:#94A3B8;margin-top:-4px;">Atracción turística destacada</small>
+
+                <span class="pop-badge" style="background:#F59E0B20;color:#F59E0B;border-color:#F59E0B40;">
+                    Ambiente Vivo 🎉
+                </span>
+                <small style="font-size:11px;color:#94A3B8;margin-top:-4px;">Restaurante o bar popular</small>
+
+                <span class="pop-badge" style="background:#6B728020;color:#6B7280;border-color:#6B728040;">
+                    Sin filas 🔥
+                </span>
+                <small style="font-size:11px;color:#94A3B8;margin-top:-4px;">Lugar tranquilo o poco concurrido</small>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- Grid de lugares -->
+        <div class="col-lg-10 col-md-9">
+            {% if lugares %}
+            <p style="font-size:13px;color:#94A3B8;margin-bottom:1rem;">
+                {{ lugares|length }} resultado(s) en <strong>{{ viaje.destino }}</strong>
+            </p>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+                {% for lugar in lugares %}
+                <div class="col">
+                    <div class="lugar-card">
+                        <!-- Imagen -->
+                        <div class="img-wrapper">
+                            {% if lugar.foto %}
+                                <img src="{{ lugar.foto }}" alt="{{ lugar.nombre }}" class="lugar-card-img"
+                                    onerror="this.style.display='none'">
+
+                                {% else %}
+                            <div class="lugar-card-img-placeholder" id="placeholder-{{ forloop.counter }}" style="display:none;">
+                                {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
+                            </div>
+                            {% endif %}
+                            <span class="badge-ciudad">{{ lugar.ciudad }}</span>
+                            <span class="badge-pop" style="background:{{ lugar.pop_color }};">{{ lugar.popularidad }}</span>
+                        </div>
+
+                        <div class="lugar-card-body">
+                            <p class="lugar-nombre">{{ lugar.nombre }}</p>
+                            {% if lugar.categorias %}
+                            <p class="lugar-cat">{{ lugar.categorias|join:", " }}</p>
+                            {% endif %}
+
+                            {% if lugar.descripcion %}
+                            <p style="font-size:12px;color:#64748B;margin-bottom:8px;line-height:1.4;">
+                                {{ lugar.descripcion|truncatechars:80 }}
+                            </p>
+                            {% endif %}
+
+                            <div class="d-flex align-items-center justify-content-between mt-auto pt-1">
+                                {% if lugar.precio %}
+                                    <span class="lugar-precio">{{ lugar.precio }}</span>
+                                {% else %}
+                                    <span style="font-size:12px;color:#94A3B8;">Precio variable</span>
+                                {% endif %}
+                                {% if lugar.rating %}
+                                <span class="rating-stars">
+                                    ★ <span style="font-weight:700;color:#1A2E35;">{{ lugar.rating }}</span>
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="mt-2">
+                                {% if lugar.website %}
+                                <a href="{{ lugar.website }}" target="_blank" class="btn-ver-mas mb-1">
+                                    Ver más
+                                </a>
+                                {% endif %}
+
+                                <!-- Formulario para agregar a actividades -->
+                                <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}"
+                                      onsubmit="showToast()">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="nombre" value="{{ lugar.nombre }}">
+                                    <input type="hidden" name="direccion" value="{{ lugar.direccion }}">
+                                    <input type="hidden" name="precio" value="{{ lugar.precio }}">
+                                    <input type="hidden" name="website" value="{{ lugar.website }}">
+                                    <button type="submit" class="btn-agregar">
+                                        + Agregar a Actividades
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="empty-state">
+                <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <h5 style="color:#1A2E35;font-weight:700;">Sin resultados</h5>
+                <p style="font-size:14px;">No encontramos lugares para <strong>{{ busqueda|default:viaje.destino }}</strong>.<br>Intenta con otro término.</p>
+                <a href="?categoria={{ categoria }}" class="categoria-btn active mt-2">Ver todos</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</main>
+
+<script>
+function showToast() {
+    const t = document.getElementById('toastFaro');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+{% endblock %}

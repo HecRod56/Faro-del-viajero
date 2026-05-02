@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
+  
     #CLOUDINARY
     'cloudinary_storage',
     'cloudinary',
@@ -56,6 +57,8 @@ INSTALLED_APPS = [
     'apps.actividades',
     'chat',
     'apps.galeria',
+    #ES LA DE APIS
+    'apps.busqueda',
     ]
 
 MIDDLEWARE = [
@@ -202,3 +205,8 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 # El nombre que aparecerá en la bandeja de entrada
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
+
+#KEYS DE LAS APIS
+GEOAPIFY_API_KEY   = config('GEOAPIFY_API_KEY')
+FOURSQUARE_API_KEY = config('FOURSQUARE_API_KEY')
+PEXELS_API_KEY     = config('PEXELS_API_KEY')
