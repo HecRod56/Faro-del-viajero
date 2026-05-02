@@ -14,8 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Bloque para CSS específico de cada módulo -->
+    {% block extra_css %}{% endblock %}
     {% block head %}{% endblock %}
-
+    
     <style>
         :root {
             --turquesa: #0E9E8E;
