@@ -6,8 +6,9 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from decimal import Decimal, InvalidOperation
 
-from apps.gestion_viajes.models import Viaje, Participante, Gasto
+from apps.gestion_viajes.models import Viaje, Participante
 from apps.control_gastos.models import GastoParticipante, PresupuestoPersonal
+from apps.control_gastos.models import Gasto
 from apps.control_gastos.services import (
     crear_gasto,
     modificar_gasto,

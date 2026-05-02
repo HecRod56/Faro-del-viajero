@@ -452,6 +452,7 @@ def calcular_resumen_grupal(viaje) -> dict:
         'aportaciones':             lista_aportaciones,
         'liquidaciones_pendientes': [
             {
+                'id':    liq.id,
                 'de':    str(liq.deudor.usuario),
                 'a':     str(liq.acreedor.usuario),
                 'monto': liq.monto,
