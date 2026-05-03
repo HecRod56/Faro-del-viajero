@@ -46,27 +46,39 @@ def agregar_actividad(request, viaje_id):
 def p_destinos(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
 
-    categoria  = request.GET.get("categoria", "atracciones")
-    busqueda   = request.GET.get("q", "")
-    precio_min = request.GET.get("precio_min", 0)
-    precio_max = request.GET.get("precio_max", 10000)
+    categoria     = request.GET.get('categoria', 'atracciones')
+    busqueda      = request.GET.get('q', '')
+    precio_max    = int(request.GET.get('precio_max', 10000))
+    cupos         = max(1, min(int(request.GET.get('cupos', 12)), 30))
+    subcategorias = request.GET.getlist('subcategoria')   # lista, ej: ['cultura', 'deportes']
+    popularidades = request.GET.getlist('popularidad')    # lista, ej: ['En Tendencia 🔥']
 
-    # Término de búsqueda: lo que escribió el usuario o el destino del viaje
     termino = busqueda if busqueda else viaje.destino
 
-    lugares   = buscar_lugares(termino, categoria=categoria, limite=12)
+    lugares = buscar_lugares(
+        termino,
+        categoria=categoria,
+        limite=min(cupos * 2, 30),   # pedir el doble para compensar filtrados
+        precio_max=precio_max,
+        subcategorias=subcategorias if subcategorias else None,
+        popularidades=popularidades if popularidades else None,
+    )
+    lugares = lugares[:cupos]        # recortar al número de cupos solicitado
+
     foto_hero = obtener_foto_destino(viaje.destino)
     coords    = obtener_coordenadas(viaje.destino)
 
     context = {
-        "viaje":      viaje,
-        "viaje_actual": viaje,  # ←     NUEVA  LINEA
-        "lugares":    lugares,
-        "categoria":  categoria,
-        "busqueda":   busqueda,
-        "foto_hero":  foto_hero,
-        "coords":     coords,
-        "precio_min": precio_min,
-        "precio_max": precio_max,
+        'viaje':         viaje,
+        'viaje_actual':  viaje,
+        'lugares':       lugares,
+        'categoria':     categoria,
+        'busqueda':      busqueda,
+        'foto_hero':     foto_hero,
+        'coords':        coords,
+        'precio_max':    precio_max,
+        'cupos':         cupos,
+        'subcategorias': subcategorias,
+        'popularidades': popularidades,
     }
     return render(request, "busqueda/destinos.html", context)

@@ -50,18 +50,139 @@
 
     <div class="row g-4">
 
-        <!-- Leyenda de popularidad -->
+        <!-- Panel de Filtros -->
         <div class="col-lg-2 col-md-3">
             <div class="filtros-panel">
-                <h6>Simbología</h6>
-                <div class="d-flex flex-column gap-2">
-                    <span class="pop-badge" style="background:#0E9E8E20;color:#0E9E8E;border-color:#0E9E8E40;">En Tendencia 🔥</span>
-                    <small style="font-size:11px;color:#94A3B8;margin-top:-4px;">Atracción turística destacada</small>
-                    <span class="pop-badge" style="background:#F59E0B20;color:#F59E0B;border-color:#F59E0B40;">Ambiente Vivo 🎉</span>
-                    <small style="font-size:11px;color:#94A3B8;margin-top:-4px;">Restaurante o bar popular</small>
-                    <span class="pop-badge" style="background:#6B728020;color:#6B7280;border-color:#6B728040;">Sin filas 🔥</span>
-                    <small style="font-size:11px;color:#94A3B8;margin-top:-4px;">Lugar tranquilo o poco concurrido</small>
-                </div>
+                <form method="GET" id="form-filtros">
+                    <input type="hidden" name="categoria" value="{{ categoria }}">
+                    {% if busqueda %}<input type="hidden" name="q" value="{{ busqueda }}">{% endif %}
+
+                    <h6 style="font-weight:600;font-size:15px;color:#1A2E35;margin-bottom:1rem;">Filtros</h6>
+
+                    <!-- CATEGORÍA -->
+                    <p class="filtro-label">Tipo de Atracción</p>
+                    <div class="d-flex flex-column gap-1 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="cultura"
+                                   id="sub_cultura" {% if 'cultura' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_cultura" style="font-size:13px;color:#374151;">🏛️ Cultura</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="naturaleza"
+                                   id="sub_naturaleza" {% if 'naturaleza' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_naturaleza" style="font-size:13px;color:#374151;">🌿 Naturaleza</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="aventura"
+                                   id="sub_aventura" {% if 'aventura' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_aventura" style="font-size:13px;color:#374151;">🏃 Aventura</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="entretenimiento"
+                                   id="sub_entretenimiento" {% if 'entretenimiento' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_entretenimiento" style="font-size:13px;color:#374151;">🎭 Entretenimiento</label>
+                        </div>
+                    </div>
+
+                    <!-- PRECIO ESTIMADO -->
+                    <p class="filtro-label">Precio estimado</p>
+                    <input type="range" id="slider_precio" name="precio_max"
+                           min="0" max="10000" step="100" value="{{ precio_max }}"
+                           style="width:100%;accent-color:#0E9E8E;margin-bottom:4px;"
+                           oninput="document.getElementById('lbl_precio').textContent='$'+Number(this.value).toLocaleString()+' MXN'">
+                    <div class="d-flex justify-content-between" style="font-size:11px;color:#94A3B8;margin-bottom:1rem;">
+                        <span>$0 MXN</span>
+                        <span id="lbl_precio">${{ precio_max }} MXN</span>
+                    </div>
+
+                    <!-- POPULARIDAD (badges toggle multi-select) -->
+                    <p class="filtro-label">Popularidad</p>
+                    <div class="d-flex flex-column gap-2 mb-3">
+
+                        <label style="cursor:pointer;margin:0;">
+                            <input type="checkbox" name="popularidad" value="En Tendencia 🔥" class="pop-chk"
+                                   {% if 'En Tendencia 🔥' in popularidades %}checked{% endif %} style="display:none;">
+                            <span class="pop-pill" data-on="#0E9E8E" data-off="#0E9E8E20" data-text-on="#fff" data-text-off="#0E9E8E"
+                                  style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                                         font-size:12px;font-weight:600;border:1px solid #0E9E8E40;
+                                         background:{% if 'En Tendencia 🔥' in popularidades %}#0E9E8E{% else %}#0E9E8E20{% endif %};
+                                         color:{% if 'En Tendencia 🔥' in popularidades %}#fff{% else %}#0E9E8E{% endif %};">
+                                En Tendencia 🔥
+                            </span>
+                        </label>
+
+                        <label style="cursor:pointer;margin:0;">
+                            <input type="checkbox" name="popularidad" value="Ambiente Vivo 🍽️" class="pop-chk"
+                                   {% if 'Ambiente Vivo 🍽️' in popularidades %}checked{% endif %} style="display:none;">
+                            <span class="pop-pill" data-on="#F59E0B" data-off="#F59E0B20" data-text-on="#fff" data-text-off="#F59E0B"
+                                  style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                                         font-size:12px;font-weight:600;border:1px solid #F59E0B40;
+                                         background:{% if 'Ambiente Vivo 🍽️' in popularidades %}#F59E0B{% else %}#F59E0B20{% endif %};
+                                         color:{% if 'Ambiente Vivo 🍽️' in popularidades %}#fff{% else %}#F59E0B{% endif %};">
+                                Ambiente Vivo 🍽️
+                            </span>
+                        </label>
+
+                        <label style="cursor:pointer;margin:0;">
+                            <input type="checkbox" name="popularidad" value="Sin filas" class="pop-chk"
+                                   {% if 'Sin filas' in popularidades %}checked{% endif %} style="display:none;">
+                            <span class="pop-pill" data-on="#6B7280" data-off="#6B728020" data-text-on="#fff" data-text-off="#6B7280"
+                                  style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                                         font-size:12px;font-weight:600;border:1px solid #6B728040;
+                                         background:{% if 'Sin filas' in popularidades %}#6B7280{% else %}#6B728020{% endif %};
+                                         color:{% if 'Sin filas' in popularidades %}#fff{% else %}#6B7280{% endif %};">
+                                Sin filas 🤙
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- CUPOS (stepper) -->
+                    <p class="filtro-label">Cupos</p>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                        <button type="button" onclick="stepCupos(-1)"
+                                style="width:28px;height:28px;border-radius:50%;border:1px solid #D1D5DB;
+                                       background:white;font-size:18px;line-height:1;cursor:pointer;color:#374151;">−</button>
+                        <input type="hidden" id="cupos_input" name="cupos" value="{{ cupos }}">
+                        <span id="cupos_display" style="font-weight:700;font-size:16px;color:#1A2E35;min-width:24px;text-align:center;">{{ cupos }}</span>
+                        <button type="button" onclick="stepCupos(1)"
+                                style="width:28px;height:28px;border-radius:50%;border:none;
+                                       background:#0E9E8E;font-size:18px;line-height:1;cursor:pointer;color:white;">+</button>
+                    </div>
+
+                    <!-- BOTONES -->
+                    <button type="submit" class="btn btn-sm w-100 mb-2"
+                            style="background:#0E9E8E;color:white;font-size:13px;border-radius:8px;padding:7px 0;">
+                        Aplicar filtros
+                    </button>
+                    <a href="?categoria={{ categoria }}"
+                       style="display:block;width:100%;text-align:center;padding:6px 0;font-size:13px;
+                              border:1px solid #D1D5DB;border-radius:8px;color:#374151;background:white;text-decoration:none;">
+                        Limpiar Filtro(s)
+                    </a>
+
+                </form>
+
+                <style>
+                    .filtro-label { font-size:11px; font-weight:600; color:#64748B; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+                </style>
+
+                <script>
+                function stepCupos(delta) {
+                    const inp = document.getElementById('cupos_input');
+                    const dsp = document.getElementById('cupos_display');
+                    let v = parseInt(inp.value) + delta;
+                    v = Math.min(Math.max(v, 1), 30);
+                    inp.value = v;
+                    dsp.textContent = v;
+                }
+                document.querySelectorAll('.pop-chk').forEach(chk => {
+                    chk.addEventListener('change', function() {
+                        const pill = this.nextElementSibling;
+                        pill.style.background = this.checked ? pill.dataset.on  : pill.dataset.off;
+                        pill.style.color      = this.checked ? pill.dataset.textOn : pill.dataset.textOff;
+                    });
+                });
+                </script>
             </div>
         </div>
 

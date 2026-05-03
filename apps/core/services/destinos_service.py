@@ -18,6 +18,13 @@ CATEGORY_MAP = {
     "hoteles":     "accommodation",
 }
 
+SUBCATEGORY_MAP = {
+    'cultura':       'tourism.museum,tourism.historic,tourism.monument,tourism.archaeological,tourism.castle,tourism.sights',
+    'naturaleza':    'leisure.park,leisure.beach,leisure.nature_reserve,leisure.garden,leisure.picnic_site',
+    'aventura':      'sport,leisure.sports_centre,leisure.stadium,leisure.fitness,leisure.golf_course,leisure.ski,leisure.water_park',
+    'entretenimiento': 'entertainment.cinema,entertainment.theatre,entertainment.concert_hall,entertainment.music_venue,entertainment.nightclub,entertainment.casino',
+}
+
 
 def normalizar(s):
     return unicodedata.normalize('NFD', s.lower()).encode('ascii', 'ignore').decode('utf-8')
@@ -94,13 +101,17 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     return None
 
 
-def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 18,
-                   precio_min: int = 0, precio_max: int = 99999):
+def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
+                   precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, popularidades: list = None):
     coords = obtener_coordenadas(destino)
     if not coords["lat"]:
         return []
 
-    cat = CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
+    if subcategorias:
+        cats = [SUBCATEGORY_MAP[s] for s in subcategorias if s in SUBCATEGORY_MAP]
+        cat = ','.join(cats) if cats else CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
+    else:
+        cat = CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
     params = {
         "apiKey": settings.GEOAPIFY_API_KEY,
         "categories": cat,
@@ -165,12 +176,21 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         else:
             precio_str = None
 
+        # Valor numérico del límite superior del precio para el filtro del slider
+        if categoria == "hoteles":
+            _estrellas_precio = {1: 1000, 2: 2000, 3: 4000, 4: 7000, 5: 15000}
+            precio_max_num = _estrellas_precio.get(int(acc.get("stars", 3)), 4000)
+        elif categoria == "gastronomia":
+            precio_max_num = 500
+        else:
+            precio_max_num = 1500
+
         # Popularidad
         cats_str = str(p.get("categories", []))
         if "tourism" in cats_str or "attraction" in cats_str or "sights" in cats_str:
             label, color = "En Tendencia 🔥", "#0E9E8E"
         elif "catering" in cats_str or "restaurant" in cats_str:
-            label, color = "Ambiente Vivo 🎉", "#F59E0B"
+            label, color = "Ambiente Vivo 🍽️", "#F59E0B"
         else:
             label, color = "Sin filas", "#6B7280"
 
@@ -181,6 +201,16 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
                 if parte.lower() not in ["yes", "no"] and parte not in cat_display:
                     cat_display.append(parte)
         cat_display = cat_display[:2]
+
+        # ── Filtros post-fetch ─────────────────────────────
+        # Precio: aplicar solo si el usuario bajó el slider (precio_max < 10000)
+        if precio_max < 10000 and precio_max_num > precio_max:
+            continue
+
+        # Popularidad: filtrar si se seleccionó al menos una opción
+        if popularidades and label not in popularidades:
+            continue
+        # ───────────────────────────────────────────────────
 
         lugares.append({
             "nombre":      nombre,
@@ -197,6 +227,7 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
             "descripcion": p.get("description") or raw.get("description", ""),
             "lat":         p.get("lat"),
             "lon":         p.get("lon"),
+            "precio_max_num": precio_max_num,
         })
 
     return lugares
