@@ -46,12 +46,13 @@ def agregar_actividad(request, viaje_id):
 def p_destinos(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
 
-    categoria     = request.GET.get('categoria', 'atracciones')
-    busqueda      = request.GET.get('q', '')
-    precio_max    = int(request.GET.get('precio_max', 10000))
-    cupos         = max(1, min(int(request.GET.get('cupos', 12)), 30))
-    subcategorias = request.GET.getlist('subcategoria')   # lista, ej: ['cultura', 'deportes']
-    popularidades = request.GET.getlist('popularidad')    # lista, ej: ['En Tendencia 🔥']
+    categoria      = request.GET.get('categoria', 'atracciones')
+    busqueda       = request.GET.get('q', '')
+    precio_max     = int(request.GET.get('precio_max', 10000))
+    num_integrantes = viaje.participantes.count() or 1   # participantes reales del viaje
+    cupos          = max(1, min(int(request.GET.get('cupos', num_integrantes)), num_integrantes))
+    subcategorias  = request.GET.getlist('subcategoria')   # lista, ej: ['cultura', 'deportes']
+    popularidades  = request.GET.getlist('popularidad')    # lista, ej: ['En Tendencia 🔥']
 
     termino = busqueda if busqueda else viaje.destino
 
@@ -76,9 +77,10 @@ def p_destinos(request, viaje_id):
         'busqueda':      busqueda,
         'foto_hero':     foto_hero,
         'coords':        coords,
-        'precio_max':    precio_max,
-        'cupos':         cupos,
-        'subcategorias': subcategorias,
-        'popularidades': popularidades,
+        'precio_max':       precio_max,
+        'cupos':            cupos,
+        'num_integrantes':  num_integrantes,
+        'subcategorias':    subcategorias,
+        'popularidades':    popularidades,
     }
     return render(request, "busqueda/destinos.html", context)

@@ -138,16 +138,20 @@
 
                     <!-- CUPOS (stepper) -->
                     <p class="filtro-label">Cupos</p>
-                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-                        <button type="button" onclick="stepCupos(-1)"
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                        <button type="button" id="btn_cupos_menos" onclick="stepCupos(-1)"
                                 style="width:28px;height:28px;border-radius:50%;border:1px solid #D1D5DB;
                                        background:white;font-size:18px;line-height:1;cursor:pointer;color:#374151;">−</button>
                         <input type="hidden" id="cupos_input" name="cupos" value="{{ cupos }}">
                         <span id="cupos_display" style="font-weight:700;font-size:16px;color:#1A2E35;min-width:24px;text-align:center;">{{ cupos }}</span>
-                        <button type="button" onclick="stepCupos(1)"
+                        <button type="button" id="btn_cupos_mas" onclick="stepCupos(1)"
+                                data-max="{{ num_integrantes }}"
                                 style="width:28px;height:28px;border-radius:50%;border:none;
                                        background:#0E9E8E;font-size:18px;line-height:1;cursor:pointer;color:white;">+</button>
                     </div>
+                    <p style="font-size:10px;color:#94A3B8;text-align:center;margin-bottom:1rem;">
+                        👥 {{ num_integrantes }} integrante{{ num_integrantes|pluralize }} en el viaje
+                    </p>
 
                     <!-- BOTONES -->
                     <button type="submit" class="btn btn-sm w-100 mb-2"
@@ -167,14 +171,32 @@
                 </style>
 
                 <script>
+                const MAX_CUPOS = parseInt(document.getElementById('btn_cupos_mas').dataset.max) || 1;
                 function stepCupos(delta) {
                     const inp = document.getElementById('cupos_input');
                     const dsp = document.getElementById('cupos_display');
+                    const btnMas   = document.getElementById('btn_cupos_mas');
+                    const btnMenos = document.getElementById('btn_cupos_menos');
                     let v = parseInt(inp.value) + delta;
-                    v = Math.min(Math.max(v, 1), 30);
+                    v = Math.min(Math.max(v, 1), MAX_CUPOS);
                     inp.value = v;
                     dsp.textContent = v;
+                    // Deshabilitar botón + al llegar al límite
+                    if (v >= MAX_CUPOS) {
+                        btnMas.disabled = true;
+                        btnMas.style.background = '#CBD5E1';
+                        btnMas.style.cursor = 'not-allowed';
+                    } else {
+                        btnMas.disabled = false;
+                        btnMas.style.background = '#0E9E8E';
+                        btnMas.style.cursor = 'pointer';
+                    }
+                    // Deshabilitar botón − al llegar a 1
+                    btnMenos.disabled = v <= 1;
+                    btnMenos.style.color = v <= 1 ? '#CBD5E1' : '#374151';
                 }
+                // Estado inicial de los botones al cargar la página
+                document.addEventListener('DOMContentLoaded', function() { stepCupos(0); });
                 document.querySelectorAll('.pop-chk').forEach(chk => {
                     chk.addEventListener('change', function() {
                         const pill = this.nextElementSibling;
