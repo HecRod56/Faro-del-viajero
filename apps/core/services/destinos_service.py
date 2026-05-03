@@ -169,20 +169,23 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
     if not coords["lat"]:
         return []
 
-    if subcategorias:
-        cats = [SUBCATEGORY_MAP[s] for s in subcategorias if s in SUBCATEGORY_MAP]
-        cat = ','.join(cats) if cats else CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
-    else:
-        cat = CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
+    # Siempre consultar con categorías amplias para maximizar resultados.
+    # El filtro por subcategoría (cultura/naturaleza/aventura/entretenimiento)
+    # se aplica post-fetch sobre `categoria_filtro`, evitando que Geoapify
+    # devuelva lista vacía con categorías muy específicas.
+    cat = CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
+
+    # Pedir más resultados cuando hay filtros para compensar el descarte post-fetch
+    api_limite = min(limite * 3, 100) if subcategorias else limite
+
     params = {
         "apiKey": settings.GEOAPIFY_API_KEY,
         "categories": cat,
         "filter": f"circle:{coords['lon']},{coords['lat']},20000",
-        "limit": limite,
+        "limit": api_limite,
         "lang": "es",
         "conditions": "named",
         "country": "mx",  # ← solo México
-
     }
     try:
         resp = requests.get(GEOAPIFY_PLACES, params=params, timeout=10)
@@ -268,6 +271,10 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         categoria_filtro = obtener_categoria_filtro(p.get("categories", []))
 
         # ── Filtros post-fetch ─────────────────────────────
+        # Subcategoría: descartar si el lugar no pertenece a ninguna de las seleccionadas
+        if subcategorias and categoria_filtro not in subcategorias:
+            continue
+
         # Precio: aplicar solo si el usuario bajó el slider (precio_max < 10000)
         if precio_max < 10000 and precio_max_num > precio_max:
             continue
