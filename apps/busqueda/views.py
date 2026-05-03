@@ -56,15 +56,17 @@ def p_destinos(request, viaje_id):
 
     termino = busqueda if busqueda else viaje.destino
 
+    LIMITE_DISPLAY = 12   # tarjetas a mostrar siempre
+
     lugares = buscar_lugares(
         termino,
         categoria=categoria,
-        limite=min(cupos * 2, 30),   # pedir el doble para compensar filtrados
+        limite=LIMITE_DISPLAY * 3 if subcategorias else LIMITE_DISPLAY,
         precio_max=precio_max,
         subcategorias=subcategorias if subcategorias else None,
         popularidades=popularidades if popularidades else None,
     )
-    lugares = lugares[:cupos]        # recortar al número de cupos solicitado
+    lugares = lugares[:LIMITE_DISPLAY]   # mostrar máximo 12 tarjetas
 
     foto_hero = obtener_foto_destino(viaje.destino)
     coords    = obtener_coordenadas(viaje.destino)
