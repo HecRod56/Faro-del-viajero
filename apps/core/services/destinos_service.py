@@ -25,6 +25,68 @@ SUBCATEGORY_MAP = {
     'entretenimiento': 'entertainment.cinema,entertainment.theatre,entertainment.concert_hall,entertainment.music_venue,entertainment.nightclub,entertainment.casino',
 }
 
+# Mapa inverso para determinar la categoría de filtro de una categoría de Geoapify
+CATEGORY_TO_FILTER = {
+    'tourism.museum': 'cultura',
+    'tourism.historic': 'cultura',
+    'tourism.monument': 'cultura',
+    'tourism.archaeological': 'cultura',
+    'tourism.castle': 'cultura',
+    'tourism.sights': 'cultura',
+    'leisure.park': 'naturaleza',
+    'leisure.beach': 'naturaleza',
+    'leisure.nature_reserve': 'naturaleza',
+    'leisure.garden': 'naturaleza',
+    'leisure.picnic_site': 'naturaleza',
+    'sport': 'aventura',
+    'leisure.sports_centre': 'aventura',
+    'leisure.stadium': 'aventura',
+    'leisure.fitness': 'aventura',
+    'leisure.golf_course': 'aventura',
+    'leisure.ski': 'aventura',
+    'leisure.water_park': 'aventura',
+    'entertainment.cinema': 'entretenimiento',
+    'entertainment.theatre': 'entretenimiento',
+    'entertainment.concert_hall': 'entretenimiento',
+    'entertainment.music_venue': 'entretenimiento',
+    'entertainment.nightclub': 'entretenimiento',
+    'entertainment.casino': 'entretenimiento',
+}
+
+
+def obtener_categoria_filtro(categorias_geoapify):
+    """
+    Determina la categoría de filtro (cultura, naturaleza, aventura, entretenimiento)
+    basándose en las categorías de Geoapify.
+    Usa coincidencia por prefijo para cubrir subcategorías anidadas como
+    'tourism.sights.viewpoint', 'entertainment.culture', etc.
+    """
+    # Ordenar las claves de mayor a menor longitud para preferir el match más específico
+    claves_ordenadas = sorted(CATEGORY_TO_FILTER.keys(), key=len, reverse=True)
+
+    for cat in categorias_geoapify:
+        # Coincidencia exacta primero
+        if cat in CATEGORY_TO_FILTER:
+            return CATEGORY_TO_FILTER[cat]
+        # Coincidencia por prefijo: 'tourism.sights.viewpoint' empieza con 'tourism.sights'
+        for clave in claves_ordenadas:
+            if cat.startswith(clave):
+                return CATEGORY_TO_FILTER[clave]
+
+    # Fallback por categoría padre cuando Geoapify devuelve solo el nivel raíz
+    PARENT_FALLBACK = {
+        'tourism':       'cultura',
+        'entertainment': 'entretenimiento',
+        'leisure':       'naturaleza',
+        'sport':         'aventura',
+    }
+    for cat in categorias_geoapify:
+        raiz = cat.split('.')[0]
+        if raiz in PARENT_FALLBACK:
+            return PARENT_FALLBACK[raiz]
+
+    return None
+
 
 def normalizar(s):
     return unicodedata.normalize('NFD', s.lower()).encode('ascii', 'ignore').decode('utf-8')
@@ -202,6 +264,9 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
                     cat_display.append(parte)
         cat_display = cat_display[:2]
 
+        # Determinar categoría de filtro
+        categoria_filtro = obtener_categoria_filtro(p.get("categories", []))
+
         # ── Filtros post-fetch ─────────────────────────────
         # Precio: aplicar solo si el usuario bajó el slider (precio_max < 10000)
         if precio_max < 10000 and precio_max_num > precio_max:
@@ -228,6 +293,7 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
             "lat":         p.get("lat"),
             "lon":         p.get("lon"),
             "precio_max_num": precio_max_num,
+            "categoria_filtro": categoria_filtro,
         })
 
     return lugares

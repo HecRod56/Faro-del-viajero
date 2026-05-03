@@ -214,6 +214,25 @@
                         </div>
 
                         <div class="lugar-card-body">
+                            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+                                {% if lugar.categoria_filtro == "naturaleza" %}
+                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8F5E9;color:#2E7D32;">
+                                        🌿 Naturaleza
+                                    </span>
+                                {% elif lugar.categoria_filtro == "cultura" %}
+                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8EAF6;color:#283593;">
+                                        🏛️ Cultura
+                                    </span>
+                                {% elif lugar.categoria_filtro == "aventura" %}
+                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#FFF3E0;color:#E65100;">
+                                        🏃 Aventura
+                                    </span>
+                                {% elif lugar.categoria_filtro == "entretenimiento" %}
+                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#F3E5F5;color:#6A1B9A;">
+                                        🎭 Entretenimiento
+                                    </span>
+                                {% endif %}
+                            </div>
                             <p class="lugar-nombre">{{ lugar.nombre }}</p>
                             {% if lugar.categorias %}
                             <p class="lugar-cat">{{ lugar.categorias|join:", " }}</p>
