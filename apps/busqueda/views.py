@@ -1,7 +1,8 @@
+#view.py busqueda
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from apps.gestion_viajes.models import Viaje
-from apps.core.services.destinos_service import buscar_lugares, obtener_foto_destino, obtener_coordenadas
+from apps.core.services.destinos_service import buscar_lugares, obtener_foto_destino, obtener_coordenadas, obtener_detalle_lugar
 from django.contrib import messages
 
 
@@ -35,13 +36,6 @@ def agregar_actividad(request, viaje_id):
 
     return redirect(f"/busqueda/viaje/{viaje_id}/destinos/")
 
-
-
-
-
-
-
-
 @login_required
 def p_destinos(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
@@ -70,3 +64,15 @@ def p_destinos(request, viaje_id):
         "precio_max": precio_max,
     }
     return render(request, "busqueda/destinos.html", context)
+
+def detalle_lugar_view(request, viaje_id):
+    nombre    = request.GET.get('nombre', '')
+    ciudad    = request.GET.get('ciudad', '')
+    categoria = request.GET.get('categoria', 'atracciones')
+
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+    lugar = obtener_detalle_lugar(nombre, ciudad, categoria)
+    return render(request, 'busqueda/detalle_lugar.html', {
+        'viaje': viaje,
+        'lugar': lugar,
+    })

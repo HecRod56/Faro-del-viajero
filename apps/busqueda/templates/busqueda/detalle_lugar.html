@@ -1,0 +1,157 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ lugar.nombre }} — Faro del Viajero{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'busqueda/css/destinos.css' %}">
+<link rel="stylesheet" href="{% static 'busqueda/css/detalle_lugar.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+<!-- Toast -->
+<div class="toast-faro" id="toastFaro">✓ Actividad agregada</div>
+
+<div class="container-fluid px-4">
+
+    <!-- Galería de fotos -->
+    <div class="galeria-grid">
+
+        {% if lugar.fotos %}
+            {% if lugar.fotos.0 %}
+                <img src="{{ lugar.fotos.0 }}" alt="{{ lugar.nombre }}" class="foto-principal"
+                     onerror="this.style.display='none'">
+            {% else %}
+                <div class="foto-principal galeria-placeholder">🏖️</div>
+            {% endif %}
+
+            {% for foto in lugar.fotos|slice:"1:5" %}
+                <img src="{{ foto }}" alt="{{ lugar.nombre }}" class="foto-sec"
+                     onerror="this.style.display='none'">
+            {% empty %}
+                <div class="foto-sec galeria-placeholder">📷</div>
+                <div class="foto-sec galeria-placeholder">📷</div>
+                <div class="foto-sec galeria-placeholder">📷</div>
+                <div class="foto-sec galeria-placeholder">📷</div>
+            {% endfor %}
+
+        {% else %}
+            <div class="foto-principal galeria-placeholder">🏖️</div>
+            <div class="foto-sec galeria-placeholder">📷</div>
+            <div class="foto-sec galeria-placeholder">📷</div>
+            <div class="foto-sec galeria-placeholder">📷</div>
+            <div class="foto-sec galeria-placeholder">📷</div>
+        {% endif %}
+
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="row g-4 pb-5">
+
+        <!-- Panel izquierdo: info -->
+        <div class="col-lg-8">
+            <div class="detalle-card">
+
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div>
+                        <h1 class="detalle-nombre">{{ lugar.nombre }}</h1>
+                        <p class="detalle-ciudad">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            {{ lugar.ciudad }}{% if lugar.direccion %}, {{ lugar.direccion }}{% endif %}
+                        </p>
+                    </div>
+                    {% if lugar.categorias %}
+                        <span class="badge-categoria">{{ lugar.categorias.0 }}</span>
+                    {% endif %}
+                </div>
+
+                {% if lugar.popularidad %}
+                <span class="popularidad-link">{{ lugar.popularidad }}</span>
+                {% endif %}
+
+                <!-- Descripción -->
+                {% if lugar.descripcion %}
+                <p class="seccion-titulo">DESCRIPCIÓN</p>
+                <p class="detalle-descripcion">{{ lugar.descripcion }}</p>
+                {% endif %}
+
+                <!-- Lo incluye (opcional: viene del servicio o se omite) -->
+                {% if lugar.lo_incluye %}
+                <p class="seccion-titulo mt-3">LO INCLUYE</p>
+                <div class="lo-incluye-lista">
+                    {% for item in lugar.lo_incluye %}
+                        <span>{{ item }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Info extra: teléfono / website -->
+                {% if lugar.telefono or lugar.website %}
+                <div class="d-flex gap-3 mt-4 flex-wrap">
+                    {% if lugar.telefono %}
+                    <a href="tel:{{ lugar.telefono }}" class="text-decoration-none" style="font-size:13px;color:#64748B;">
+                        📞 {{ lugar.telefono }}
+                    </a>
+                    {% endif %}
+                    {% if lugar.website %}
+                    <a href="{{ lugar.website }}" target="_blank" style="font-size:13px;color:var(--turquesa);font-weight:600;text-decoration:none;">
+                        🌐 Sitio web oficial
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- Panel derecho: precio + acciones -->
+        <div class="col-lg-4">
+            <div class="panel-precio">
+
+                <p class="precio-label">Precio por persona</p>
+                <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
+                <p class="precio-usd">~ precio estimado</p>
+
+                <!-- Agregar como actividad -->
+                <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}"
+                      onsubmit="showToast()">
+                    {% csrf_token %}
+                    <input type="hidden" name="nombre"    value="{{ lugar.nombre }}">
+                    <input type="hidden" name="direccion" value="{{ lugar.direccion }}">
+                    <input type="hidden" name="precio"    value="{{ lugar.precio }}">
+                    <input type="hidden" name="website"   value="{{ lugar.website }}">
+                    <button type="submit" class="btn-agregar-detalle">
+                        + Agregar como actividad
+                    </button>
+                </form>
+
+                {% if lugar.website %}
+                <a href="{{ lugar.website }}" target="_blank" class="btn-sitio-oficial">
+                    Ver sitio oficial
+                </a>
+                {% endif %}
+
+                <div class="aviso-faro">
+                    <strong>Información:</strong> Faro del Viajero no gestiona reservas ni cobros.
+                    Para reservar, visita el sitio oficial del servicio.
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function showToast() {
+    const t = document.getElementById('toastFaro');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+
+{% endblock %}

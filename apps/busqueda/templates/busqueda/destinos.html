@@ -1,4 +1,4 @@
-
+<!--destinos.html-->
 {% extends "core/base.html" %}
 {% load static %}
 
@@ -120,7 +120,7 @@
                             <!-- Botones -->
                             <div class="mt-2">
                                 {% if lugar.website %}
-                                <a href="{{ lugar.website }}" target="_blank" class="btn-ver-mas mb-1">
+                                <a href="{% url 'busqueda:detalle_lugar' viaje.id %}?nombre={{ lugar.nombre }}&ciudad={{ lugar.ciudad }}&categoria={{ categoria }}">
                                     Ver más
                                 </a>
                                 {% endif %}
