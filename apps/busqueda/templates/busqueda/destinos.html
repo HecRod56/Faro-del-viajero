@@ -171,37 +171,40 @@
                 </style>
 
                 <script>
-                const MAX_CUPOS = parseInt(document.getElementById('btn_cupos_mas').dataset.max) || 1;
-                function stepCupos(delta) {
-                    const inp = document.getElementById('cupos_input');
-                    const dsp = document.getElementById('cupos_display');
-                    const btnMas   = document.getElementById('btn_cupos_mas');
-                    const btnMenos = document.getElementById('btn_cupos_menos');
-                    let v = parseInt(inp.value) + delta;
-                    v = Math.min(Math.max(v, 1), MAX_CUPOS);
-                    inp.value = v;
-                    dsp.textContent = v;
-                    // Deshabilitar botón + al llegar al límite
-                    if (v >= MAX_CUPOS) {
-                        btnMas.disabled = true;
-                        btnMas.style.background = '#CBD5E1';
-                        btnMas.style.cursor = 'not-allowed';
-                    } else {
-                        btnMas.disabled = false;
-                        btnMas.style.background = '#0E9E8E';
-                        btnMas.style.cursor = 'pointer';
+                document.addEventListener('DOMContentLoaded', function () {
+                    var MAX_CUPOS = parseInt(document.getElementById('btn_cupos_mas').getAttribute('data-max')) || 1;
+                    var inp     = document.getElementById('cupos_input');
+                    var dsp     = document.getElementById('cupos_display');
+                    var btnMas  = document.getElementById('btn_cupos_mas');
+                    var btnMenos= document.getElementById('btn_cupos_menos');
+
+                    function actualizarBotones(v) {
+                        btnMas.disabled  = (v >= MAX_CUPOS);
+                        btnMas.style.background = (v >= MAX_CUPOS) ? '#CBD5E1' : '#0E9E8E';
+                        btnMas.style.cursor     = (v >= MAX_CUPOS) ? 'not-allowed' : 'pointer';
+                        btnMenos.disabled       = (v <= 1);
+                        btnMenos.style.color    = (v <= 1) ? '#CBD5E1' : '#374151';
                     }
-                    // Deshabilitar botón − al llegar a 1
-                    btnMenos.disabled = v <= 1;
-                    btnMenos.style.color = v <= 1 ? '#CBD5E1' : '#374151';
-                }
-                // Estado inicial de los botones al cargar la página
-                document.addEventListener('DOMContentLoaded', function() { stepCupos(0); });
-                document.querySelectorAll('.pop-chk').forEach(chk => {
-                    chk.addEventListener('change', function() {
-                        const pill = this.nextElementSibling;
-                        pill.style.background = this.checked ? pill.dataset.on  : pill.dataset.off;
-                        pill.style.color      = this.checked ? pill.dataset.textOn : pill.dataset.textOff;
+
+                    window.stepCupos = function(delta) {
+                        var v = parseInt(inp.value) + delta;
+                        if (v < 1) { v = 1; }
+                        if (v > MAX_CUPOS) { v = MAX_CUPOS; }
+                        inp.value      = v;
+                        dsp.textContent= v;
+                        actualizarBotones(v);
+                    };
+
+                    // Estado visual inicial
+                    actualizarBotones(parseInt(inp.value));
+
+                    // Pills de popularidad
+                    document.querySelectorAll('.pop-chk').forEach(function(chk) {
+                        chk.addEventListener('change', function() {
+                            var pill = this.nextElementSibling;
+                            pill.style.background = this.checked ? pill.getAttribute('data-on')       : pill.getAttribute('data-off');
+                            pill.style.color      = this.checked ? pill.getAttribute('data-text-on')  : pill.getAttribute('data-text-off');
+                        });
                     });
                 });
                 </script>
@@ -267,7 +270,9 @@
                             {% endif %}
 
                             <div class="d-flex align-items-center justify-content-between mt-auto pt-1">
-                                {% if lugar.precio %}
+                                {% if lugar.precio == "Gratis" %}
+                                    <span style="font-size:12px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:8px;">🎟️ Gratis</span>
+                                {% elif lugar.precio %}
                                     <span class="lugar-precio">{{ lugar.precio }}</span>
                                 {% else %}
                                     <span style="font-size:12px;color:#94A3B8;">Precio variable</span>

@@ -1,3 +1,4 @@
+import re
 import requests
 import unicodedata
 from django.conf import settings
@@ -163,6 +164,63 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     return None
 
 
+# ─── Rangos estimados por categoría (fallback) ───────────────────────────────
+_PRECIO_FALLBACK = {
+    "hoteles":    {1: ("$500 - $1,000",   1000),
+                   2: ("$1,000 - $2,000", 2000),
+                   3: ("$2,000 - $4,000", 4000),
+                   4: ("$4,000 - $7,000", 7000),
+                   5: ("$7,000+",         15000)},
+    "gastronomia": {
+        "$":    ("$50 - $150 MXN",      150),
+        "$$":   ("$150 - $300 MXN",     300),
+        "$$$":  ("$300 - $600 MXN",     600),
+        "$$$$": ("$600+ MXN",           1500),
+    },
+}
+
+
+def extraer_precio_real(raw: dict, acc: dict, categoria: str):
+    """
+    Intenta obtener un precio real del campo OSM `raw`.
+    Devuelve (precio_str, precio_max_num).
+    """
+    # 1. Entrada gratuita explícita
+    if str(raw.get("fee", "")).lower() == "no":
+        return "Gratis", 0
+
+    # 2. Campo `charge` con precio real: "MXN 150", "150 MXN", "150", "$150"
+    charge = str(raw.get("charge", "") or raw.get("entrance_fee", "")).strip()
+    if charge:
+        nums = re.findall(r'[\d,\.]+', charge.replace(",", ""))
+        if nums:
+            try:
+                valor = float(nums[0])
+                return f"${valor:,.0f} MXN", int(valor)
+            except ValueError:
+                pass
+
+    # 3. `price_range` para restaurantes ("$" a "$$$$")
+    if categoria == "gastronomia":
+        pr = str(raw.get("price_range", "") or raw.get("price_level", "")).strip()
+        if pr in _PRECIO_FALLBACK["gastronomia"]:
+            txt, num = _PRECIO_FALLBACK["gastronomia"][pr]
+            return txt + " por persona", num
+        return "$150 - $500 MXN por persona", 500
+
+    # 4. Hoteles: usar estrellas
+    if categoria == "hoteles":
+        estrellas = int(acc.get("stars") or raw.get("stars", 3))
+        estrellas = max(1, min(estrellas, 5))
+        txt, num = _PRECIO_FALLBACK["hoteles"].get(estrellas, ("$2,000 - $4,000", 4000))
+        return txt + " MXN/noche", num
+
+    # 5. Atracciones: fallback genérico
+    if str(raw.get("fee", "")).lower() == "yes":
+        return "$200 - $1,500 MXN por persona", 1500
+    return "$200 - $1,500 MXN por persona", 1500
+
+
 def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
                    precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, popularidades: list = None):
     coords = obtener_coordenadas(destino)
@@ -228,27 +286,8 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         if acc.get("stars"):
             rating = float(acc["stars"])
 
-        # Precio estimado por categoría
-        if categoria == "hoteles":
-            estrellas = int(acc.get("stars", 3))
-            precios_hotel = {1: "$500 - $1,000", 2: "$1,000 - $2,000",
-                             3: "$2,000 - $4,000", 4: "$4,000 - $7,000", 5: "$7,000+"}
-            precio_str = precios_hotel.get(estrellas, "$2,000 - $4,000") + " MXN/noche"
-        elif categoria == "gastronomia":
-            precio_str = "$150 - $500 MXN por persona"
-        elif categoria == "atracciones":
-            precio_str = "$200 - $1,500 MXN por persona"
-        else:
-            precio_str = None
-
-        # Valor numérico del límite superior del precio para el filtro del slider
-        if categoria == "hoteles":
-            _estrellas_precio = {1: 1000, 2: 2000, 3: 4000, 4: 7000, 5: 15000}
-            precio_max_num = _estrellas_precio.get(int(acc.get("stars", 3)), 4000)
-        elif categoria == "gastronomia":
-            precio_max_num = 500
-        else:
-            precio_max_num = 1500
+        # Precio real desde OSM / fallback por categoría
+        precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria)
 
         # Popularidad
         cats_str = str(p.get("categories", []))
