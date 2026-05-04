@@ -162,70 +162,50 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
 
 # ─── Foursquare: popularidad real ─────────────────────────────────────────────
 
-def _normalizar_nombre(nombre: str) -> str:
-    """Minúsculas, sin acentos, sin especiales → para comparación de nombres."""
-    nombre = nombre.lower().strip()
-    nombre = unicodedata.normalize('NFKD', nombre)
-    nombre = ''.join(c for c in nombre if not unicodedata.combining(c))
-    nombre = re.sub(r'[^a-z0-9\s]', '', nombre)
-    return re.sub(r'\s+', ' ', nombre).strip()
-
-
-def obtener_popularidad_foursquare(lat: float, lon: float, radio: int = 20000) -> dict:
+def obtener_popularidad_lugar_foursquare(lat: float, lon: float, nombre: str) -> tuple:
     """
-    UNA sola llamada a Foursquare Places API v3. Devuelve:
-      {nombre_normalizado: (label, color)}
-    Clasificación por `popularity` (0-1):
-      >= 0.70 → "En Tendencia"  | >= 0.35 → "Ambiente Vivo" | < 0.35 → "Sin filas"
-    Labels sin emoji para evitar problemas de encoding con el template Django.
+    Busca la popularidad de un lugar específico en Foursquare usando sus coordenadas y nombre.
+    Devuelve (label, color) o None si no se encuentra o no hay datos.
     """
     key = getattr(settings, 'FOURSQUARE_API_KEY', '')
-    if not key:
-        return {}
+    if not key or not lat or not lon:
+        return None
+
     headers = {"Authorization": key, "Accept": "application/json"}
-    params  = {"ll": f"{lat},{lon}", "limit": 50, "radius": radio,
-               "fields": "name,popularity,stats"}
+    # Usamos un radio de 500m y el nombre para encontrar exactamente este lugar
+    params = {
+        "ll": f"{lat},{lon}",
+        "radius": 500,
+        "query": nombre,
+        "limit": 1,
+        "fields": "name,popularity,stats"
+    }
+
     try:
-        resp = requests.get(FOURSQUARE_PLACES, headers=headers, params=params, timeout=8)
+        # Timeout más corto para no demorar mucho la carga total si hay varios lugares
+        resp = requests.get(FOURSQUARE_PLACES, headers=headers, params=params, timeout=3)
         resp.raise_for_status()
         results = resp.json().get("results", [])
     except Exception as e:
-        print(f"[Foursquare] Error: {e}")
-        return {}
-
-    pop_map = {}
-    for place in results:
-        nombre = place.get("name", "").strip()
-        if not nombre:
-            continue
-        pop = place.get("popularity")
-        if pop is None:
-            checkins = place.get("stats", {}).get("totalCheckins", 0)
-            pop = min(checkins / 10_000, 1.0)
-        if pop >= 0.70:
-            label, color = "En Tendencia", "#0E9E8E"
-        elif pop >= 0.35:
-            label, color = "Ambiente Vivo", "#F59E0B"
-        else:
-            label, color = "Sin filas", "#6B7280"
-        pop_map[_normalizar_nombre(nombre)] = (label, color)
-
-    print(f"[Foursquare] {len(pop_map)} lugares con popularidad cargados.")
-    return pop_map
-
-
-def _buscar_popularidad(nombre: str, pop_map: dict):
-    """Coincidencia exacta o parcial (substring mutuo). Devuelve (label, color) o None."""
-    if not pop_map:
+        print(f"[Foursquare] Error al buscar '{nombre}': {e}")
         return None
-    n = _normalizar_nombre(nombre)
-    if n in pop_map:
-        return pop_map[n]
-    if len(n) > 5:
-        for k, v in pop_map.items():
-            if len(k) > 5 and (n in k or k in n):
-                return v
-    return None
+
+    if not results:
+        return None
+
+    place = results[0]
+    pop = place.get("popularity")
+    
+    if pop is None:
+        checkins = place.get("stats", {}).get("totalCheckins", 0)
+        pop = min(checkins / 10_000, 1.0)
+
+    if pop >= 0.70:
+        return "En Tendencia", "#0E9E8E"
+    elif pop >= 0.35:
+        return "Ambiente Vivo", "#F59E0B"
+    else:
+        return "Sin filas", "#6B7280"
 
 
 def _popularidad_fallback(categorias: list) -> tuple:
@@ -251,11 +231,12 @@ def _popularidad_fallback(categorias: list) -> tuple:
         "concert",
         "nightclub", "casino",
         "leisure.ski",
+        "bar", "pub", "fast_food", "food_court",  # <--- Bares y comida rápida suelen estar llenos
     )
     AMBIENTE_VIVO = (
         "museum", "historic", "castle", "archaeological",
         "sights", "attraction",
-        "catering", "restaurant", "cafe", "bar",
+        "restaurant", "cafe",  # <--- Restaurantes formales y cafés
         "sport", "fitness", "golf",
         "tourism",
     )
@@ -360,9 +341,6 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
 
     lugares = []
 
-    # ── Foursquare: popularidad real en UNA sola llamada (antes del loop) ────────
-    pop_map_fsq = obtener_popularidad_foursquare(coords['lat'], coords['lon'])
-
     for f in features:
         p   = f.get("properties", {})
         raw = p.get("datasource", {}).get("raw", {})
@@ -399,7 +377,10 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria)
 
         # ── Popularidad: Foursquare (real) con fallback inteligente por categoría ────────
-        pop_result = _buscar_popularidad(nombre, pop_map_fsq)
+        lat_lugar = p.get("lat")
+        lon_lugar = p.get("lon")
+        pop_result = obtener_popularidad_lugar_foursquare(lat_lugar, lon_lugar, nombre)
+        
         if pop_result:
             label, color = pop_result
         else:
