@@ -1,4 +1,4 @@
-import re
+#destinos_service.py core
 import requests
 import unicodedata
 from django.conf import settings
@@ -8,10 +8,6 @@ GEOAPIFY_PLACES = "https://api.geoapify.com/v2/places"
 PEXELS_BASE     = "https://api.pexels.com/v1"
 WIKIMEDIA_BASE = "https://commons.wikimedia.org/w/api.php"
 WIKIMEDIA_HEADERS = {"User-Agent": "FaroDelViajero/1.0 (farodelviajero@gmail.com)"}
-
-
-
-
 
 CATEGORY_MAP = {
     "atracciones": "tourism,entertainment,leisure",
@@ -92,7 +88,6 @@ def obtener_categoria_filtro(categorias_geoapify):
 def normalizar(s):
     return unicodedata.normalize('NFD', s.lower()).encode('ascii', 'ignore').decode('utf-8')
 
-
 def obtener_coordenadas(destino: str):
     params = {
         "text": f"{destino} Mexico",
@@ -111,7 +106,6 @@ def obtener_coordenadas(destino: str):
     except Exception as e:
         print(f"Error Geoapify geocode: {e}")
     return {"lat": None, "lon": None, "nombre": destino}
-
 
 def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     # Intentar con Wikimedia Commons primero
@@ -344,7 +338,6 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
 
     return lugares
 
-
 def obtener_foto_destino(destino: str):
     headers = {"Authorization": settings.PEXELS_API_KEY}
     params = {"query": f"{destino} Mexico travel", "per_page": 1, "orientation": "landscape"}
@@ -357,3 +350,58 @@ def obtener_foto_destino(destino: str):
     except Exception as e:
         print(f"Error Pexels: {e}")
     return None
+
+def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
+    """Obtiene múltiples fotos landscape de Pexels para la galería."""
+    headers = {'Authorization': settings.PEXELS_API_KEY}
+    params = {
+        'query': f'{nombre} {ciudad} Mexico',
+        'per_page': cantidad,
+        'orientation': 'landscape'
+    }
+    try:
+        resp = requests.get(f'{PEXELS_BASE}/search', headers=headers,
+                            params=params, timeout=5)
+        resp.raise_for_status()
+        fotos = resp.json().get('photos', [])
+        return [f['src']['large'] for f in fotos]
+    except Exception:
+        return []
+
+def obtener_detalle_lugar(nombre: str, ciudad: str, categoria: str):
+    """
+    Consolida datos para la pantalla Detalle de Atracción.
+    Combina Geoapify (metadatos) + Pexels (galería).
+    """
+    # 1. Geocodificar para obtener coordenadas del lugar
+    coords = obtener_coordenadas(f'{nombre} {ciudad}')
+
+    # 2. Galería: 5 fotos de Pexels
+    fotos = obtener_fotos_lugar(nombre, ciudad, cantidad=5)
+
+    # 3. Precio estimado según categoría
+    precio_map = {
+        'atracciones': '$200 - $1,500 MXN por persona',
+        'gastronomia':  '$150 - $500 MXN por persona',
+        'hoteles':      '$2,000 - $4,000 MXN/noche',
+    }
+    precio = precio_map.get(categoria, 'Precio no disponible')
+
+    # 4. Popularidad (inferida de categoría)
+    if categoria == 'atracciones':
+        popularidad = 'Lugar con popularidad alta'
+    elif categoria == 'gastronomia':
+        popularidad = 'Ambiente Vivo'
+    else:
+        popularidad = 'Disponible'
+
+    return {
+        'nombre':      nombre,
+        'ciudad':      ciudad,
+        'fotos':       fotos,          # lista de URLs para galería
+        'descripcion': '',             # completar con IA si se desea
+        'precio':      precio,
+        'popularidad': popularidad,
+        'lat':         coords['lat'],
+        'lon':         coords['lon'],
+    }

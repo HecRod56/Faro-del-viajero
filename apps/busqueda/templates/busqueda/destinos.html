@@ -1,4 +1,4 @@
-
+<!--destinos.html-->
 {% extends "core/base.html" %}
 {% load static %}
 
@@ -222,21 +222,23 @@
                 <div class="col">
                     <div class="lugar-card">
                         <!-- Imagen -->
-                        <div class="img-wrapper">
-                            {% if lugar.foto %}
-                                <img src="{{ lugar.foto }}" alt="{{ lugar.nombre }}" class="lugar-card-img"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="lugar-card-img-placeholder" style="display:none;">
-                                    {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
-                                </div>
-                            {% else %}
-                                <div class="lugar-card-img-placeholder">
-                                    {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
-                                </div>
-                            {% endif %}
-                            <span class="badge-ciudad">{{ lugar.ciudad }}</span>
-                            <span class="badge-pop" style="background:{{ lugar.pop_color }};">{{ lugar.popularidad }}</span>
-                        </div>
+                        <a href="{% url 'busqueda:detalle_lugar' viaje.id %}?nombre={{ lugar.nombre }}&ciudad={{ lugar.ciudad }}&categoria={{ categoria }}" style="text-decoration:none;">
+                            <div class="img-wrapper">
+                                {% if lugar.foto %}
+                                    <img src="{{ lugar.foto }}" alt="{{ lugar.nombre }}" class="lugar-card-img"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="lugar-card-img-placeholder" style="display:none;">
+                                        {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="lugar-card-img-placeholder">
+                                        {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
+                                    </div>
+                                {% endif %}
+                                <span class="badge-ciudad">{{ lugar.ciudad }}</span>
+                                <span class="badge-pop" style="background:{{ lugar.pop_color }};">{{ lugar.popularidad }}</span>
+                            </div>
+                        </a>
 
                         <div class="lugar-card-body">
                             <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
@@ -286,12 +288,6 @@
 
                             <!-- Botones -->
                             <div class="mt-2">
-                                {% if lugar.website %}
-                                <a href="{{ lugar.website }}" target="_blank" class="btn-ver-mas mb-1">
-                                    Ver más
-                                </a>
-                                {% endif %}
-
                                 <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}"
                                       onsubmit="showToast()">
                                     {% csrf_token %}
