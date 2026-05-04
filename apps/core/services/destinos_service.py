@@ -13,7 +13,7 @@ WIKIMEDIA_HEADERS = {"User-Agent": "FaroDelViajero/1.0 (farodelviajero@gmail.com
 
 CATEGORY_MAP = {
     "atracciones": "tourism,entertainment,leisure",
-    "gastronomia": "catering.restaurant,catering.cafe,catering.bar",
+    "gastronomia": "catering.restaurant,catering.cafe,catering.bar,catering.fast_food,catering.pub,catering.food_court,catering.ice_cream",
     "hoteles":     "accommodation",
 }
 
@@ -22,6 +22,10 @@ SUBCATEGORY_MAP = {
     'naturaleza':    'leisure.park,leisure.beach,leisure.nature_reserve,leisure.garden,leisure.picnic_site',
     'aventura':      'sport,leisure.sports_centre,leisure.stadium,leisure.fitness,leisure.golf_course,leisure.ski,leisure.water_park',
     'entretenimiento': 'entertainment.cinema,entertainment.theatre,entertainment.concert_hall,entertainment.music_venue,entertainment.nightclub,entertainment.casino',
+    'restaurantes':  'catering.restaurant',
+    'cafes':         'catering.cafe,catering.ice_cream',
+    'bares':         'catering.bar,catering.pub,catering.biergarten',
+    'comida_rapida': 'catering.fast_food,catering.food_court',
 }
 
 # Mapa inverso para determinar la categoría de filtro de una categoría de Geoapify
@@ -50,6 +54,14 @@ CATEGORY_TO_FILTER = {
     'entertainment.music_venue': 'entretenimiento',
     'entertainment.nightclub': 'entretenimiento',
     'entertainment.casino': 'entretenimiento',
+    'catering.restaurant': 'restaurantes',
+    'catering.cafe': 'cafes',
+    'catering.ice_cream': 'cafes',
+    'catering.bar': 'bares',
+    'catering.pub': 'bares',
+    'catering.biergarten': 'bares',
+    'catering.fast_food': 'comida_rapida',
+    'catering.food_court': 'comida_rapida',
 }
 
 
@@ -186,6 +198,12 @@ def obtener_popularidad_lugar_foursquare(lat: float, lon: float, nombre: str) ->
         resp = requests.get(FOURSQUARE_PLACES, headers=headers, params=params, timeout=3)
         resp.raise_for_status()
         results = resp.json().get("results", [])
+    except requests.exceptions.HTTPError as e:
+        status = e.response.status_code if e.response is not None else "unknown"
+        # Foursquare v3 está devolviendo 410 Gone de forma permanente para este endpoint
+        if status != 410:
+            print(f"[Foursquare] HTTP {status} al buscar '{nombre}': {e}")
+        return None
     except Exception as e:
         print(f"[Foursquare] Error al buscar '{nombre}': {e}")
         return None
@@ -377,14 +395,9 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria)
 
         # ── Popularidad: Foursquare (real) con fallback inteligente por categoría ────────
-        lat_lugar = p.get("lat")
-        lon_lugar = p.get("lon")
-        pop_result = obtener_popularidad_lugar_foursquare(lat_lugar, lon_lugar, nombre)
-        
-        if pop_result:
-            label, color = pop_result
-        else:
-            label, color = _popularidad_fallback(p.get("categories", []))
+        # Foursquare Places API v3 /search está deprecado (devuelve 410 Gone).
+        # Pasamos directamente al fallback usando la metadata de Geoapify, lo cual es más rápido.
+        label, color = _popularidad_fallback(p.get("categories", []))
 
         cat_display = []
         for c in p.get("categories", []):
