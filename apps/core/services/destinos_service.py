@@ -402,8 +402,8 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         if subcategorias and categoria_filtro not in subcategorias:
             continue
 
-        # Precio: aplicar solo si el usuario bajó el slider (precio_max < 10000)
-        if precio_max < 10000 and precio_max_num > precio_max:
+        # Precio: aplicar filtro de rango (precio_min y precio_max)
+        if precio_max_num < precio_min or precio_max_num > precio_max:
             continue
 
         # Popularidad: filtrar si se seleccionó al menos una opción

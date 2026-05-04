@@ -42,6 +42,7 @@ def p_destinos(request, viaje_id):
 
     categoria      = request.GET.get('categoria', 'atracciones')
     busqueda       = request.GET.get('q', '')
+    precio_min     = int(request.GET.get('precio_min', 0))
     precio_max     = int(request.GET.get('precio_max', 10000))
     num_integrantes = viaje.participantes.count() or 1   # participantes reales del viaje
     cupos          = max(1, min(int(request.GET.get('cupos', num_integrantes)), num_integrantes))
@@ -56,6 +57,7 @@ def p_destinos(request, viaje_id):
         termino,
         categoria=categoria,
         limite=LIMITE_DISPLAY * 3 if subcategorias else LIMITE_DISPLAY,
+        precio_min=precio_min,
         precio_max=precio_max,
         subcategorias=subcategorias if subcategorias else None,
         popularidades=popularidades if popularidades else None,
@@ -73,6 +75,7 @@ def p_destinos(request, viaje_id):
         'busqueda':      busqueda,
         'foto_hero':     foto_hero,
         'coords':        coords,
+        'precio_min':       precio_min,
         'precio_max':       precio_max,
         'cupos':            cupos,
         'num_integrantes':  num_integrantes,
