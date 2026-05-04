@@ -326,7 +326,8 @@ def extraer_precio_real(raw: dict, acc: dict, categoria: str):
 
 
 def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
-                   precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, popularidades: list = None):
+                   precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, 
+                   popularidades: list = None, estrellas: list = None, servicios: list = None):
     coords = obtener_coordenadas(destino)
     if not coords["lat"]:
         return []
@@ -338,7 +339,8 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
     cat = CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
 
     # Pedir más resultados cuando hay filtros para compensar el descarte post-fetch
-    api_limite = min(limite * 3, 100) if subcategorias else limite
+    hay_filtros = bool(subcategorias or estrellas or servicios or popularidades)
+    api_limite = 100 if hay_filtros else limite
 
     params = {
         "apiKey": settings.GEOAPIFY_API_KEY,
@@ -422,6 +424,54 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         # Popularidad: filtrar si se seleccionó al menos una opción
         if popularidades and label not in popularidades:
             continue
+            
+        # Filtros exclusivos de Hoteles
+        if categoria == "hoteles":
+            # Filtrar por estrellas
+            if estrellas and int(rating or 3) not in estrellas:
+                continue
+            
+            # Filtrar por servicios
+            if servicios:
+                facilities = p.get("facilities", {})
+                raw_facilities = raw.get("facilities", {})
+                cumple_todos = True
+                
+                # Checkeamos si tiene alberca o mascotas según facilities o categories
+                categorias_str = " ".join(p.get("categories", []))
+                
+                if "alberca" in servicios:
+                    has_pool = ("swimming_pool" in facilities or "swimming_pool" in raw_facilities or 
+                                "swimming_pool" in categorias_str)
+                    if not has_pool:
+                        cumple_todos = False
+                        
+                if "mascotas" in servicios:
+                    has_pets = ("pets_allowed" in facilities or "dogs" in raw_facilities or 
+                                "pet" in categorias_str or "dogs" in categorias_str)
+                    if not has_pets:
+                        cumple_todos = False
+
+                if "wifi" in servicios:
+                    has_wifi = ("internet_access" in facilities or "internet_access" in raw_facilities or
+                                "internet_access" in categorias_str)
+                    if not has_wifi:
+                        cumple_todos = False
+
+                if "estacionamiento" in servicios:
+                    has_parking = ("parking" in facilities or "parking" in raw_facilities or
+                                   "parking" in categorias_str)
+                    if not has_parking:
+                        cumple_todos = False
+
+                if "accesibilidad" in servicios:
+                    has_wheelchair = ("wheelchair" in facilities or "wheelchair" in raw_facilities or
+                                      "wheelchair" in categorias_str)
+                    if not has_wheelchair:
+                        cumple_todos = False
+                        
+                if not cumple_todos:
+                    continue
         # ───────────────────────────────────────────────────
 
         lugares.append({

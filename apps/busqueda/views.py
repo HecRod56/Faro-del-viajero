@@ -48,6 +48,11 @@ def p_destinos(request, viaje_id):
     cupos          = max(1, min(int(request.GET.get('cupos', num_integrantes)), num_integrantes))
     subcategorias  = request.GET.getlist('subcategoria')   # lista, ej: ['cultura', 'deportes']
     popularidades  = request.GET.getlist('popularidad')    # lista, ej: ['En Tendencia 🔥']
+    
+    # Filtros para Hoteles
+    estrellas_str  = request.GET.getlist('estrellas')
+    estrellas      = [int(e) for e in estrellas_str if e.isdigit()]
+    servicios      = request.GET.getlist('servicios')
 
     termino = busqueda if busqueda else viaje.destino
 
@@ -61,6 +66,8 @@ def p_destinos(request, viaje_id):
         precio_max=precio_max,
         subcategorias=subcategorias if subcategorias else None,
         popularidades=popularidades if popularidades else None,
+        estrellas=estrellas if estrellas else None,
+        servicios=servicios if servicios else None,
     )
     lugares = lugares[:LIMITE_DISPLAY]   # mostrar máximo 12 tarjetas
 
@@ -81,6 +88,8 @@ def p_destinos(request, viaje_id):
         'num_integrantes':  num_integrantes,
         'subcategorias':    subcategorias,
         'popularidades':    popularidades,
+        'estrellas':        estrellas,
+        'servicios':        servicios,
     }
     return render(request, "busqueda/destinos.html", context)
 
