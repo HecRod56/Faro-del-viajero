@@ -1,12 +1,14 @@
 #destinos_service.py core
+import re
 import requests
 import unicodedata
 from django.conf import settings
 
-GEOAPIFY_BASE   = "https://api.geoapify.com/v1"
-GEOAPIFY_PLACES = "https://api.geoapify.com/v2/places"
-PEXELS_BASE     = "https://api.pexels.com/v1"
-WIKIMEDIA_BASE = "https://commons.wikimedia.org/w/api.php"
+GEOAPIFY_BASE     = "https://api.geoapify.com/v1"
+GEOAPIFY_PLACES   = "https://api.geoapify.com/v2/places"
+FOURSQUARE_PLACES = "https://api.foursquare.com/v3/places/search"
+PEXELS_BASE       = "https://api.pexels.com/v1"
+WIKIMEDIA_BASE    = "https://commons.wikimedia.org/w/api.php"
 WIKIMEDIA_HEADERS = {"User-Agent": "FaroDelViajero/1.0 (farodelviajero@gmail.com)"}
 
 CATEGORY_MAP = {
@@ -158,6 +160,115 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     return None
 
 
+# ─── Foursquare: popularidad real ─────────────────────────────────────────────
+
+def _normalizar_nombre(nombre: str) -> str:
+    """Minúsculas, sin acentos, sin especiales → para comparación de nombres."""
+    nombre = nombre.lower().strip()
+    nombre = unicodedata.normalize('NFKD', nombre)
+    nombre = ''.join(c for c in nombre if not unicodedata.combining(c))
+    nombre = re.sub(r'[^a-z0-9\s]', '', nombre)
+    return re.sub(r'\s+', ' ', nombre).strip()
+
+
+def obtener_popularidad_foursquare(lat: float, lon: float, radio: int = 20000) -> dict:
+    """
+    UNA sola llamada a Foursquare Places API v3. Devuelve:
+      {nombre_normalizado: (label, color)}
+    Clasificación por `popularity` (0-1):
+      >= 0.70 → "En Tendencia"  | >= 0.35 → "Ambiente Vivo" | < 0.35 → "Sin filas"
+    Labels sin emoji para evitar problemas de encoding con el template Django.
+    """
+    key = getattr(settings, 'FOURSQUARE_API_KEY', '')
+    if not key:
+        return {}
+    headers = {"Authorization": key, "Accept": "application/json"}
+    params  = {"ll": f"{lat},{lon}", "limit": 50, "radius": radio,
+               "fields": "name,popularity,stats"}
+    try:
+        resp = requests.get(FOURSQUARE_PLACES, headers=headers, params=params, timeout=8)
+        resp.raise_for_status()
+        results = resp.json().get("results", [])
+    except Exception as e:
+        print(f"[Foursquare] Error: {e}")
+        return {}
+
+    pop_map = {}
+    for place in results:
+        nombre = place.get("name", "").strip()
+        if not nombre:
+            continue
+        pop = place.get("popularity")
+        if pop is None:
+            checkins = place.get("stats", {}).get("totalCheckins", 0)
+            pop = min(checkins / 10_000, 1.0)
+        if pop >= 0.70:
+            label, color = "En Tendencia", "#0E9E8E"
+        elif pop >= 0.35:
+            label, color = "Ambiente Vivo", "#F59E0B"
+        else:
+            label, color = "Sin filas", "#6B7280"
+        pop_map[_normalizar_nombre(nombre)] = (label, color)
+
+    print(f"[Foursquare] {len(pop_map)} lugares con popularidad cargados.")
+    return pop_map
+
+
+def _buscar_popularidad(nombre: str, pop_map: dict):
+    """Coincidencia exacta o parcial (substring mutuo). Devuelve (label, color) o None."""
+    if not pop_map:
+        return None
+    n = _normalizar_nombre(nombre)
+    if n in pop_map:
+        return pop_map[n]
+    if len(n) > 5:
+        for k, v in pop_map.items():
+            if len(k) > 5 and (n in k or k in n):
+                return v
+    return None
+
+
+def _popularidad_fallback(categorias: list) -> tuple:
+    """
+    Estima el nivel de afluencia esperado basándose en las categorías de Geoapify.
+    Usado cuando Foursquare no devuelve dato para ese lugar.
+
+    En Tendencia  → entretenimiento de pago, parques temáticos, estadios,
+                    zoológicos, cines, teatros, discotecas, casinos.
+    Ambiente Vivo → museos, sitios históricos, restaurantes, bares,
+                    deportes, atracciones turísticas generales.
+    Sin filas     → parques, jardines, naturaleza, monumentos, miradores.
+    """
+    cats = " ".join(categorias).lower()
+
+    EN_TENDENCIA = (
+        "entertainment",   # cubre entertainment.cinema, .theatre, .nightclub, etc.
+        "theme_park",
+        "water_park",
+        "amusement",
+        "zoo", "aquarium",
+        "stadium",
+        "concert",
+        "nightclub", "casino",
+        "leisure.ski",
+    )
+    AMBIENTE_VIVO = (
+        "museum", "historic", "castle", "archaeological",
+        "sights", "attraction",
+        "catering", "restaurant", "cafe", "bar",
+        "sport", "fitness", "golf",
+        "tourism",
+    )
+
+    for kw in EN_TENDENCIA:
+        if kw in cats:
+            return "En Tendencia", "#0E9E8E"
+    for kw in AMBIENTE_VIVO:
+        if kw in cats:
+            return "Ambiente Vivo", "#F59E0B"
+    return "Sin filas", "#6B7280"
+
+
 # ─── Rangos estimados por categoría (fallback) ───────────────────────────────
 _PRECIO_FALLBACK = {
     "hoteles":    {1: ("$500 - $1,000",   1000),
@@ -248,6 +359,10 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         return []
 
     lugares = []
+
+    # ── Foursquare: popularidad real en UNA sola llamada (antes del loop) ────────
+    pop_map_fsq = obtener_popularidad_foursquare(coords['lat'], coords['lon'])
+
     for f in features:
         p   = f.get("properties", {})
         raw = p.get("datasource", {}).get("raw", {})
@@ -283,14 +398,12 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         # Precio real desde OSM / fallback por categoría
         precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria)
 
-        # Popularidad
-        cats_str = str(p.get("categories", []))
-        if "tourism" in cats_str or "attraction" in cats_str or "sights" in cats_str:
-            label, color = "En Tendencia 🔥", "#0E9E8E"
-        elif "catering" in cats_str or "restaurant" in cats_str:
-            label, color = "Ambiente Vivo 🍽️", "#F59E0B"
+        # ── Popularidad: Foursquare (real) con fallback inteligente por categoría ────────
+        pop_result = _buscar_popularidad(nombre, pop_map_fsq)
+        if pop_result:
+            label, color = pop_result
         else:
-            label, color = "Sin filas", "#6B7280"
+            label, color = _popularidad_fallback(p.get("categories", []))
 
         cat_display = []
         for c in p.get("categories", []):

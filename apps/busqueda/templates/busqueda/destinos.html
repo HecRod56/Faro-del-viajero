@@ -16,7 +16,8 @@
 {% if messages %}
 <div class="container-fluid px-4 pt-2">
     {% for msg in messages %}
-    <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible" role="alert" style="border-radius:12px;font-size:13px;font-family:'Montserrat',sans-serif;">
+    <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible"
+        role="alert" style="border-radius:12px;font-size:13px;font-family:'Montserrat',sans-serif;">
         {{ msg }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -28,7 +29,7 @@
 
     <!-- Hero -->
     <div class="destinos-hero"
-         style="background-image: url('{% if foto_hero %}{{ foto_hero }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=60{% endif %}');">
+        style="background-image: url('{% if foto_hero %}{{ foto_hero }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=60{% endif %}');">
         <div class="destinos-hero-content">
             <p class="text-white mb-1" style="font-size:13px;opacity:0.85;">Sugerencias en</p>
             <h1 class="text-white fw-bold mb-0" style="font-size:1.8rem;">{{ viaje.destino }}</h1>
@@ -64,33 +65,37 @@
                     <div class="d-flex flex-column gap-1 mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="subcategoria" value="cultura"
-                                   id="sub_cultura" {% if 'cultura' in subcategorias %}checked{% endif %}>
-                            <label class="form-check-label" for="sub_cultura" style="font-size:13px;color:#374151;">🏛️ Cultura</label>
+                                id="sub_cultura" {% if 'cultura' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_cultura" style="font-size:13px;color:#374151;">🏛️
+                                Cultura</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="subcategoria" value="naturaleza"
-                                   id="sub_naturaleza" {% if 'naturaleza' in subcategorias %}checked{% endif %}>
-                            <label class="form-check-label" for="sub_naturaleza" style="font-size:13px;color:#374151;">🌿 Naturaleza</label>
+                                id="sub_naturaleza" {% if 'naturaleza' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_naturaleza"
+                                style="font-size:13px;color:#374151;">🌿 Naturaleza</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="subcategoria" value="aventura"
-                                   id="sub_aventura" {% if 'aventura' in subcategorias %}checked{% endif %}>
-                            <label class="form-check-label" for="sub_aventura" style="font-size:13px;color:#374151;">🏃 Aventura</label>
+                                id="sub_aventura" {% if 'aventura' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_aventura" style="font-size:13px;color:#374151;">🏃
+                                Aventura</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="subcategoria" value="entretenimiento"
-                                   id="sub_entretenimiento" {% if 'entretenimiento' in subcategorias %}checked{% endif %}>
-                            <label class="form-check-label" for="sub_entretenimiento" style="font-size:13px;color:#374151;">🎭 Entretenimiento</label>
+                                id="sub_entretenimiento" {% if 'entretenimiento' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_entretenimiento"
+                                style="font-size:13px;color:#374151;">🎭 Entretenimiento</label>
                         </div>
                     </div>
 
                     <!-- PRECIO ESTIMADO -->
                     <p class="filtro-label">Precio estimado</p>
-                    <input type="range" id="slider_precio" name="precio_max"
-                           min="0" max="10000" step="100" value="{{ precio_max }}"
-                           style="width:100%;accent-color:#0E9E8E;margin-bottom:4px;"
-                           oninput="document.getElementById('lbl_precio').textContent='$'+Number(this.value).toLocaleString()+' MXN'">
-                    <div class="d-flex justify-content-between" style="font-size:11px;color:#94A3B8;margin-bottom:1rem;">
+                    <input type="range" id="slider_precio" name="precio_max" min="0" max="10000" step="100"
+                        value="{{ precio_max }}" style="width:100%;accent-color:#0E9E8E;margin-bottom:4px;"
+                        oninput="document.getElementById('lbl_precio').textContent='$'+Number(this.value).toLocaleString()+' MXN'">
+                    <div class="d-flex justify-content-between"
+                        style="font-size:11px;color:#94A3B8;margin-bottom:1rem;">
                         <span>$0 MXN</span>
                         <span id="lbl_precio">${{ precio_max }} MXN</span>
                     </div>
@@ -100,25 +105,27 @@
                     <div class="d-flex flex-column gap-2 mb-3">
 
                         <label style="cursor:pointer;margin:0;">
-                            <input type="checkbox" name="popularidad" value="En Tendencia 🔥" class="pop-chk"
-                                   {% if 'En Tendencia 🔥' in popularidades %}checked{% endif %} style="display:none;">
-                            <span class="pop-pill" data-on="#0E9E8E" data-off="#0E9E8E20" data-text-on="#fff" data-text-off="#0E9E8E"
+                            <input type="checkbox" name="popularidad" value="En Tendencia" class="pop-chk"
+                                   {% if 'En Tendencia' in popularidades %}checked{% endif %} style="display:none;">
+                            <span class="pop-pill" data-on="#0E9E8E" data-off="#0E9E8E20" data-text-on="#fff"
+                                  data-text-off="#0E9E8E"
                                   style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
                                          font-size:12px;font-weight:600;border:1px solid #0E9E8E40;
-                                         background:{% if 'En Tendencia 🔥' in popularidades %}#0E9E8E{% else %}#0E9E8E20{% endif %};
-                                         color:{% if 'En Tendencia 🔥' in popularidades %}#fff{% else %}#0E9E8E{% endif %};">
+                                         background:{% if 'En Tendencia' in popularidades %}#0E9E8E{% else %}#0E9E8E20{% endif %};
+                                         color:{% if 'En Tendencia' in popularidades %}#fff{% else %}#0E9E8E{% endif %};">
                                 En Tendencia 🔥
                             </span>
                         </label>
 
                         <label style="cursor:pointer;margin:0;">
-                            <input type="checkbox" name="popularidad" value="Ambiente Vivo 🍽️" class="pop-chk"
-                                   {% if 'Ambiente Vivo 🍽️' in popularidades %}checked{% endif %} style="display:none;">
-                            <span class="pop-pill" data-on="#F59E0B" data-off="#F59E0B20" data-text-on="#fff" data-text-off="#F59E0B"
+                            <input type="checkbox" name="popularidad" value="Ambiente Vivo" class="pop-chk"
+                                   {% if 'Ambiente Vivo' in popularidades %}checked{% endif %} style="display:none;">
+                            <span class="pop-pill" data-on="#F59E0B" data-off="#F59E0B20" data-text-on="#fff"
+                                  data-text-off="#F59E0B"
                                   style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
                                          font-size:12px;font-weight:600;border:1px solid #F59E0B40;
-                                         background:{% if 'Ambiente Vivo 🍽️' in popularidades %}#F59E0B{% else %}#F59E0B20{% endif %};
-                                         color:{% if 'Ambiente Vivo 🍽️' in popularidades %}#fff{% else %}#F59E0B{% endif %};">
+                                         background:{% if 'Ambiente Vivo' in popularidades %}#F59E0B{% else %}#F59E0B20{% endif %};
+                                         color:{% if 'Ambiente Vivo' in popularidades %}#fff{% else %}#F59E0B{% endif %};">
                                 Ambiente Vivo 🍽️
                             </span>
                         </label>
@@ -126,8 +133,8 @@
                         <label style="cursor:pointer;margin:0;">
                             <input type="checkbox" name="popularidad" value="Sin filas" class="pop-chk"
                                    {% if 'Sin filas' in popularidades %}checked{% endif %} style="display:none;">
-                            <span class="pop-pill" data-on="#6B7280" data-off="#6B728020" data-text-on="#fff" data-text-off="#6B7280"
-                                  style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                            <span class="pop-pill" data-on="#6B7280" data-off="#6B728020" data-text-on="#fff"
+                                data-text-off="#6B7280" style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
                                          font-size:12px;font-weight:600;border:1px solid #6B728040;
                                          background:{% if 'Sin filas' in popularidades %}#6B7280{% else %}#6B728020{% endif %};
                                          color:{% if 'Sin filas' in popularidades %}#fff{% else %}#6B7280{% endif %};">
@@ -140,13 +147,13 @@
                     <p class="filtro-label">Cupos</p>
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
                         <button type="button" id="btn_cupos_menos" onclick="stepCupos(-1)"
-                                style="width:28px;height:28px;border-radius:50%;border:1px solid #D1D5DB;
+                            style="width:28px;height:28px;border-radius:50%;border:1px solid #D1D5DB;
                                        background:white;font-size:18px;line-height:1;cursor:pointer;color:#374151;">−</button>
                         <input type="hidden" id="cupos_input" name="cupos" value="{{ cupos }}">
-                        <span id="cupos_display" style="font-weight:700;font-size:16px;color:#1A2E35;min-width:24px;text-align:center;">{{ cupos }}</span>
-                        <button type="button" id="btn_cupos_mas" onclick="stepCupos(1)"
-                                data-max="{{ num_integrantes }}"
-                                style="width:28px;height:28px;border-radius:50%;border:none;
+                        <span id="cupos_display"
+                              style="font-weight:700;font-size:16px;color:#1A2E35;min-width:24px;text-align:center;">{{ cupos }}</span>
+                        <button type="button" id="btn_cupos_mas" onclick="stepCupos(1)" data-max="{{ num_integrantes }}"
+                            style="width:28px;height:28px;border-radius:50%;border:none;
                                        background:#0E9E8E;font-size:18px;line-height:1;cursor:pointer;color:white;">+</button>
                     </div>
                     <p style="font-size:10px;color:#94A3B8;text-align:center;margin-bottom:1rem;">
@@ -155,11 +162,11 @@
 
                     <!-- BOTONES -->
                     <button type="submit" class="btn btn-sm w-100 mb-2"
-                            style="background:#0E9E8E;color:white;font-size:13px;border-radius:8px;padding:7px 0;">
+                        style="background:#0E9E8E;color:white;font-size:13px;border-radius:8px;padding:7px 0;">
                         Aplicar filtros
                     </button>
                     <a href="?categoria={{ categoria }}"
-                       style="display:block;width:100%;text-align:center;padding:6px 0;font-size:13px;
+                        style="display:block;width:100%;text-align:center;padding:6px 0;font-size:13px;
                               border:1px solid #D1D5DB;border-radius:8px;color:#374151;background:white;text-decoration:none;">
                         Limpiar Filtro(s)
                     </a>
@@ -167,46 +174,53 @@
                 </form>
 
                 <style>
-                    .filtro-label { font-size:11px; font-weight:600; color:#64748B; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+                    .filtro-label {
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #64748B;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        margin-bottom: 6px;
+                    }
                 </style>
 
                 <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    var MAX_CUPOS = parseInt(document.getElementById('btn_cupos_mas').getAttribute('data-max')) || 1;
-                    var inp     = document.getElementById('cupos_input');
-                    var dsp     = document.getElementById('cupos_display');
-                    var btnMas  = document.getElementById('btn_cupos_mas');
-                    var btnMenos= document.getElementById('btn_cupos_menos');
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var MAX_CUPOS = parseInt(document.getElementById('btn_cupos_mas').getAttribute('data-max')) || 1;
+                        var inp = document.getElementById('cupos_input');
+                        var dsp = document.getElementById('cupos_display');
+                        var btnMas = document.getElementById('btn_cupos_mas');
+                        var btnMenos = document.getElementById('btn_cupos_menos');
 
-                    function actualizarBotones(v) {
-                        btnMas.disabled  = (v >= MAX_CUPOS);
-                        btnMas.style.background = (v >= MAX_CUPOS) ? '#CBD5E1' : '#0E9E8E';
-                        btnMas.style.cursor     = (v >= MAX_CUPOS) ? 'not-allowed' : 'pointer';
-                        btnMenos.disabled       = (v <= 1);
-                        btnMenos.style.color    = (v <= 1) ? '#CBD5E1' : '#374151';
-                    }
+                        function actualizarBotones(v) {
+                            btnMas.disabled = (v >= MAX_CUPOS);
+                            btnMas.style.background = (v >= MAX_CUPOS) ? '#CBD5E1' : '#0E9E8E';
+                            btnMas.style.cursor = (v >= MAX_CUPOS) ? 'not-allowed' : 'pointer';
+                            btnMenos.disabled = (v <= 1);
+                            btnMenos.style.color = (v <= 1) ? '#CBD5E1' : '#374151';
+                        }
 
-                    window.stepCupos = function(delta) {
-                        var v = parseInt(inp.value) + delta;
-                        if (v < 1) { v = 1; }
-                        if (v > MAX_CUPOS) { v = MAX_CUPOS; }
-                        inp.value      = v;
-                        dsp.textContent= v;
-                        actualizarBotones(v);
-                    };
+                        window.stepCupos = function (delta) {
+                            var v = parseInt(inp.value) + delta;
+                            if (v < 1) { v = 1; }
+                            if (v > MAX_CUPOS) { v = MAX_CUPOS; }
+                            inp.value = v;
+                            dsp.textContent = v;
+                            actualizarBotones(v);
+                        };
 
-                    // Estado visual inicial
-                    actualizarBotones(parseInt(inp.value));
+                        // Estado visual inicial
+                        actualizarBotones(parseInt(inp.value));
 
-                    // Pills de popularidad
-                    document.querySelectorAll('.pop-chk').forEach(function(chk) {
-                        chk.addEventListener('change', function() {
-                            var pill = this.nextElementSibling;
-                            pill.style.background = this.checked ? pill.getAttribute('data-on')       : pill.getAttribute('data-off');
-                            pill.style.color      = this.checked ? pill.getAttribute('data-text-on')  : pill.getAttribute('data-text-off');
+                        // Pills de popularidad
+                        document.querySelectorAll('.pop-chk').forEach(function (chk) {
+                            chk.addEventListener('change', function () {
+                                var pill = this.nextElementSibling;
+                                pill.style.background = this.checked ? pill.getAttribute('data-on') : pill.getAttribute('data-off');
+                                pill.style.color = this.checked ? pill.getAttribute('data-text-on') : pill.getAttribute('data-text-off');
+                            });
                         });
                     });
-                });
                 </script>
             </div>
         </div>
@@ -222,18 +236,19 @@
                 <div class="col">
                     <div class="lugar-card">
                         <!-- Imagen -->
-                        <a href="{% url 'busqueda:detalle_lugar' viaje.id %}?nombre={{ lugar.nombre }}&ciudad={{ lugar.ciudad }}&categoria={{ categoria }}" style="text-decoration:none;">
+                        <a href="{% url 'busqueda:detalle_lugar' viaje.id %}?nombre={{ lugar.nombre }}&ciudad={{ lugar.ciudad }}&categoria={{ categoria }}"
+                            style="text-decoration:none;">
                             <div class="img-wrapper">
                                 {% if lugar.foto %}
-                                    <img src="{{ lugar.foto }}" alt="{{ lugar.nombre }}" class="lugar-card-img"
-                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="lugar-card-img-placeholder" style="display:none;">
-                                        {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
-                                    </div>
+                                <img src="{{ lugar.foto }}" alt="{{ lugar.nombre }}" class="lugar-card-img"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="lugar-card-img-placeholder" style="display:none;">
+                                    {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
+                                </div>
                                 {% else %}
-                                    <div class="lugar-card-img-placeholder">
-                                        {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
-                                    </div>
+                                <div class="lugar-card-img-placeholder">
+                                    {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
+                                </div>
                                 {% endif %}
                                 <span class="badge-ciudad">{{ lugar.ciudad }}</span>
                                 <span class="badge-pop" style="background:{{ lugar.pop_color }};">{{ lugar.popularidad }}</span>
@@ -243,21 +258,25 @@
                         <div class="lugar-card-body">
                             <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
                                 {% if lugar.categoria_filtro == "naturaleza" %}
-                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8F5E9;color:#2E7D32;">
-                                        🌿 Naturaleza
-                                    </span>
+                                <span
+                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8F5E9;color:#2E7D32;">
+                                    🌿 Naturaleza
+                                </span>
                                 {% elif lugar.categoria_filtro == "cultura" %}
-                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8EAF6;color:#283593;">
-                                        🏛️ Cultura
-                                    </span>
+                                <span
+                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8EAF6;color:#283593;">
+                                    🏛️ Cultura
+                                </span>
                                 {% elif lugar.categoria_filtro == "aventura" %}
-                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#FFF3E0;color:#E65100;">
-                                        🏃 Aventura
-                                    </span>
+                                <span
+                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#FFF3E0;color:#E65100;">
+                                    🏃 Aventura
+                                </span>
                                 {% elif lugar.categoria_filtro == "entretenimiento" %}
-                                    <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#F3E5F5;color:#6A1B9A;">
-                                        🎭 Entretenimiento
-                                    </span>
+                                <span
+                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#F3E5F5;color:#6A1B9A;">
+                                    🎭 Entretenimiento
+                                </span>
                                 {% endif %}
                             </div>
                             <p class="lugar-nombre">{{ lugar.nombre }}</p>
@@ -273,11 +292,13 @@
 
                             <div class="d-flex align-items-center justify-content-between mt-auto pt-1">
                                 {% if lugar.precio == "Gratis" %}
-                                    <span style="font-size:12px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:8px;">🎟️ Gratis</span>
+                                <span
+                                    style="font-size:12px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:8px;">🎟️
+                                    Gratis</span>
                                 {% elif lugar.precio %}
-                                    <span class="lugar-precio">{{ lugar.precio }}</span>
+                                <span class="lugar-precio">{{ lugar.precio }}</span>
                                 {% else %}
-                                    <span style="font-size:12px;color:#94A3B8;">Precio variable</span>
+                                <span style="font-size:12px;color:#94A3B8;">Precio variable</span>
                                 {% endif %}
                                 {% if lugar.rating %}
                                 <span class="rating-stars">
@@ -289,7 +310,7 @@
                             <!-- Botones -->
                             <div class="mt-2">
                                 <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}"
-                                      onsubmit="showToast()">
+                                    onsubmit="showToast()">
                                     {% csrf_token %}
                                     <input type="hidden" name="nombre" value="{{ lugar.nombre }}">
                                     <input type="hidden" name="direccion" value="{{ lugar.direccion }}">
@@ -309,7 +330,8 @@
             {% else %}
             <div class="empty-state">
                 <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
                 </svg>
                 <h5 style="color:#1A2E35;font-weight:700;">Sin resultados</h5>
                 <p style="font-size:14px;">No encontramos lugares para <strong>{{ busqueda|default:viaje.destino }}</strong>.<br>Intenta con otro término.</p>
@@ -322,10 +344,10 @@
 </main>
 
 <script>
-function showToast() {
-    const t = document.getElementById('toastFaro');
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 3000);
-}
+    function showToast() {
+        const t = document.getElementById('toastFaro');
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
 </script>
 {% endblock %}
