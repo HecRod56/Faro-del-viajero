@@ -31,13 +31,13 @@
 
     <!-- Tabs -->
     <div class="trip-type-tabs" role="tablist">
-        <button class="trip-type-btn active" role="tab" aria-selected="true">
+        <button class="trip-type-btn active" role="tab" aria-selected="true" data-tipo="ida_vuelta" type="button">
             <span aria-hidden="true">⇄</span> Ida y vuelta
         </button>
-        <button class="trip-type-btn" role="tab">
+        <button class="trip-type-btn" role="tab" data-tipo="ida" type="button">
             <span aria-hidden="true">→</span> Solo ida
         </button>
-        <button class="trip-type-btn" role="tab">
+        <button class="trip-type-btn" role="tab" data-tipo="regreso" type="button">
             <span aria-hidden="true">←</span> Solo regreso
         </button>
     </div>
@@ -48,11 +48,12 @@
             <!-- ==========================================
                  FORMULARIO DE BÚSQUEDA
                  ========================================== -->
-            <form method="POST" class="search-form-card">
+            <form method="POST" class="search-form-card" id="formBusqueda">
                 {% csrf_token %}
                 
-                <!-- INPUT OCULTO CRUCIAL PARA EL BACKEND -->
+                <!-- INPUTS OCULTOS CRUCIALES PARA EL BACKEND -->
                 <input type="hidden" name="modo_transporte" id="modoTransporte" value="{{ modo_transporte|default:'vuelo' }}">
+                <input type="hidden" name="tipo_viaje_busqueda" id="tipoViajeBusqueda" value="{{ tipo_viaje|default:'ida_vuelta' }}">
 
                 <!-- Modo de transporte -->
                 <div class="form-section-title">
@@ -98,19 +99,19 @@
                     <span aria-hidden="true">📅</span> Fechas y pasajeros
                 </div>
                 <div class="form-row-grid">
-                    <div class="form-field">
-                        <label for="fecha-ida">Fecha de ida</label>
+                    <div class="form-field" id="containerIda">
+                        <label for="fecha-ida" id="labelFechaIda">Fecha de ida</label>
                         <span class="field-icon" aria-hidden="true">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                         </span>
                         <input type="date" id="fecha-ida" name="fecha_ida" value="{{ fecha_ida|default:'' }}" required>
                     </div>
-                    <div class="form-field">
-                        <label for="fecha-regreso">Fecha de regreso (opcional)</label>
+                    <div class="form-field" id="containerRegreso">
+                        <label for="fecha-regreso" id="labelFechaRegreso">Fecha de regreso</label>
                         <span class="field-icon" aria-hidden="true">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                         </span>
-                        <input type="date" id="fecha-regreso" name="fecha_regreso" value="{{ fecha_regreso|default:'' }}">
+                        <input type="date" id="fecha-regreso" name="fecha_regreso" value="{{ fecha_regreso|default:'' }}" required>
                     </div>
                     <div class="form-field">
                         <label for="pasajeros">Pasajeros</label>
@@ -151,7 +152,7 @@
             {% if busqueda_realizada %}
                 <div class="results-header">
                     <div class="results-count">
-                        <strong>{{ total_resultados }} opci{{ total_resultados|pluralize:"ón,ones" }} encontrad{{ total_resultados|pluralize:"a,as" }}</strong> · {{ origen }} → {{ destino }} · {{ fecha_ida }}
+                        <strong>{{ total_resultados }} opci{{ total_resultados|pluralize:"ón,ones" }} encontrad{{ total_resultados|pluralize:"a,as" }}</strong> · {{ origen }} → {{ destino }}
                     </div>
                 </div>
 
@@ -229,7 +230,10 @@
                 </h5>
 
                 {% if busqueda_realizada and vuelos %}
-                    <!-- Resumen visual (se actualiza con JS) -->
+                    <div class="summary-row">
+                        <span class="label">Tipo</span>
+                        <span class="value" id="sumTipoViaje">Ida y vuelta</span>
+                    </div>
                     <div class="summary-row">
                         <span class="label">Ruta</span>
                         <span class="value" id="sumRuta">{{ origen }} → {{ destino }}</span>
@@ -255,10 +259,6 @@
                         <span class="value" id="sumDuracion">—</span>
                     </div>
                     <div class="summary-row">
-                        <span class="label">Escalas</span>
-                        <span class="value" id="sumEscalas">—</span>
-                    </div>
-                    <div class="summary-row">
                         <span class="label">Pasajeros</span>
                         <span class="value">{{ pasajeros }} persona{{ pasajeros|pluralize:"s" }}</span>
                     </div>
@@ -268,13 +268,14 @@
                     </div>
 
                     <!-- Formulario oculto para confirmar el vuelo -->
-                    <!-- Formulario oculto para confirmar el vuelo -->
                     <form method="POST" id="formConfirmar">
                         {% csrf_token %}
                         <input type="hidden" name="confirmar_vuelo" value="1">
                         
-                        <!-- ESTA ES LA LÍNEA MÁGICA QUE FALTABA -->
-                        <input type="hidden" name="modo_transporte" value="{{ modo_transporte|default:'vuelo' }}">
+                        <!-- SEGURO ANTI-FALLOS: El id="inputModoConfirm" es vital -->
+                        <input type="hidden" name="modo_transporte" id="inputModoConfirm" value="{{ modo_transporte|default:'vuelo' }}">
+                        <!-- CÁMBIALO A ESTO: -->
+                        <input type="hidden" name="tipo_trayecto" id="inputTipoTrayecto" value="{{ tipo_trayecto_val|default:'IDA_VUELTA' }}">
                         
                         <input type="hidden" name="offer_id" id="inputOfferId">
                         <input type="hidden" name="aerolinea" id="inputAerolinea">
@@ -289,7 +290,6 @@
                         <input type="hidden" name="precio_total" id="inputPrecio">
                         <input type="hidden" name="moneda" id="inputMoneda">
                         <input type="hidden" name="pasajeros" value="{{ pasajeros }}">
-                        <input type="hidden" name="tipo_trayecto" value="IDA">
 
                         <button type="submit" class="search-btn mt-3" id="btnConfirmar" disabled>
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
@@ -307,19 +307,71 @@
                 {% endif %}
             </div>
         </div>
+    </div>
+</div>
 
 <script>
+    // ==========================================
+    // LÓGICA DE PESTAÑAS (TIPO DE VIAJE)
+    // ==========================================
+    const tabBtns = document.querySelectorAll('.trip-type-btn');
+    const inputIda = document.getElementById('fecha-ida');
+    const inputRegreso = document.getElementById('fecha-regreso');
+    const labelFechaIda = document.getElementById('labelFechaIda');
+    
+    // Inputs ocultos para enviar al backend
+    const inputTipoViajeBusqueda = document.getElementById('tipoViajeBusqueda');
+    const inputTipoTrayectoConfirm = document.getElementById('inputTipoTrayecto');
+    const sumTipoViaje = document.getElementById('sumTipoViaje');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Actualizar diseño de botones
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+            
+            const tipo = this.dataset.tipo;
+            if(inputTipoViajeBusqueda) inputTipoViajeBusqueda.value = tipo;
+
+            // Manejar validaciones y campos visuales
+            if (tipo === 'ida') {
+                inputIda.disabled = false; inputIda.required = true;
+                inputRegreso.disabled = true; inputRegreso.required = false; inputRegreso.value = '';
+                labelFechaIda.textContent = 'Fecha de viaje';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo ida';
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA';
+                
+            } else if (tipo === 'regreso') {
+                inputIda.disabled = true; inputIda.required = false; inputIda.value = '';
+                inputRegreso.disabled = false; inputRegreso.required = true;
+                labelFechaIda.textContent = 'Fecha de ida'; // Visualmente oculto o ignorado
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo regreso';
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'REGRESO';
+                
+            } else { // ida_vuelta
+                inputIda.disabled = false; inputIda.required = true;
+                inputRegreso.disabled = false; inputRegreso.required = true;
+                labelFechaIda.textContent = 'Fecha de ida';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Ida y vuelta';
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA_VUELTA';
+            }
+        });
+    });
+
     // ==========================================
     // LÓGICA DE CAMBIO DE MODO (VUELOS VS AUTOBUSES)
     // ==========================================
     const modeBtns = document.querySelectorAll('.mode-btn');
-    const inputModoBusqueda = document.getElementById('modoTransporte'); // Input form búsqueda
+    const inputModoBusqueda = document.getElementById('modoTransporte'); 
+    const inputModoConfirm = document.getElementById('inputModoConfirm'); // Crucial para la DB
     const labelOrigen = document.getElementById('labelOrigen');
     const labelDestino = document.getElementById('labelDestino');
     const searchBtnSpan = document.querySelector('#searchBtn span');
     const emptyStateIcon = document.getElementById('emptyStateIcon');
-    const sumLabelAerolinea = document.getElementById('sumLabelAerolinea');
-    const sumLabelVuelo = document.getElementById('sumLabelVuelo');
     const origenInput = document.getElementById('origen');
     const destinoInput = document.getElementById('destino');
 
@@ -329,15 +381,16 @@
             labelDestino.textContent = 'Hasta (Código Ciudad)';
             searchBtnSpan.textContent = 'Buscar autobuses';
             if(emptyStateIcon) emptyStateIcon.textContent = '🚌';
-            if(sumLabelAerolinea) sumLabelAerolinea.textContent = 'Línea';
-            if(sumLabelVuelo) sumLabelVuelo.textContent = 'Servicio';
         } else {
             labelOrigen.textContent = 'Desde (código IATA)';
             labelDestino.textContent = 'Hasta (código IATA)';
             searchBtnSpan.textContent = 'Buscar vuelos con Duffel';
             if(emptyStateIcon) emptyStateIcon.textContent = '✈️';
-            if(sumLabelAerolinea) sumLabelAerolinea.textContent = 'Aerolínea';
-            if(sumLabelVuelo) sumLabelVuelo.textContent = 'Vuelo';
+        }
+        
+        // Mantener sincronizado el input final que guarda en DB
+        if(inputModoConfirm) {
+            inputModoConfirm.value = modo;
         }
     }
 
@@ -352,27 +405,21 @@
             
             const modoSeleccionado = this.dataset.modo;
             inputModoBusqueda.value = modoSeleccionado;
-            
-            // Limpiamos los inputs al cambiar de transporte
-            if(origenInput) origenInput.value = '';
-            if(destinoInput) destinoInput.value = '';
-
             actualizarInterfaz(modoSeleccionado);
         });
     });
 
-    // Ejecutar al cargar la página
+    // Ejecutar al cargar
     actualizarInterfaz(inputModoBusqueda.value);
 
-    // ==========================================
-    // LÓGICA DE FORMATO Y SELECCIÓN
-    // ==========================================
-    
-    // Siempre convertir inputs a mayúsculas
+    // Convertir inputs a mayúsculas
     function formatearInput(e) { e.target.value = e.target.value.toUpperCase(); }
     if (origenInput) origenInput.addEventListener('input', formatearInput);
     if (destinoInput) destinoInput.addEventListener('input', formatearInput);
 
+    // ==========================================
+    // SELECCIONAR RESULTADO Y LLENAR RESUMEN
+    // ==========================================
     function seleccionarVuelo(card) {
         document.querySelectorAll('.flight-result').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
@@ -385,7 +432,6 @@
         document.getElementById('sumSalida').textContent = data.horaSalida ? data.horaSalida.slice(0, 16).replace('T', ' · ') : '—';
         document.getElementById('sumLlegada').textContent = data.horaLlegada ? data.horaLlegada.slice(0, 16).replace('T', ' · ') : '—';
         document.getElementById('sumDuracion').textContent = data.duracion;
-        document.getElementById('sumEscalas').textContent = data.escalas;
         document.getElementById('sumPrecio').textContent = '$' + data.precio + ' ' + data.moneda;
 
         document.getElementById('inputOfferId').value = data.offerId;
@@ -401,10 +447,22 @@
         document.getElementById('inputPrecio').value = data.precio;
         document.getElementById('inputMoneda').value = data.moneda;
 
+        // Asegurar que el modo transporte se vaya correcto en el POST
+        if(inputModoConfirm) {
+            inputModoConfirm.value = document.getElementById('modoTransporte').value;
+        }
+
         document.getElementById('btnConfirmar').disabled = false;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Restaurar pestaña activa tras recargar
+        const tipoViajeGuardado = document.getElementById('tipoViajeBusqueda').value;
+        const tabActiva = document.querySelector(`.trip-type-btn[data-tipo="${tipoViajeGuardado}"]`);
+        if (tabActiva) {
+            tabActiva.click(); // Esto arregla visualmente la UI y sincroniza los valores
+        }
+
         const primerVuelo = document.querySelector('.flight-result.selected');
         if (primerVuelo) {
             seleccionarVuelo(primerVuelo);

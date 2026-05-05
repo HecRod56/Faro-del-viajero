@@ -19,6 +19,7 @@ class Trayecto(models.Model):
     TIPO_CHOICES = [
         ('IDA', 'Ida'),
         ('REGRESO', 'Regreso'),
+        ('IDA_VUELTA', 'Ida y Vuelta'),
     ]
 
     ESTADO_CHOICES = [
@@ -121,6 +122,7 @@ class TrayectoAutobus(models.Model):
     TIPO_CHOICES = [
         ('IDA', 'Ida'),
         ('REGRESO', 'Regreso'),
+        ('IDA_VUELTA', 'Ida y Vuelta'),
     ]
 
     ESTADO_CHOICES = [

@@ -92,7 +92,8 @@
             <div class="cost-row">
                 <span class="label">
                     <span aria-hidden="true">{% if trayecto.es_autobus %}🚌{% else %}✈️{% endif %}</span> 
-                    {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de ida ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
+                    <!-- AQUÍ ESTÁ LA MAGIA DEL GET_TIPO_DISPLAY EN MINÚSCULAS -->
+                    {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de {{ trayecto.get_tipo_display|lower }} ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
                 </span>
                 <span class="value">{{ trayecto.precio_display }}</span>
             </div>
@@ -101,7 +102,7 @@
             <div class="cost-row">
                 <span class="label">
                     <span aria-hidden="true">{% if trayecto.es_autobus %}🚌{% else %}✈️{% endif %}</span> 
-                    {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de regreso ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
+                    {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de {{ trayecto.get_tipo_display|lower }} ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
                 </span>
                 <span class="value">{{ trayecto.precio_display }}</span>
             </div>
@@ -123,12 +124,16 @@
             
             {% if tiene_trayectos %}
 
-                <!-- Trayectos de IDA -->
+                <!-- Trayectos de IDA (y Redondos) -->
                 {% for trayecto in trayectos_ida %}
                 <article class="transport-card shadow-sm">
                     <div class="route-header">
                         <div class="route-badges">
-                            <span class="route-badge">IDA</span>
+                            <!-- AQUÍ ESTÁ LA MAGIA DEL GET_TIPO_DISPLAY EN MAYÚSCULAS -->
+                            <span class="route-badge" {% if trayecto.tipo == 'IDA_VUELTA' %}style="background: #E8721C;"{% endif %}>
+                                {{ trayecto.get_tipo_display|upper }}
+                            </span>
+                            
                             {% if trayecto.estado == 'CONFIRMADO' %}
                             <span class="status-chip confirmed">
                                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
@@ -200,12 +205,12 @@
                 </article>
                 {% endfor %}
 
-                <!-- Trayectos de REGRESO -->
+                <!-- Trayectos de REGRESO Puros -->
                 {% for trayecto in trayectos_regreso %}
                 <article class="transport-card shadow-sm">
                     <div class="route-header">
                         <div class="route-badges">
-                            <span class="route-badge route-badge-return">REGRESO</span>
+                            <span class="route-badge route-badge-return">{{ trayecto.get_tipo_display|upper }}</span>
                             {% if trayecto.estado == 'CONFIRMADO' %}
                             <span class="status-chip confirmed">
                                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>

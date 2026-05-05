@@ -27,20 +27,20 @@ def transporte_principal(request):
     trayectos_ida = []
     trayectos_regreso = []
 
-    # ==========================================
+    
     # 1. Obtener y procesar VUELOS
     # ==========================================
-    vuelos_ida = list(Trayecto.objects.filter(registrado_por=request.user, tipo='IDA'))
-    vuelos_regreso = list(Trayecto.objects.filter(registrado_por=request.user, tipo='REGRESO'))
+    # Ya no filtramos por tipo aquí, traemos todos los del usuario
+    vuelos = list(Trayecto.objects.filter(registrado_por=request.user))
 
-    for v in vuelos_ida + vuelos_regreso:
-        v.es_autobus = False  # Bandera clave para el icono en el HTML
-        
+    for v in vuelos:
+        v.es_autobus = False  
         precio_convertido = convertir_precio(v.precio_total, v.moneda, moneda_usuario)
         v.precio_display = formatear_precio(precio_convertido, moneda_usuario)
         costo_total += float(precio_convertido)
         
-        if v.tipo == 'IDA':
+        # Si es IDA o IDA_VUELTA lo ponemos en la primera lista
+        if v.tipo in ['IDA', 'IDA_VUELTA']:
             trayectos_ida.append(v)
         else:
             trayectos_regreso.append(v)
@@ -48,13 +48,10 @@ def transporte_principal(request):
     # ==========================================
     # 2. Obtener y procesar AUTOBUSES
     # ==========================================
-    buses_ida = list(TrayectoAutobus.objects.filter(registrado_por=request.user, tipo='IDA'))
-    buses_regreso = list(TrayectoAutobus.objects.filter(registrado_por=request.user, tipo='REGRESO'))
+    buses = list(TrayectoAutobus.objects.filter(registrado_por=request.user))
 
-    for b in buses_ida + buses_regreso:
-        b.es_autobus = True   # Bandera clave para el icono en el HTML
-        
-        # Mapeamos los campos para que el HTML los entienda como si fueran vuelos
+    for b in buses:
+        b.es_autobus = True   
         b.aerolinea = b.linea_autobus
         b.numero_vuelo = b.servicio
         b.origen_codigo = b.origen_nombre
@@ -64,7 +61,8 @@ def transporte_principal(request):
         b.precio_display = formatear_precio(precio_convertido, moneda_usuario)
         costo_total += float(precio_convertido)
         
-        if b.tipo == 'IDA':
+        # Si es IDA o IDA_VUELTA lo ponemos en la primera lista
+        if b.tipo in ['IDA', 'IDA_VUELTA']:
             trayectos_ida.append(b)
         else:
             trayectos_regreso.append(b)
@@ -107,7 +105,6 @@ def registrar_trayecto(request):
             modo = request.POST.get('modo_transporte', 'vuelo')
             
             try:
-                # 1. Convertir fechas de string a objetos datetime con zona horaria
                 dt_salida = datetime.strptime(request.POST.get('fecha_salida'), '%Y-%m-%dT%H:%M:%S')
                 dt_llegada = datetime.strptime(request.POST.get('fecha_llegada'), '%Y-%m-%dT%H:%M:%S')
                 
@@ -118,7 +115,8 @@ def registrar_trayecto(request):
                     Trayecto.objects.create(
                         viaje_id=request.POST.get('viaje_id', 1), # TODO: Pasar ID real
                         registrado_por=request.user,
-                        tipo=request.POST.get('tipo_trayecto', 'IDA'),
+                        # Usamos 'IDA_VUELTA' como salvavidas por defecto
+                        tipo=request.POST.get('tipo_trayecto', 'IDA_VUELTA'), 
                         aerolinea=request.POST.get('aerolinea', ''),
                         numero_vuelo=request.POST.get('numero_vuelo', ''),
                         origen_codigo=request.POST.get('origen_codigo', ''),
@@ -138,7 +136,7 @@ def registrar_trayecto(request):
                     TrayectoAutobus.objects.create(
                         viaje_id=request.POST.get('viaje_id', 1), # TODO: Pasar ID real
                         registrado_por=request.user,
-                        tipo=request.POST.get('tipo_trayecto', 'IDA'),
+                        tipo=request.POST.get('tipo_trayecto', 'IDA_VUELTA'), 
                         linea_autobus=request.POST.get('aerolinea', ''), 
                         servicio=request.POST.get('numero_vuelo', ''),   
                         origen_nombre=request.POST.get('origen_codigo', ''),
@@ -165,6 +163,17 @@ def registrar_trayecto(request):
         # ==========================================
         else:
             modo_transporte = request.POST.get('modo_transporte', 'vuelo')
+            
+            # ¡NUEVO! Capturar el tipo de viaje (la pestaña que seleccionó el usuario)
+            tipo_viaje = request.POST.get('tipo_viaje_busqueda', 'ida_vuelta')
+            
+            # Traducimos la pestaña al valor exacto que espera la Base de Datos
+            if tipo_viaje == 'ida_vuelta':
+                tipo_trayecto_val = 'IDA_VUELTA'
+            elif tipo_viaje == 'regreso':
+                tipo_trayecto_val = 'REGRESO'
+            else:
+                tipo_trayecto_val = 'IDA'
             
             origen = request.POST.get('origen', '').strip().upper()
             destino = request.POST.get('destino', '').strip().upper()
@@ -203,6 +212,9 @@ def registrar_trayecto(request):
                 'pasajeros': pasajeros,
                 'moneda_usuario': request.user.currency,
                 'modo_transporte': modo_transporte,
+                
+                'tipo_viaje': tipo_viaje,               
+                'tipo_trayecto_val': tipo_trayecto_val, 
             }
 
     return render(request, 'transporte/registrar_trayecto.html', context)
