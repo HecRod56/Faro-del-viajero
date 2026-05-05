@@ -1,17 +1,19 @@
 #destinos_service.py core
+import re
 import requests
 import unicodedata
 from django.conf import settings
 
-GEOAPIFY_BASE   = "https://api.geoapify.com/v1"
-GEOAPIFY_PLACES = "https://api.geoapify.com/v2/places"
-PEXELS_BASE     = "https://api.pexels.com/v1"
-WIKIMEDIA_BASE = "https://commons.wikimedia.org/w/api.php"
+GEOAPIFY_BASE     = "https://api.geoapify.com/v1"
+GEOAPIFY_PLACES   = "https://api.geoapify.com/v2/places"
+FOURSQUARE_PLACES = "https://api.foursquare.com/v3/places/search"
+PEXELS_BASE       = "https://api.pexels.com/v1"
+WIKIMEDIA_BASE    = "https://commons.wikimedia.org/w/api.php"
 WIKIMEDIA_HEADERS = {"User-Agent": "FaroDelViajero/1.0 (farodelviajero@gmail.com)"}
 
 CATEGORY_MAP = {
     "atracciones": "tourism,entertainment,leisure",
-    "gastronomia": "catering.restaurant,catering.cafe,catering.bar",
+    "gastronomia": "catering.restaurant,catering.cafe,catering.bar,catering.fast_food,catering.pub,catering.food_court,catering.ice_cream",
     "hoteles":     "accommodation",
 }
 
@@ -20,6 +22,10 @@ SUBCATEGORY_MAP = {
     'naturaleza':    'leisure.park,leisure.beach,leisure.nature_reserve,leisure.garden,leisure.picnic_site',
     'aventura':      'sport,leisure.sports_centre,leisure.stadium,leisure.fitness,leisure.golf_course,leisure.ski,leisure.water_park',
     'entretenimiento': 'entertainment.cinema,entertainment.theatre,entertainment.concert_hall,entertainment.music_venue,entertainment.nightclub,entertainment.casino',
+    'restaurantes':  'catering.restaurant',
+    'cafes':         'catering.cafe,catering.ice_cream',
+    'bares':         'catering.bar,catering.pub,catering.biergarten',
+    'comida_rapida': 'catering.fast_food,catering.food_court',
 }
 
 # Mapa inverso para determinar la categoría de filtro de una categoría de Geoapify
@@ -48,6 +54,14 @@ CATEGORY_TO_FILTER = {
     'entertainment.music_venue': 'entretenimiento',
     'entertainment.nightclub': 'entretenimiento',
     'entertainment.casino': 'entretenimiento',
+    'catering.restaurant': 'restaurantes',
+    'catering.cafe': 'cafes',
+    'catering.ice_cream': 'cafes',
+    'catering.bar': 'bares',
+    'catering.pub': 'bares',
+    'catering.biergarten': 'bares',
+    'catering.fast_food': 'comida_rapida',
+    'catering.food_court': 'comida_rapida',
 }
 
 
@@ -158,8 +172,162 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     return None
 
 
+# ─── Foursquare: popularidad real ─────────────────────────────────────────────
+
+def obtener_popularidad_lugar_foursquare(lat: float, lon: float, nombre: str) -> tuple:
+    """
+    Busca la popularidad de un lugar específico en Foursquare usando sus coordenadas y nombre.
+    Devuelve (label, color) o None si no se encuentra o no hay datos.
+    """
+    key = getattr(settings, 'FOURSQUARE_API_KEY', '')
+    if not key or not lat or not lon:
+        return None
+
+    headers = {"Authorization": key, "Accept": "application/json"}
+    # Usamos un radio de 500m y el nombre para encontrar exactamente este lugar
+    params = {
+        "ll": f"{lat},{lon}",
+        "radius": 500,
+        "query": nombre,
+        "limit": 1,
+        "fields": "name,popularity,stats"
+    }
+
+    try:
+        # Timeout más corto para no demorar mucho la carga total si hay varios lugares
+        resp = requests.get(FOURSQUARE_PLACES, headers=headers, params=params, timeout=3)
+        resp.raise_for_status()
+        results = resp.json().get("results", [])
+    except requests.exceptions.HTTPError as e:
+        status = e.response.status_code if e.response is not None else "unknown"
+        # Foursquare v3 está devolviendo 410 Gone de forma permanente para este endpoint
+        if status != 410:
+            print(f"[Foursquare] HTTP {status} al buscar '{nombre}': {e}")
+        return None
+    except Exception as e:
+        print(f"[Foursquare] Error al buscar '{nombre}': {e}")
+        return None
+
+    if not results:
+        return None
+
+    place = results[0]
+    pop = place.get("popularity")
+    
+    if pop is None:
+        checkins = place.get("stats", {}).get("totalCheckins", 0)
+        pop = min(checkins / 10_000, 1.0)
+
+    if pop >= 0.70:
+        return "En Tendencia", "#0E9E8E"
+    elif pop >= 0.35:
+        return "Ambiente Vivo", "#F59E0B"
+    else:
+        return "Sin filas", "#6B7280"
+
+
+def _popularidad_fallback(categorias: list) -> tuple:
+    """
+    Estima el nivel de afluencia esperado basándose en las categorías de Geoapify.
+    Usado cuando Foursquare no devuelve dato para ese lugar.
+
+    En Tendencia  → entretenimiento de pago, parques temáticos, estadios,
+                    zoológicos, cines, teatros, discotecas, casinos.
+    Ambiente Vivo → museos, sitios históricos, restaurantes, bares,
+                    deportes, atracciones turísticas generales.
+    Sin filas     → parques, jardines, naturaleza, monumentos, miradores.
+    """
+    cats = " ".join(categorias).lower()
+
+    EN_TENDENCIA = (
+        "entertainment",   # cubre entertainment.cinema, .theatre, .nightclub, etc.
+        "theme_park",
+        "water_park",
+        "amusement",
+        "zoo", "aquarium",
+        "stadium",
+        "concert",
+        "nightclub", "casino",
+        "leisure.ski",
+        "bar", "pub", "fast_food", "food_court",  # <--- Bares y comida rápida suelen estar llenos
+    )
+    AMBIENTE_VIVO = (
+        "museum", "historic", "castle", "archaeological",
+        "sights", "attraction",
+        "restaurant", "cafe",  # <--- Restaurantes formales y cafés
+        "sport", "fitness", "golf",
+        "tourism",
+    )
+
+    for kw in EN_TENDENCIA:
+        if kw in cats:
+            return "En Tendencia", "#0E9E8E"
+    for kw in AMBIENTE_VIVO:
+        if kw in cats:
+            return "Ambiente Vivo", "#F59E0B"
+    return "Sin filas", "#6B7280"
+
+
+# ─── Rangos estimados por categoría (fallback) ───────────────────────────────
+_PRECIO_FALLBACK = {
+    "hoteles":    {1: ("$500 - $1,000",   1000),
+                   2: ("$1,000 - $2,000", 2000),
+                   3: ("$2,000 - $4,000", 4000),
+                   4: ("$4,000 - $7,000", 7000),
+                   5: ("$7,000+",         15000)},
+    "gastronomia": {
+        "$":    ("$50 - $150 MXN",      150),
+        "$$":   ("$150 - $300 MXN",     300),
+        "$$$":  ("$300 - $600 MXN",     600),
+        "$$$$": ("$600+ MXN",           1500),
+    },
+}
+
+
+def extraer_precio_real(raw: dict, acc: dict, categoria: str):
+    """
+    Intenta obtener un precio real del campo OSM `raw`.
+    Devuelve (precio_str, precio_max_num).
+    """
+    # 1. Entrada gratuita explícita
+    if str(raw.get("fee", "")).lower() == "no":
+        return "Gratis", 0
+
+    # 2. Campo `charge` con precio real: "MXN 150", "150 MXN", "150", "$150"
+    charge = str(raw.get("charge", "") or raw.get("entrance_fee", "")).strip()
+    if charge:
+        nums = re.findall(r'[\d,\.]+', charge.replace(",", ""))
+        if nums:
+            try:
+                valor = float(nums[0])
+                return f"${valor:,.0f} MXN", int(valor)
+            except ValueError:
+                pass
+
+    # 3. `price_range` para restaurantes ("$" a "$$$$")
+    if categoria == "gastronomia":
+        pr = str(raw.get("price_range", "") or raw.get("price_level", "")).strip()
+        if pr in _PRECIO_FALLBACK["gastronomia"]:
+            txt, num = _PRECIO_FALLBACK["gastronomia"][pr]
+            return txt + " por persona", num
+        return "$150 - $500 MXN por persona", 500
+
+    # 4. Hoteles: usar estrellas
+    if categoria == "hoteles":
+        estrellas = int(acc.get("stars") or raw.get("stars", 3))
+        estrellas = max(1, min(estrellas, 5))
+        txt, num = _PRECIO_FALLBACK["hoteles"].get(estrellas, ("$2,000 - $4,000", 4000))
+        return txt + " MXN/noche", num
+
+    # 5. Atracciones: fallback genérico
+    if str(raw.get("fee", "")).lower() == "yes":
+        return "$200 - $1,500 MXN por persona", 1500
+    return "$200 - $1,500 MXN por persona", 1500
+
+
 def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
-                   precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, popularidades: list = None):
+                   precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, 
+                   popularidades: list = None, estrellas: list = None, servicios: list = None):
     coords = obtener_coordenadas(destino)
     if not coords["lat"]:
         return []
@@ -171,7 +339,8 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
     cat = CATEGORY_MAP.get(categoria, "tourism,entertainment,leisure")
 
     # Pedir más resultados cuando hay filtros para compensar el descarte post-fetch
-    api_limite = min(limite * 3, 100) if subcategorias else limite
+    hay_filtros = bool(subcategorias or estrellas or servicios or popularidades)
+    api_limite = 100 if hay_filtros else limite
 
     params = {
         "apiKey": settings.GEOAPIFY_API_KEY,
@@ -191,6 +360,7 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         return []
 
     lugares = []
+
     for f in features:
         p   = f.get("properties", {})
         raw = p.get("datasource", {}).get("raw", {})
@@ -223,36 +393,13 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         if acc.get("stars"):
             rating = float(acc["stars"])
 
-        # Precio estimado por categoría
-        if categoria == "hoteles":
-            estrellas = int(acc.get("stars", 3))
-            precios_hotel = {1: "$500 - $1,000", 2: "$1,000 - $2,000",
-                             3: "$2,000 - $4,000", 4: "$4,000 - $7,000", 5: "$7,000+"}
-            precio_str = precios_hotel.get(estrellas, "$2,000 - $4,000") + " MXN/noche"
-        elif categoria == "gastronomia":
-            precio_str = "$150 - $500 MXN por persona"
-        elif categoria == "atracciones":
-            precio_str = "$200 - $1,500 MXN por persona"
-        else:
-            precio_str = None
+        # Precio real desde OSM / fallback por categoría
+        precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria)
 
-        # Valor numérico del límite superior del precio para el filtro del slider
-        if categoria == "hoteles":
-            _estrellas_precio = {1: 1000, 2: 2000, 3: 4000, 4: 7000, 5: 15000}
-            precio_max_num = _estrellas_precio.get(int(acc.get("stars", 3)), 4000)
-        elif categoria == "gastronomia":
-            precio_max_num = 500
-        else:
-            precio_max_num = 1500
-
-        # Popularidad
-        cats_str = str(p.get("categories", []))
-        if "tourism" in cats_str or "attraction" in cats_str or "sights" in cats_str:
-            label, color = "En Tendencia 🔥", "#0E9E8E"
-        elif "catering" in cats_str or "restaurant" in cats_str:
-            label, color = "Ambiente Vivo 🍽️", "#F59E0B"
-        else:
-            label, color = "Sin filas", "#6B7280"
+        # ── Popularidad: Foursquare (real) con fallback inteligente por categoría ────────
+        # Foursquare Places API v3 /search está deprecado (devuelve 410 Gone).
+        # Pasamos directamente al fallback usando la metadata de Geoapify, lo cual es más rápido.
+        label, color = _popularidad_fallback(p.get("categories", []))
 
         cat_display = []
         for c in p.get("categories", []):
@@ -270,13 +417,61 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         if subcategorias and categoria_filtro not in subcategorias:
             continue
 
-        # Precio: aplicar solo si el usuario bajó el slider (precio_max < 10000)
-        if precio_max < 10000 and precio_max_num > precio_max:
+        # Precio: aplicar filtro de rango (precio_min y precio_max)
+        if precio_max_num < precio_min or precio_max_num > precio_max:
             continue
 
         # Popularidad: filtrar si se seleccionó al menos una opción
         if popularidades and label not in popularidades:
             continue
+            
+        # Filtros exclusivos de Hoteles
+        if categoria == "hoteles":
+            # Filtrar por estrellas
+            if estrellas and int(rating or 3) not in estrellas:
+                continue
+            
+            # Filtrar por servicios
+            if servicios:
+                facilities = p.get("facilities", {})
+                raw_facilities = raw.get("facilities", {})
+                cumple_todos = True
+                
+                # Checkeamos si tiene alberca o mascotas según facilities o categories
+                categorias_str = " ".join(p.get("categories", []))
+                
+                if "alberca" in servicios:
+                    has_pool = ("swimming_pool" in facilities or "swimming_pool" in raw_facilities or 
+                                "swimming_pool" in categorias_str)
+                    if not has_pool:
+                        cumple_todos = False
+                        
+                if "mascotas" in servicios:
+                    has_pets = ("pets_allowed" in facilities or "dogs" in raw_facilities or 
+                                "pet" in categorias_str or "dogs" in categorias_str)
+                    if not has_pets:
+                        cumple_todos = False
+
+                if "wifi" in servicios:
+                    has_wifi = ("internet_access" in facilities or "internet_access" in raw_facilities or
+                                "internet_access" in categorias_str)
+                    if not has_wifi:
+                        cumple_todos = False
+
+                if "estacionamiento" in servicios:
+                    has_parking = ("parking" in facilities or "parking" in raw_facilities or
+                                   "parking" in categorias_str)
+                    if not has_parking:
+                        cumple_todos = False
+
+                if "accesibilidad" in servicios:
+                    has_wheelchair = ("wheelchair" in facilities or "wheelchair" in raw_facilities or
+                                      "wheelchair" in categorias_str)
+                    if not has_wheelchair:
+                        cumple_todos = False
+                        
+                if not cumple_todos:
+                    continue
         # ───────────────────────────────────────────────────
 
         lugares.append({
