@@ -90,13 +90,19 @@
         <div class="cost-breakdown" id="costBreakdown">
             {% for trayecto in trayectos_ida %}
             <div class="cost-row">
-                <span class="label"><span aria-hidden="true">✈️</span> Vuelo de ida ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})</span>
+                <span class="label">
+                    <span aria-hidden="true">{% if trayecto.es_autobus %}🚌{% else %}✈️{% endif %}</span> 
+                    {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de ida ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
+                </span>
                 <span class="value">{{ trayecto.precio_display }}</span>
             </div>
             {% endfor %}
             {% for trayecto in trayectos_regreso %}
             <div class="cost-row">
-                <span class="label"><span aria-hidden="true">✈️</span> Vuelo de regreso ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})</span>
+                <span class="label">
+                    <span aria-hidden="true">{% if trayecto.es_autobus %}🚌{% else %}✈️{% endif %}</span> 
+                    {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de regreso ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
+                </span>
                 <span class="value">{{ trayecto.precio_display }}</span>
             </div>
             {% endfor %}
@@ -160,8 +166,12 @@
                             <div class="city-date">{{ trayecto.fecha_salida|date:"D, d M" }}</div>
                         </div>
                         <div class="flight-line">
-                            <div class="flight-icon">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                            <div class="flight-icon" style="font-size: 20px;">
+                                {% if trayecto.es_autobus %}
+                                    🚌
+                                {% else %}
+                                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="city-block text-end" style="padding-right: 0;">
@@ -173,9 +183,11 @@
 
                     <div class="route-footer">
                         <div class="transport-meta">
-                            <span><strong class="text-oscuro">{{ trayecto.aerolinea }}</strong> · Vuelo {{ trayecto.numero_vuelo }}</span>
+                            <span><strong class="text-oscuro">{{ trayecto.aerolinea }}</strong> · {% if trayecto.es_autobus %}Servicio{% else %}Vuelo{% endif %} {{ trayecto.numero_vuelo }}</span>
                             <span>⏱ {{ trayecto.duracion }}</span>
-                            <span>{{ trayecto.escalas_texto }}</span>
+                            {% if not trayecto.es_autobus %}
+                                <span>{{ trayecto.escalas_texto }}</span>
+                            {% endif %}
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="registered-by" title="Registrado por {{ trayecto.registrado_por.get_full_name }}">
@@ -231,8 +243,12 @@
                             <div class="city-date">{{ trayecto.fecha_salida|date:"D, d M" }}</div>
                         </div>
                         <div class="flight-line">
-                            <div class="flight-icon">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="transform: scaleX(-1);"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                            <div class="flight-icon" style="font-size: 20px;">
+                                {% if trayecto.es_autobus %}
+                                    <span style="display: inline-block; transform: scaleX(-1);">🚌</span>
+                                {% else %}
+                                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="transform: scaleX(-1);"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="city-block text-end" style="padding-right: 0;">
@@ -244,9 +260,11 @@
 
                     <div class="route-footer">
                         <div class="transport-meta">
-                            <span><strong class="text-oscuro">{{ trayecto.aerolinea }}</strong> · Vuelo {{ trayecto.numero_vuelo }}</span>
+                            <span><strong class="text-oscuro">{{ trayecto.aerolinea }}</strong> · {% if trayecto.es_autobus %}Servicio{% else %}Vuelo{% endif %} {{ trayecto.numero_vuelo }}</span>
                             <span>⏱ {{ trayecto.duracion }}</span>
-                            <span>{{ trayecto.escalas_texto }}</span>
+                            {% if not trayecto.es_autobus %}
+                                <span>{{ trayecto.escalas_texto }}</span>
+                            {% endif %}
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="registered-by" title="Registrado por {{ trayecto.registrado_por.get_full_name }}">
@@ -262,7 +280,7 @@
             {% else %}
                 <!-- Estado vacío -->
                 <div class="empty-state">
-                    <div class="mb-2 fs-4">✈️</div>
+                    <div class="mb-2 fs-4">✈️ / 🚌</div>
                     Aún no hay trayectos registrados.<br>
                     <a href="{% url 'transporte:registrar_trayecto' %}" class="text-naranja text-decoration-underline mt-1 d-inline-block">+ Registrar el primer trayecto</a>
                 </div>
