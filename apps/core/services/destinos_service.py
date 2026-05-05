@@ -512,8 +512,10 @@ def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
     """
     Obtiene múltiples fotos en calidad Full HD para la galería.
     Intenta primero Wikimedia Commons, luego completa con Pexels si es necesario.
+    Omite la primera imagen de Wikimedia para evitar redundancia con la portada de grid.
     """
     fotos = []
+    primera_consulta = True
     
     # 1. Intentar con Wikimedia Commons primero (Full HD: 1920px)
     queries = [nombre, f"{nombre} {ciudad}", f"{ciudad} Mexico"]
@@ -536,9 +538,14 @@ def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
             resp = requests.get(WIKIMEDIA_BASE, headers=WIKIMEDIA_HEADERS, params=params, timeout=6)
             resp.raise_for_status()
             pages = resp.json().get("query", {}).get("pages", {})
+            primera_foto_consulta = True  # Flag para omitir la primera foto de la primera consulta
             for p in pages.values():
                 if len(fotos) >= cantidad:
                     break
+                # Omitir la primera foto de la primera consulta (es la portada)
+                if primera_consulta and primera_foto_consulta:
+                    primera_foto_consulta = False
+                    continue
                 ii = p.get("imageinfo", [{}])[0]
                 mime = ii.get("mime", "")
                 url = ii.get("thumburl", "")
@@ -547,6 +554,8 @@ def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
                     fotos.append(url)
         except Exception as e:
             print(f"Error Wikimedia: {e}")
+        
+        primera_consulta = False
     
     # 2. Completar con Pexels si no hay suficientes fotos (original quality)
     if len(fotos) < cantidad:
