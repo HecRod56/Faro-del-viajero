@@ -509,21 +509,62 @@ def obtener_foto_destino(destino: str):
     return None
 
 def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
-    """Obtiene múltiples fotos landscape de Pexels para la galería."""
-    headers = {'Authorization': settings.PEXELS_API_KEY}
-    params = {
-        'query': f'{nombre} {ciudad} Mexico',
-        'per_page': cantidad,
-        'orientation': 'landscape'
-    }
-    try:
-        resp = requests.get(f'{PEXELS_BASE}/search', headers=headers,
-                            params=params, timeout=5)
-        resp.raise_for_status()
-        fotos = resp.json().get('photos', [])
-        return [f['src']['large'] for f in fotos]
-    except Exception:
-        return []
+    """
+    Obtiene múltiples fotos en calidad Full HD para la galería.
+    Intenta primero Wikimedia Commons, luego completa con Pexels si es necesario.
+    """
+    fotos = []
+    
+    # 1. Intentar con Wikimedia Commons primero (Full HD: 1920px)
+    queries = [nombre, f"{nombre} {ciudad}", f"{ciudad} Mexico"]
+    for query in queries:
+        if len(fotos) >= cantidad:
+            break
+            
+        params = {
+            "action": "query",
+            "generator": "search",
+            "gsrsearch": query,
+            "gsrnamespace": 6,
+            "gsrlimit": 10,
+            "prop": "imageinfo",
+            "iiprop": "url|size|mime",
+            "iiurlwidth": 1920,  # Full HD quality
+            "format": "json",
+        }
+        try:
+            resp = requests.get(WIKIMEDIA_BASE, headers=WIKIMEDIA_HEADERS, params=params, timeout=6)
+            resp.raise_for_status()
+            pages = resp.json().get("query", {}).get("pages", {})
+            for p in pages.values():
+                if len(fotos) >= cantidad:
+                    break
+                ii = p.get("imageinfo", [{}])[0]
+                mime = ii.get("mime", "")
+                url = ii.get("thumburl", "")
+                # Solo fotos, no logos ni SVGs
+                if url and ("image/jpeg" in mime or "image/png" in mime):
+                    fotos.append(url)
+        except Exception as e:
+            print(f"Error Wikimedia: {e}")
+    
+    # 2. Completar con Pexels si no hay suficientes fotos (original quality)
+    if len(fotos) < cantidad:
+        headers = {"Authorization": settings.PEXELS_API_KEY}
+        params = {
+            "query": f"{nombre} {ciudad} Mexico",
+            "per_page": cantidad - len(fotos),
+            "orientation": "landscape",
+        }
+        try:
+            resp = requests.get(f"{PEXELS_BASE}/search", headers=headers, params=params, timeout=5)
+            resp.raise_for_status()
+            fotos_pexels = resp.json().get("photos", [])
+            fotos.extend([f["src"]["original"] for f in fotos_pexels])
+        except Exception as e:
+            print(f"Error Pexels en obtener_fotos_lugar: {e}")
+    
+    return fotos[:cantidad]
 
 def obtener_detalle_lugar(nombre: str, ciudad: str, categoria: str):
     """
