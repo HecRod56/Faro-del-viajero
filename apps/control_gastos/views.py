@@ -303,10 +303,24 @@ def marcar_pagada_view(request, viaje_id, liquidacion_id):
     from apps.control_gastos.models import Liquidacion
     liquidacion = get_object_or_404(Liquidacion, pk=liquidacion_id, viaje=viaje)
 
+    # NUEVO: leer monto del form; si viene vacío se paga todo
+    monto_abono = None
+    monto_str = request.POST.get('monto_abono', '').strip()
+    if monto_str:
+        try:
+            from decimal import Decimal, InvalidOperation
+            monto_abono = Decimal(monto_str)
+        except InvalidOperation:
+            messages.error(request, "Monto inválido.")
+            return redirect('gastos:resumen', viaje_id=viaje_id)
+
     try:
-        marcar_liquidacion_pagada(liquidacion, usuario=request.user)
-        messages.success(request, "Deuda marcada como pagada.")
-    except PermissionError as e:
+        marcar_liquidacion_pagada(liquidacion, usuario=request.user, monto_abono=monto_abono)
+        if liquidacion.pagado:
+            messages.success(request, "Deuda saldada completamente.")
+        else:
+            messages.success(request, f"Abono de ${monto_abono} registrado.")
+    except (PermissionError, ValueError) as e:
         messages.error(request, str(e))
 
     return redirect('gastos:resumen', viaje_id=viaje_id)

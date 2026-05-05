@@ -256,23 +256,42 @@ class Liquidacion(models.Model):
     )
     monto     = models.DecimalField(max_digits=10, decimal_places=2)
 
-    # RF-43: marcar como pagado
+    monto_pagado = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        default=Decimal('0.00')
+    )
+
     pagado    = models.BooleanField(default=False)
     pagado_en = models.DateTimeField(null=True, blank=True)
 
-    class Meta:
-        unique_together = ('viaje', 'deudor', 'acreedor')
-        verbose_name = 'Liquidación'
-        verbose_name_plural = 'Liquidaciones'
+    @property
+    def monto_pendiente(self):
+        """Lo que falta por pagar."""
+        return self.monto - self.monto_pagado
 
     def marcar_pagado(self):
         self.pagado    = True
         self.pagado_en = timezone.now()
         self.save(update_fields=['pagado', 'pagado_en'])
 
-    def __str__(self):
-        estado = 'pagado' if self.pagado else 'pendiente'
-        return f"{self.deudor} → {self.acreedor}: ${self.monto} ({estado})"
+    # NUEVO: abono parcial o total
+    def abonar(self, cantidad):
+        from decimal import Decimal
+        cantidad = Decimal(str(cantidad))
+        if cantidad <= 0:
+            raise ValueError("El abono debe ser mayor a cero.")
+        if cantidad > self.monto_pendiente:
+            raise ValueError(
+                f"El abono (${cantidad}) supera lo pendiente (${self.monto_pendiente})."
+            )
+        self.monto_pagado += cantidad
+        if self.monto_pagado >= self.monto:
+            self.monto_pagado = self.monto
+            self.pagado    = True
+            self.pagado_en = timezone.now()
+            self.save(update_fields=['monto_pagado', 'pagado', 'pagado_en'])
+        else:
+            self.save(update_fields=['monto_pagado'])
 
 
 # ─── AuditoriaGasto ──────────────────────────────────────────────────────────

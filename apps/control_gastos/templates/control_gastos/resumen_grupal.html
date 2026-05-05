@@ -116,7 +116,8 @@
   /* ── Grid principal ── */
   .grid {
     display: grid;
-    grid-template-columns: 340px 1fr;
+    /* NOTA: Si prefieres que la tarjeta NO abarque todo, sino solo ensanchar la columna izquierda, cambia '340px' por '450px' o el ancho que desees y elimina el grid-column de .aportaciones-card */
+    grid-template-columns: 450px 1fr;
     gap: 20px;
     padding: 20px 24px;
     align-items: start;
@@ -148,7 +149,11 @@
   .presupuesto-tabla td { font-weight: 500; }
 
   /* ── Card aportaciones ── */
-  .aportaciones-card { margin-top: 16px; }
+  .aportaciones-card { 
+    margin-top: 16px; 
+    /* CORRECCIÓN: Esta línea fuerza a la tarjeta a abarcar todo el ancho del grid desde la primera hasta la última columna */
+    grid-column: 1 / -1; 
+  }
   .aportaciones-card .card-header {
     padding: 14px 16px 10px;
     font-weight: 600;
@@ -158,7 +163,7 @@
   .aportaciones-inner {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 24px;
     padding: 16px;
   }
   .aportaciones-lista { flex: 1; }
@@ -445,6 +450,7 @@
   }
   .empty-state p { font-size: 14px; margin-top: 8px; }
 </style>
+
 </head>
 <body>
 
@@ -478,6 +484,9 @@
 </ul>
 {% endif %}
 
+{# ── Nombre completo del usuario actual para comparaciones de string ── #}
+{% with nombre_usuario=request.user.get_full_name|default:request.user.username %}
+
 
 <!-- ══════════════════════════════════════════════════
      PESTAÑA 1: RESUMEN GRUPAL
@@ -509,14 +518,20 @@
         </table>
       </div>
 
-      <!-- Card aportaciones -->
+      <!-- Card aportaciones — CORREGIDO: comillas cerradas correctamente -->
       <div class="card aportaciones-card">
         <div class="card-header">Aportaciones</div>
         <div class="aportaciones-inner">
           <div class="aportaciones-lista">
             {% for ap in resumen.aportaciones %}
             <div class="aportacion-row">
-              <span class="aportacion-nombre">{{ ap.participante }}</span>
+              <span class="aportacion-nombre">
+                {{ ap.participante.get_full_name|default:ap.participante.username }}
+                {# CAMBIO: comparamos el string del nombre contra el nombre del usuario actual #}
+                 {% if ap.participante == request.user %}
+                  <span class="tu-badge">(Tú)</span>
+                {% endif %}
+              </span>
               <span class="aportacion-monto">${{ ap.total_pagado|floatformat:0 }}</span>
             </div>
             {% empty %}
@@ -547,7 +562,14 @@
           {% for gasto in gastos %}
           <tr>
             <td>{{ gasto.fecha|date:"j/n" }}</td>
-            <td>{{ gasto.pagado_por.usuario.get_short_name|default:gasto.pagado_por.usuario.username }}</td>
+            <td>
+              {# CAMBIO: comparamos el objeto User directamente, no un string #}
+              {% if gasto.pagado_por.usuario == request.user %}
+                Tú
+              {% else %}
+                {{ gasto.pagado_por.usuario.get_short_name|default:gasto.pagado_por.usuario.username }}
+              {% endif %}
+            </td>
             <td>{{ gasto.concepto }}</td>
             <td><span class="pill-categoria">{{ gasto.get_categoria_display|truncatechars:10 }}</span></td>
             <td class="monto">${{ gasto.monto|floatformat:0 }}</td>
@@ -643,30 +665,42 @@
 
   <div class="deudas-section">
     {% if mi_billetera.deudas_que_tengo %}
-    <h4>Le debo a…</h4>
-    {% for d in mi_billetera.deudas_que_tengo %}
-    <div class="deuda-row">
-      <span class="de-a">Le debo a <strong>{{ d.a }}</strong></span>
-      <span class="deuda-monto debes">-${{ d.monto|floatformat:2 }}</span>
-    </div>
-    {% endfor %}
+<h4>Le debo a…</h4>
+{% for d in mi_billetera.deudas_que_tengo %}
+<div class="deuda-row">
+  <span class="de-a">Le debo a
+    <strong>{{ d.a }}{% if d.a == nombre_usuario %} <span class="tu-badge">(Tú)</span>{% endif %}</strong>
+  </span>
+  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+    <span class="deuda-monto debes">-${{ d.monto_pendiente|floatformat:2 }}</span>
+    {% if d.monto_pagado > 0 %}
+    <span style="font-size:11px; color:var(--texto-2);">
+      Abonado ${{ d.monto_pagado|floatformat:2 }} de ${{ d.monto|floatformat:2 }}
+    </span>
     {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endif %}
 
-    {% if mi_billetera.deudas_hacia_mi %}
-    <h4 style="margin-top:18px;">Me deben…</h4>
-    {% for d in mi_billetera.deudas_hacia_mi %}
-    <div class="deuda-row">
-      <span class="de-a"><strong>{{ d.de }}</strong> me debe</span>
-      <span class="deuda-monto te-deben">+${{ d.monto|floatformat:2 }}</span>
-    </div>
-    {% endfor %}
+{% if mi_billetera.deudas_hacia_mi %}
+<h4 style="margin-top:18px;">Me deben…</h4>
+{% for d in mi_billetera.deudas_hacia_mi %}
+<div class="deuda-row">
+  <span class="de-a">
+    <strong>{{ d.de }}{% if d.de == nombre_usuario %} <span class="tu-badge">(Tú)</span>{% endif %}</strong> me debe
+  </span>
+  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+    <span class="deuda-monto te-deben">+${{ d.monto_pendiente|floatformat:2 }}</span>
+    {% if d.monto_pagado > 0 %}
+    <span style="font-size:11px; color:var(--texto-2);">
+      Abonado ${{ d.monto_pagado|floatformat:2 }} de ${{ d.monto|floatformat:2 }}
+    </span>
     {% endif %}
-
-    {% if not mi_billetera.deudas_que_tengo and not mi_billetera.deudas_hacia_mi %}
-    <div class="empty-state">
-      <p>Estás a mano con todos.</p>
-    </div>
-    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endif %}
   </div>
 
 </div><!-- /tab billetera -->
@@ -677,32 +711,46 @@
 ══════════════════════════════════════════════════ -->
 <div id="tab-liquidacion" class="tab-content">
   <div class="liquidacion-wrap">
-    {% for liq in resumen.liquidaciones_pendientes %}
-    <div class="liq-row">
-      <div class="liq-info">
-        <span class="liq-texto">
-          <span>{{ liq.de }}</span> le debe a <span>{{ liq.a }}</span>
-        </span>
-      </div>
-      <div style="display:flex; align-items:center; gap:14px;">
-        <span class="liq-monto">${{ liq.monto|floatformat:2 }}</span>
-        {% comment %}
-          El botón solo lo activa el acreedor (RF-43).
-          La vista marcar_pagada_view lo valida en backend también.
-        {% endcomment %}
-        <form method="POST" action="{% url 'gastos:marcar_pagada' viaje.id liq.id %}" style="display:inline">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-verde" style="font-size:12px; padding:7px 14px;">
-            Marcar como pagado
-          </button>
-        </form>
-      </div>
-    </div>
-    {% empty %}
-    <div class="empty-state">
-      <p>No hay deudas pendientes. ¡Todos están a mano!</p>
-    </div>
-    {% endfor %}
+{% for liq in resumen.liquidaciones_pendientes %}
+<div class="liq-row">
+  <div class="liq-info">
+    <span class="liq-texto">
+      <span>{{ liq.de }}{% if liq.de == nombre_usuario %} <span class="tu-badge">(Tú)</span>{% endif %}</span>
+      le debe a
+      <span>{{ liq.a }}{% if liq.a == nombre_usuario %} <span class="tu-badge">(Tú)</span>{% endif %}</span>
+    </span>
+    {# NUEVO: mostrar desglose si hay abonos parciales #}
+    {% if liq.monto_pagado > 0 %}
+    <span style="font-size:12px; color:var(--texto-2);">
+      Abonado: ${{ liq.monto_pagado|floatformat:2 }} /
+      Pendiente: ${{ liq.monto_pendiente|floatformat:2 }}
+    </span>
+    {% endif %}
+  </div>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <span class="liq-monto">${{ liq.monto_pendiente|floatformat:2 }}</span>
+    <form method="POST" action="{% url 'gastos:marcar_pagada' viaje.id liq.id %}" 
+          style="display:flex; align-items:center; gap:8px;">
+      {% csrf_token %}
+      {# NUEVO: input de abono parcial, opcional #}
+      <input type="number"
+             name="monto_abono"
+             step="0.01"
+             min="0.01"
+             max="{{ liq.monto_pendiente }}"
+             value="{{ liq.monto_pendiente }}"
+             style="width:140px; padding:6px 10px; border:1px solid var(--borde); border-radius:6px; font-size:13px;">
+      <button type="submit" class="btn btn-verde" style="font-size:12px; padding:7px 14px;">
+        Registrar pago
+      </button>
+    </form>
+  </div>
+</div>
+{% empty %}
+<div class="empty-state">
+  <p>No hay deudas pendientes. ¡Todos están a mano!</p>
+</div>
+{% endfor %}
   </div>
 </div>
 
@@ -718,7 +766,17 @@
       <span class="hist-accion {{ h.accion }}">{{ h.accion }}</span>
       <span class="hist-texto">
         Gasto #{{ h.gasto_id }}
-        {% if h.realizado_por %} por <strong>{{ h.realizado_por.get_full_name|default:h.realizado_por.username }}</strong>{% endif %}
+        {% if h.realizado_por %}
+          por
+          <strong>
+            {# CAMBIO: comparamos objeto User directamente #}
+            {% if h.realizado_por == request.user %}
+              Ti
+            {% else %}
+              {{ h.realizado_por.get_full_name|default:h.realizado_por.username }}
+            {% endif %}
+          </strong>
+        {% endif %}
         {% if h.detalle_despues %}— <em>{{ h.detalle_despues.concepto }}</em> ${{ h.detalle_despues.monto }}{% endif %}
       </span>
     </div>
@@ -768,13 +826,18 @@
             <select name="pagado_por_id" required>
               <option value="">Selecciona…</option>
               {% for p in participantes_viaje %}
-              <option value="{{ p.id }}">{{ p.usuario.get_full_name|default:p.usuario.username }}</option>
+              <option value="{{ p.id }}">
+                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {# CAMBIO: muestra (Tú) en el selector de pagador #}
+                {% if p.usuario == request.user %}(Tú){% endif %}
+              </option>
               {% endfor %}
             </select>
           </div>
           <div class="form-group">
             <label>Método de división</label>
-            <select name="metodo_division">
+            {# id único para el modal de nuevo #}
+            <select name="metodo_division" id="nuevo-metodo">
               {% for val, etiqueta in metodos_division %}
               <option value="{{ val }}">{{ etiqueta }}</option>
               {% endfor %}
@@ -785,8 +848,18 @@
             <div class="participantes-check">
               {% for p in participantes_viaje %}
               <label class="check-row">
-                <input type="checkbox" name="participantes_ids" value="{{ p.id }}" checked>
+                <input type="checkbox" name="participantes_ids" value="{{ p.id }}" checked
+                       class="nuevo-check" data-pid="{{ p.id }}">
                 {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {# CAMBIO: muestra (Tú) en la lista de checkboxes #}
+                {% if p.usuario == request.user %}<span class="tu-badge">(Tú)</span>{% endif %}
+                <!-- Campos dinámicos por participante -->
+                <input type="number" name="porcentaje_{{ p.id }}"
+                       class="nuevo-porcentaje" style="display:none"
+                       min="0" max="100" step="0.01" placeholder="% ej: 33.33">
+                <input type="number" name="monto_fijo_{{ p.id }}"
+                       class="nuevo-monto-fijo" style="display:none"
+                       min="0" step="0.01" placeholder="$ monto">
               </label>
               {% endfor %}
             </div>
@@ -839,12 +912,17 @@
             <label>Quién pagó *</label>
             <select name="pagado_por_id" id="edit-pagador" required>
               {% for p in participantes_viaje %}
-              <option value="{{ p.id }}">{{ p.usuario.get_full_name|default:p.usuario.username }}</option>
+              <option value="{{ p.id }}">
+                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {# CAMBIO: muestra (Tú) en el selector de pagador del modal editar #}
+                {% if p.usuario == request.user %}(Tú){% endif %}
+              </option>
               {% endfor %}
             </select>
           </div>
           <div class="form-group">
             <label>Método de división</label>
+            {# CORRECCIÓN: id cambiado de "nuevo-metodo" a "edit-metodo" para evitar duplicado #}
             <select name="metodo_division" id="edit-metodo">
               {% for val, etiqueta in metodos_division %}
               <option value="{{ val }}">{{ etiqueta }}</option>
@@ -856,8 +934,18 @@
             <div class="participantes-check">
               {% for p in participantes_viaje %}
               <label class="check-row">
-                <input type="checkbox" name="participantes_ids" value="{{ p.id }}" checked>
+                <input type="checkbox" name="participantes_ids" value="{{ p.id }}" checked
+                       class="edit-check" data-pid="{{ p.id }}">
                 {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {# CAMBIO: muestra (Tú) en la lista de checkboxes del modal editar #}
+                {% if p.usuario == request.user %}<span class="tu-badge">(Tú)</span>{% endif %}
+                <!-- Campos dinámicos por participante -->
+                <input type="number" name="porcentaje_{{ p.id }}"
+                       class="edit-porcentaje" style="display:none"
+                       min="0" max="100" step="0.01" placeholder="% ej: 33.33">
+                <input type="number" name="monto_fijo_{{ p.id }}"
+                       class="edit-monto-fijo" style="display:none"
+                       min="0" step="0.01" placeholder="$ monto">
               </label>
               {% endfor %}
             </div>
@@ -898,6 +986,8 @@
     </form>
   </div>
 </div>
+
+{% endwith %}{# fin nombre_usuario #}
 
 
 <!-- ══════════════════════════════════════════════════
@@ -942,7 +1032,10 @@ function abrirModalEditar(id, concepto, monto, categoria, fecha, metodo, pagador
   document.getElementById('edit-monto').value       = monto;
   document.getElementById('edit-fecha').value       = fecha;
   document.getElementById('edit-categoria').value   = categoria;
+  // CORRECCIÓN: ahora usa el id correcto "edit-metodo"
   document.getElementById('edit-metodo').value      = metodo;
+  // Disparar el evento change para mostrar/ocultar campos dinámicos
+  document.getElementById('edit-metodo').dispatchEvent(new Event('change'));
   document.getElementById('edit-pagador').value     = pagadorId;
   document.getElementById('modal-editar').classList.add('open');
 }
@@ -953,6 +1046,31 @@ function confirmarEliminar(id, concepto) {
   document.getElementById('nombre-gasto-eliminar').textContent = '"' + concepto + '"';
   document.getElementById('modal-eliminar').classList.add('open');
 }
+
+// ── Método de división: mostrar/ocultar campos por participante ──
+function actualizarCamposDivision(selectEl, scope) {
+  const metodo = selectEl.value;
+  document.querySelectorAll('.' + scope + '-porcentaje').forEach(el => {
+    el.style.display = metodo === 'porcentaje' ? 'inline-block' : 'none';
+    el.required      = metodo === 'porcentaje';
+    if (metodo !== 'porcentaje') el.value = '';
+  });
+  document.querySelectorAll('.' + scope + '-monto-fijo').forEach(el => {
+    el.style.display = metodo === 'monto_fijo' ? 'inline-block' : 'none';
+    el.required      = metodo === 'monto_fijo';
+    if (metodo !== 'monto_fijo') el.value = '';
+  });
+}
+
+// Modal nuevo
+document.getElementById('nuevo-metodo').addEventListener('change', function () {
+  actualizarCamposDivision(this, 'nuevo');
+});
+
+// CORRECCIÓN: Modal editar usa su propio id y scope "edit"
+document.getElementById('edit-metodo').addEventListener('change', function () {
+  actualizarCamposDivision(this, 'edit');
+});
 
 // ── Donut Chart ──────────────────────────────────────────────
 const aportaciones = [
@@ -1002,6 +1120,3 @@ if (aportaciones.length > 0) {
   });
 }
 </script>
-
-</body>
-</html>

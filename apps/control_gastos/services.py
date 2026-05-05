@@ -312,9 +312,8 @@ def modificar_gasto(gasto, nuevos_datos: dict, participantes: list, usuario, dat
 
     _validar_division(gasto, participantes, datos_division)
 
-    # Reemplazar todas las participaciones (soft-delete + recrear)
-    for gp in GastoParticipante.objects.filter(gasto=gasto):
-        gp.delete(usuario=usuario)
+    GastoParticipante.objects.filter(gasto=gasto).delete()
+
 
     deudas = _calcular_deudas(gasto, participantes, datos_division)
 
@@ -404,7 +403,7 @@ def calcular_resumen_grupal(viaje) -> dict:
         pid = gp.participante_id
         if pid not in aportaciones:
             aportaciones[pid] = {
-                'participante': str(gp.participante.usuario),
+                'participante': gp.participante.usuario,
                 'total_pagado': Decimal('0.00'),
                 'total_deuda':  Decimal('0.00'),
             }
@@ -456,6 +455,8 @@ def calcular_resumen_grupal(viaje) -> dict:
                 'de':    str(liq.deudor.usuario),
                 'a':     str(liq.acreedor.usuario),
                 'monto': liq.monto,
+                'monto_pagado':    liq.monto_pagado,       # NUEVO
+                'monto_pendiente': liq.monto_pendiente, 
             }
             for liq in liquidaciones
         ],
@@ -508,26 +509,40 @@ def calcular_mi_billetera(viaje, participante) -> dict:
         'total_gastado_personal': _redondear(total_deuda_personal),
         'saldo_personal':         saldo_personal,
         'deudas_que_tengo': [
-            {'a': str(liq.acreedor.usuario), 'monto': liq.monto}
-            for liq in deudas_que_tengo
-        ],
-        'deudas_hacia_mi': [
-            {'de': str(liq.deudor.usuario), 'monto': liq.monto}
-            for liq in deudas_hacia_mi
-        ],
+    {
+        'a':               str(liq.acreedor.usuario),
+        'monto':           liq.monto,
+        'monto_pagado':    liq.monto_pagado,       # NUEVO
+        'monto_pendiente': liq.monto_pendiente,    # NUEVO
+    }
+    for liq in deudas_que_tengo
+],
+'deudas_hacia_mi': [
+    {
+        'de':              str(liq.deudor.usuario),
+        'monto':           liq.monto,
+        'monto_pagado':    liq.monto_pagado,       # NUEVO
+        'monto_pendiente': liq.monto_pendiente,    # NUEVO
+    }
+    for liq in deudas_hacia_mi
+],
     }
 
 
 @transaction.atomic
-def marcar_liquidacion_pagada(liquidacion, usuario):
+def marcar_liquidacion_pagada(liquidacion, usuario, monto_abono=None):
     """
-    Solo el acreedor puede marcar una deuda como pagada (RF-43).
-    Lanza PermissionError si el usuario no es el acreedor.
+    El acreedor puede abonar parcial o totalmente una deuda (RF-43).
+    Si monto_abono es None, paga el total pendiente.
     """
     if liquidacion.acreedor.usuario != usuario:
         raise PermissionError("Solo el acreedor puede marcar esta deuda como pagada.")
 
-    liquidacion.marcar_pagado()  # método del modelo
+    if monto_abono is None:
+        # Pago total: comportamiento anterior
+        monto_abono = liquidacion.monto_pendiente
+
+    liquidacion.abonar(monto_abono)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
