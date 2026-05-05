@@ -75,6 +75,11 @@
 
                 <!-- Descripción -->
                 {% if lugar.descripcion %}
+                <div class="description-container">
+                    <p class="text-muted">
+                        {{ lugar.descripcion }}
+                    </p>
+                </div>
                 <p class="seccion-titulo">DESCRIPCIÓN</p>
                 <p class="detalle-descripcion">{{ lugar.descripcion }}</p>
                 {% endif %}

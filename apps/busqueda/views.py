@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from apps.gestion_viajes.models import Viaje
 from apps.core.services.destinos_service import buscar_lugares, obtener_foto_destino, obtener_coordenadas, obtener_detalle_lugar
 from django.contrib import messages
-
+import requests
 
 @login_required
 def agregar_actividad(request, viaje_id):
@@ -93,6 +93,32 @@ def p_destinos(request, viaje_id):
     }
     return render(request, "busqueda/destinos.html", context)
 
+def obtener_descripcion_wikipedia(nombre_lugar, ciudad):
+    try:
+        # Buscamos en Wikipedia en español usando el nombre y la ciudad
+        query = f"{nombre_lugar} {ciudad}"
+        url = f"https://es.wikipedia.org/api/rest_v1/page/summary/{query.replace(' ', '_')}"
+        
+        # El User-Agent es buena práctica para APIs de Wikimedia
+        headers = {"User-Agent": "FaroDelViajero/1.0 (farodelviajero@gmail.com)"}
+        response = requests.get(url, headers=headers, timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data.get('extract', '')
+        
+        # Si no encuentra con ciudad, intentamos solo con el nombre
+        url_solo_nombre = f"https://es.wikipedia.org/api/rest_v1/page/summary/{nombre_lugar.replace(' ', '_')}"
+        response = requests.get(url_solo_nombre, headers=headers, timeout=5)
+        if response.status_code == 200:
+            return response.json().get('extract', '')
+
+    except Exception as e:
+        print(f"Error Wikipedia: {e}")
+    
+    return "No hay una descripción disponible para este lugar, ¡pero seguro te encantará visitarlo!"
+
+@login_required
 def detalle_lugar_view(request, viaje_id):
     nombre    = request.GET.get('nombre', '')
     ciudad    = request.GET.get('ciudad', '')
@@ -100,6 +126,12 @@ def detalle_lugar_view(request, viaje_id):
 
     viaje = get_object_or_404(Viaje, id=viaje_id)
     lugar = obtener_detalle_lugar(nombre, ciudad, categoria)
+    
+    # --- NUEVA LÓGICA ---
+    if lugar:
+        lugar['descripcion'] = obtener_descripcion_wikipedia(nombre, ciudad)
+    # ---------------------
+
     return render(request, 'busqueda/detalle_lugar.html', {
         'viaje': viaje,
         'lugar': lugar,
