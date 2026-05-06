@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'apps.actividades',
     'chat',
     'apps.galeria',
-    'apps.control_gastos'
+    'apps.control_gastos',
     #ES LA DE APIS
     'apps.busqueda',
     ]
