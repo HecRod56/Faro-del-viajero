@@ -31,3 +31,6 @@ media/
 
 # Carpeta estática generada (opcional si no quieres versionar staticfiles)
 staticfiles/
+
+#Base de datos
+.dump
