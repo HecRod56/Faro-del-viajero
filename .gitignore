@@ -33,4 +33,4 @@ media/
 staticfiles/
 
 #Base de datos
-.dump
+*.dump
