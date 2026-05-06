@@ -14,6 +14,15 @@ from pathlib import Path
 import os
 import sys
 from decouple import config, Csv
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# ==========================================
+# API de Duffel (Búsqueda de vuelos)
+# ==========================================
+DUFFEL_ACCESS_TOKEN = os.getenv('DUFFEL_ACCESS_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,6 +66,7 @@ INSTALLED_APPS = [
     'apps.actividades',
     'chat',
     'apps.galeria',
+    'apps.transporte',
     'apps.control_gastos',
     #ES LA DE APIS
     'apps.busqueda',

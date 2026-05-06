@@ -1,0 +1,465 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'transporte/css/transporte_principal.css' %}">
+<link rel="stylesheet" href="{% static 'transporte/css/transporte_registro.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+    <!-- Breadcrumb 
+    <nav class="breadcrumb-custom" aria-label="Migas de pan">
+        <a href="#">Mis viajes</a>
+        <span>›</span>
+        
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">{{ viaje.destino }} {{ viaje.fecha_inicio|date:"Y" }}</a>
+        <span>›</span>
+         URL dinámica al principal de transporte 
+        <a href="{% url 'transporte:principal' viaje.id %}">Transporte</a>
+        <span>›</span>
+        <span class="breadcrumb-current">Registrar trayecto</span>
+    </nav> -->
+<div class="container mt-4"> 
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="font-size: 28px; color: var(--color-heading);">Registrar Trayecto Principal</h2>
+        <p class="text-muted mb-0" style="font-size: 14px;">
+            Busca y registra tus vuelos o autobuses de ida y regreso. Se generará automáticamente un
+            <strong style="color: var(--color-primary);">bloqueo en el itinerario</strong> para evitar conflictos.
+        </p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="trip-type-tabs" role="tablist">
+        <button class="trip-type-btn active" role="tab" aria-selected="true" data-tipo="ida_vuelta" type="button">
+            <span aria-hidden="true">⇄</span> Ida y vuelta
+        </button>
+        <button class="trip-type-btn" role="tab" data-tipo="ida" type="button">
+            <span aria-hidden="true">→</span> Solo ida
+        </button>
+        <button class="trip-type-btn" role="tab" data-tipo="regreso" type="button">
+            <span aria-hidden="true">←</span> Solo regreso
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <!-- ==========================================
+                 FORMULARIO DE BÚSQUEDA
+                 ========================================== -->
+            <form method="POST" class="search-form-card" id="formBusqueda">
+                {% csrf_token %}
+                
+                <!-- INPUTS OCULTOS CRUCIALES PARA EL BACKEND -->
+                <input type="hidden" name="modo_transporte" id="modoTransporte" value="{{ modo_transporte|default:'vuelo' }}">
+                <input type="hidden" name="tipo_viaje_busqueda" id="tipoViajeBusqueda" value="{{ tipo_viaje|default:'ida_vuelta' }}">
+
+                <!-- Modo de transporte -->
+                <div class="form-section-title">
+                    <span aria-hidden="true">🚌</span> Modo de transporte
+                </div>
+                <div class="transport-modes" role="radiogroup" aria-label="Modo de transporte">
+                    <button class="mode-btn {% if modo_transporte != 'autobus' %}active{% endif %}" type="button" role="radio" aria-checked="{% if modo_transporte != 'autobus' %}true{% else %}false{% endif %}" data-modo="vuelo">
+                        <span class="mode-icon" aria-hidden="true">✈️</span>
+                        <span class="mode-label">Vuelo</span>
+                    </button>
+                    <button class="mode-btn {% if modo_transporte == 'autobus' %}active{% endif %}" type="button" role="radio" aria-checked="{% if modo_transporte == 'autobus' %}true{% else %}false{% endif %}" data-modo="autobus">
+                        <span class="mode-icon" aria-hidden="true">🚌</span>
+                        <span class="mode-label">Autobús</span>
+                    </button>
+                </div>
+
+                <!-- Ruta: Origen y Destino -->
+                <div class="form-section-title">
+                    <span aria-hidden="true">📍</span> Ruta
+                </div>
+                <div class="form-row-route">
+                    <div class="form-field">
+                        <label for="origen" id="labelOrigen">Desde (código IATA)</label>
+                        <span class="field-icon" aria-hidden="true">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </span>
+                        <input type="text" id="origen" name="origen" placeholder="Ej: MEX" value="{{ origen|default:'' }}" required maxlength="3" style="text-transform: uppercase;">
+                    </div>
+                    <button type="button" class="swap-btn" aria-label="Intercambiar origen y destino" onclick="const o=document.getElementById('origen'),d=document.getElementById('destino');[o.value,d.value]=[d.value,o.value];">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"/></svg>
+                    </button>
+                    <div class="form-field">
+                        <label for="destino" id="labelDestino">Hasta (código IATA)</label>
+                        <span class="field-icon" aria-hidden="true">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </span>
+                        <input type="text" id="destino" name="destino" placeholder="Ej: CUN" value="{{ destino|default:'' }}" required maxlength="3" style="text-transform: uppercase;">
+                    </div>
+                </div>
+
+                <!-- Fechas y Pasajeros -->
+                <div class="form-section-title">
+                    <span aria-hidden="true">📅</span> Fechas y pasajeros
+                </div>
+                <div class="form-row-grid">
+                    <div class="form-field" id="containerIda">
+                        <label for="fecha-ida" id="labelFechaIda">Fecha de ida</label>
+                        <span class="field-icon" aria-hidden="true">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        </span>
+                        <input type="date" id="fecha-ida" name="fecha_ida" value="{{ fecha_ida|default:'' }}" required>
+                    </div>
+                    <div class="form-field" id="containerRegreso">
+                        <label for="fecha-regreso" id="labelFechaRegreso">Fecha de regreso</label>
+                        <span class="field-icon" aria-hidden="true">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        </span>
+                        <input type="date" id="fecha-regreso" name="fecha_regreso" value="{{ fecha_regreso|default:'' }}" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="pasajeros">Pasajeros</label>
+                        <span class="field-icon" aria-hidden="true">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        </span>
+                        <select id="pasajeros" name="pasajeros">
+                            <option value="1" {% if pasajeros == 1 %}selected{% endif %}>1 persona</option>
+                            <option value="2" {% if pasajeros == 2 %}selected{% endif %}>2 personas</option>
+                            <option value="3" {% if pasajeros == 3 %}selected{% endif %}>3 personas</option>
+                            <option value="4" {% if pasajeros == 4 %}selected{% endif %}>4 personas</option>
+                            <option value="5" {% if pasajeros == 5 %}selected{% endif %}>5 personas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botón de búsqueda -->
+                <button type="submit" class="search-btn" id="searchBtn">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <span>Buscar vuelos con Duffel</span>
+                </button>
+
+                <!-- Aviso de bloqueo en itinerario -->
+                <div class="itinerary-alert">
+                    <span class="itinerary-alert-icon" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </span>
+                    <div>
+                        Al confirmar tu trayecto se creará una <strong>"Actividad de Bloqueo"</strong> automática
+                        en el itinerario del viaje, evitando que se agenden actividades durante las horas de traslado.
+                    </div>
+                </div>
+            </form>
+
+            <!-- ==========================================
+                 RESULTADOS DE BÚSQUEDA
+                 ========================================== -->
+            {% if busqueda_realizada %}
+                <div class="results-header">
+                    <div class="results-count">
+                        <strong>{{ total_resultados }} opci{{ total_resultados|pluralize:"ón,ones" }} encontrad{{ total_resultados|pluralize:"a,as" }}</strong> · {{ origen }} → {{ destino }}
+                    </div>
+                </div>
+
+                {% if vuelos %}
+                    {% for vuelo in vuelos %}
+                    <article class="flight-result {% if forloop.first %}selected{% endif %}" 
+                             data-offer-id="{{ vuelo.offer_id }}"
+                             data-aerolinea="{{ vuelo.aerolinea }}"
+                             data-numero-vuelo="{{ vuelo.numero_vuelo }}"
+                             data-origen="{{ vuelo.origen_codigo }}"
+                             data-destino="{{ vuelo.destino_codigo }}"
+                             data-hora-salida="{{ vuelo.hora_salida }}"
+                             data-hora-llegada="{{ vuelo.hora_llegada }}"
+                             data-duracion="{{ vuelo.duracion }}"
+                             data-escalas="{{ vuelo.escalas_texto }}"
+                             data-escalas-num="{{ vuelo.escalas }}"
+                             data-precio="{{ vuelo.precio_convertido }}"
+                             data-moneda="{{ vuelo.moneda_usuario }}"
+                             onclick="seleccionarVuelo(this)">
+                        <div class="airline-logo" aria-hidden="true">
+                            {% if modo_transporte == 'autobus' %}🚌{% else %}✈️{% endif %}
+                        </div>
+                        <div class="flight-route">
+                            <div class="flight-time">
+                                <div class="hour">{{ vuelo.hora_salida|slice:"11:16" }}</div>
+                                <div class="airport">{{ vuelo.origen_codigo|truncatechars:10 }}</div>
+                            </div>
+                            <div class="flight-line-result">
+                                <div class="flight-duration">{{ vuelo.duracion }}</div>
+                                <div class="flight-line-bar"></div>
+                                <div class="flight-stops {% if vuelo.escalas == 0 %}direct{% endif %}">{{ vuelo.escalas_texto }}</div>
+                            </div>
+                            <div class="flight-time">
+                                <div class="hour">{{ vuelo.hora_llegada|slice:"11:16" }}</div>
+                                <div class="airport">{{ vuelo.destino_codigo|truncatechars:10 }}</div>
+                            </div>
+                        </div>
+                        <div class="flight-info">
+                            <strong>{{ vuelo.aerolinea }}</strong>
+                            {{ vuelo.numero_vuelo }}
+                        </div>
+                        <div class="flight-price">
+                            <div class="price">{{ vuelo.precio_formateado }}</div>
+                            <div class="currency">por {{ pasajeros }} persona{{ pasajeros|pluralize:"s" }}</div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state mt-4">
+                        <div class="mb-2 fs-4">🔍</div>
+                        No se encontraron opciones para esta ruta y fecha.<br>
+                        Intenta con otras fechas o destinos.
+                    </div>
+                {% endif %}
+
+            {% endif %}
+
+            <!-- Estado inicial (antes de buscar) -->
+            {% if not busqueda_realizada %}
+                <div class="empty-state mt-4" id="emptyStateContainer">
+                    <div class="mb-2 fs-4" id="emptyStateIcon">✈️</div>
+                    <span id="emptyStateText">Ingresa tu ruta y fechas para buscar viajes disponibles.</span>
+                </div>
+            {% endif %}
+
+        </div>
+
+       <!-- ==========================================
+             PANEL LATERAL: RESUMEN DE SELECCIÓN
+             ========================================== -->
+        <div class="col-lg-4">
+            <div class="summary-side">
+                <h5 class="summary-side-title">
+                    <span aria-hidden="true">🧾</span> Resumen del trayecto
+                </h5>
+
+                {% if busqueda_realizada and vuelos %}
+                    <div class="summary-row">
+                        <span class="label">Tipo</span>
+                        <span class="value" id="sumTipoViaje">Ida y vuelta</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Ruta</span>
+                        <span class="value" id="sumRuta">{{ origen }} → {{ destino }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label" id="sumLabelAerolinea">{% if modo_transporte == 'autobus' %}Línea{% else %}Aerolínea{% endif %}</span>
+                        <span class="value" id="sumAerolinea">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label" id="sumLabelVuelo">{% if modo_transporte == 'autobus' %}Servicio{% else %}Vuelo{% endif %}</span>
+                        <span class="value" id="sumVuelo">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Salida</span>
+                        <span class="value" id="sumSalida">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Llegada</span>
+                        <span class="value" id="sumLlegada">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Duración</span>
+                        <span class="value" id="sumDuracion">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Pasajeros</span>
+                        <span class="value">{{ pasajeros }} persona{{ pasajeros|pluralize:"s" }}</span>
+                    </div>
+                    <div class="summary-row summary-row-total">
+                        <span class="label fw-bold" style="color: var(--color-heading);">Total</span>
+                        <span class="value" id="sumPrecio" style="font-size: 18px; color: var(--color-primary);">—</span>
+                    </div>
+
+                    <!-- Formulario oculto para confirmar el vuelo -->
+                    <form method="POST" id="formConfirmar">
+                        {% csrf_token %}
+                        <input type="hidden" name="confirmar_vuelo" value="1">
+                        
+                        <input type="hidden" name="modo_transporte" id="inputModoConfirm" value="{{ modo_transporte|default:'vuelo' }}">
+                        <input type="hidden" name="tipo_trayecto" id="inputTipoTrayecto" value="{{ tipo_trayecto_val|default:'IDA_VUELTA' }}">
+                        
+                        <input type="hidden" name="offer_id" id="inputOfferId">
+                        <input type="hidden" name="aerolinea" id="inputAerolinea">
+                        <input type="hidden" name="numero_vuelo" id="inputNumeroVuelo">
+                        <input type="hidden" name="origen_codigo" id="inputOrigenCodigo">
+                        <input type="hidden" name="destino_codigo" id="inputDestinoCodigo">
+                        <input type="hidden" name="fecha_salida" id="inputFechaSalida">
+                        <input type="hidden" name="fecha_llegada" id="inputFechaLlegada">
+                        <input type="hidden" name="duracion" id="inputDuracion">
+                        <input type="hidden" name="escalas_num" id="inputEscalasNum">
+                        <input type="hidden" name="escalas_texto" id="inputEscalasTxt">
+                        <input type="hidden" name="precio_total" id="inputPrecio">
+                        <input type="hidden" name="moneda" id="inputMoneda">
+                        <input type="hidden" name="pasajeros" value="{{ pasajeros }}">
+
+                        <button type="submit" class="search-btn mt-3" id="btnConfirmar" disabled>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                            Confirmar y registrar
+                        </button>
+                    </form>
+
+                    <p class="text-muted mt-3 mb-0" style="font-size: 12px; text-align: center;">
+                        Podrás adjuntar el comprobante de reserva en el siguiente paso.
+                    </p>
+                {% else %}
+                    <div class="summary-empty">
+                        Busca opciones para ver el resumen aquí.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // LÓGICA DE PESTAÑAS (TIPO DE VIAJE)
+    // ==========================================
+    const tabBtns = document.querySelectorAll('.trip-type-btn');
+    const inputIda = document.getElementById('fecha-ida');
+    const inputRegreso = document.getElementById('fecha-regreso');
+    const labelFechaIda = document.getElementById('labelFechaIda');
+    
+    const inputTipoViajeBusqueda = document.getElementById('tipoViajeBusqueda');
+    const inputTipoTrayectoConfirm = document.getElementById('inputTipoTrayecto');
+    const sumTipoViaje = document.getElementById('sumTipoViaje');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+            
+            const tipo = this.dataset.tipo;
+            if(inputTipoViajeBusqueda) inputTipoViajeBusqueda.value = tipo;
+
+            if (tipo === 'ida_vuelta') {
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA_VUELTA';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Ida y vuelta';
+            } else if (tipo === 'regreso') {
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'REGRESO';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo regreso';
+            } else {
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo ida';
+            }
+
+            if (tipo === 'ida') {
+                inputIda.disabled = false; inputIda.required = true;
+                inputRegreso.disabled = true; inputRegreso.required = false; inputRegreso.value = '';
+                labelFechaIda.textContent = 'Fecha de viaje';
+            } else if (tipo === 'regreso') {
+                inputIda.disabled = true; inputIda.required = false; inputIda.value = '';
+                inputRegreso.disabled = false; inputRegreso.required = true;
+                labelFechaIda.textContent = 'Fecha de ida'; 
+            } else { 
+                inputIda.disabled = false; inputIda.required = true;
+                inputRegreso.disabled = false; inputRegreso.required = true;
+                labelFechaIda.textContent = 'Fecha de ida';
+            }
+        });
+    });
+
+    // ==========================================
+    // LÓGICA DE CAMBIO DE MODO (VUELOS VS AUTOBUSES)
+    // ==========================================
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    const inputModoBusqueda = document.getElementById('modoTransporte'); 
+    const inputModoConfirm = document.getElementById('inputModoConfirm'); 
+    const labelOrigen = document.getElementById('labelOrigen');
+    const labelDestino = document.getElementById('labelDestino');
+    const searchBtnSpan = document.querySelector('#searchBtn span');
+    const emptyStateIcon = document.getElementById('emptyStateIcon');
+    const origenInput = document.getElementById('origen');
+    const destinoInput = document.getElementById('destino');
+
+    function actualizarInterfaz(modo) {
+        if (modo === 'autobus') {
+            labelOrigen.textContent = 'Desde (Código Ciudad)';
+            labelDestino.textContent = 'Hasta (Código Ciudad)';
+            searchBtnSpan.textContent = 'Buscar autobuses';
+            if(emptyStateIcon) emptyStateIcon.textContent = '🚌';
+        } else {
+            labelOrigen.textContent = 'Desde (código IATA)';
+            labelDestino.textContent = 'Hasta (código IATA)';
+            searchBtnSpan.textContent = 'Buscar vuelos con Duffel';
+            if(emptyStateIcon) emptyStateIcon.textContent = '✈️';
+        }
+        
+        if(inputModoConfirm) {
+            inputModoConfirm.value = modo;
+        }
+    }
+
+    modeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            modeBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-checked', 'false');
+            });
+            this.classList.add('active');
+            this.setAttribute('aria-checked', 'true');
+            
+            const modoSeleccionado = this.dataset.modo;
+            inputModoBusqueda.value = modoSeleccionado;
+            actualizarInterfaz(modoSeleccionado);
+        });
+    });
+
+    actualizarInterfaz(inputModoBusqueda.value);
+
+    function formatearInput(e) { e.target.value = e.target.value.toUpperCase(); }
+    if (origenInput) origenInput.addEventListener('input', formatearInput);
+    if (destinoInput) destinoInput.addEventListener('input', formatearInput);
+
+    function seleccionarVuelo(card) {
+        document.querySelectorAll('.flight-result').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+
+        const data = card.dataset;
+
+        document.getElementById('sumRuta').textContent = data.origen + ' → ' + data.destino;
+        document.getElementById('sumAerolinea').textContent = data.aerolinea;
+        document.getElementById('sumVuelo').textContent = data.numeroVuelo;
+        document.getElementById('sumSalida').textContent = data.horaSalida ? data.horaSalida.slice(0, 16).replace('T', ' · ') : '—';
+        document.getElementById('sumLlegada').textContent = data.horaLlegada ? data.horaLlegada.slice(0, 16).replace('T', ' · ') : '—';
+        document.getElementById('sumDuracion').textContent = data.duracion;
+        document.getElementById('sumPrecio').textContent = '$' + data.precio + ' ' + data.moneda;
+
+        document.getElementById('inputOfferId').value = data.offerId;
+        document.getElementById('inputAerolinea').value = data.aerolinea;
+        document.getElementById('inputNumeroVuelo').value = data.numeroVuelo;
+        document.getElementById('inputOrigenCodigo').value = data.origen;
+        document.getElementById('inputDestinoCodigo').value = data.destino;
+        document.getElementById('inputFechaSalida').value = data.horaSalida;
+        document.getElementById('inputFechaLlegada').value = data.horaLlegada;
+        document.getElementById('inputDuracion').value = data.duracion;
+        document.getElementById('inputEscalasNum').value = data.escalasNum || 0;
+        document.getElementById('inputEscalasTxt').value = data.escalas;
+        document.getElementById('inputPrecio').value = data.precio;
+        document.getElementById('inputMoneda').value = data.moneda;
+
+        if(inputModoConfirm) {
+            inputModoConfirm.value = document.getElementById('modoTransporte').value;
+        }
+
+        document.getElementById('btnConfirmar').disabled = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Restaurar pestaña activa tras recargar
+        const tipoViajeGuardado = document.getElementById('tipoViajeBusqueda').value;
+        const tabActiva = document.querySelector(`.trip-type-btn[data-tipo="${tipoViajeGuardado}"]`);
+        if (tabActiva) {
+            tabActiva.click(); 
+        }
+
+        const primerVuelo = document.querySelector('.flight-result.selected');
+        if (primerVuelo) {
+            seleccionarVuelo(primerVuelo);
+        }
+    });
+</script>
+{% endblock %}
