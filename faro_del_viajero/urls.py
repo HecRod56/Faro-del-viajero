@@ -23,7 +23,7 @@ urlpatterns = [
     path('', include('chat.urls')),
     path('chat/', include('chat.urls')),
     path('', include('galeria.urls')),
+    path('viajes/gastos/', include('apps.control_gastos.urls')),
     path('busqueda/', include('apps.busqueda.urls')),
-    path('', include('apps.control_gastos.urls')),
     path('', include('apps.transporte.urls')),
 ]

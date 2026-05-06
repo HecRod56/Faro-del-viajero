@@ -1,0 +1,92 @@
+<div id="tab-resumen" class="cg-tab-content activa">
+    <div class="cg-grid">
+
+        <!-- Columna izquierda -->
+        <div>
+        <div class="cg-card">
+            <table class="cg-presupuesto-tabla">
+            <thead>
+                <tr>
+                <th>Presupuesto</th><th>Gastado</th><th>Saldo</th><th>Uso</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <td>${{ resumen.presupuesto_total|floatformat:0 }}</td>
+                <td>${{ resumen.total_gastado|floatformat:0 }}</td>
+                <td>${{ resumen.saldo_disponible|floatformat:0 }}</td>
+                <td>{{ resumen.porcentaje_uso|floatformat:0 }}%</td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+
+        <div class="cg-card cg-aportaciones-card">
+            <div class="cg-card-header">Aportaciones</div>
+            <div class="cg-aportaciones-inner">
+            <div class="cg-aportaciones-lista">
+                {% for ap in resumen.aportaciones %}
+                <div class="cg-aportacion-row">
+                <span class="cg-aportacion-nombre">{{ ap.participante.usuario.get_full_name|default:ap.participante }}</span>
+                <span class="cg-aportacion-monto">${{ ap.total_pagado|floatformat:0 }}</span>
+                </div>
+                {% empty %}
+                <p style="color:var(--cg-texto-2); font-size:13px; padding:8px 0;">Sin aportaciones aún.</p>
+                {% endfor %}
+            </div>
+            <div class="cg-donut-wrap">
+                <canvas id="donut-chart"></canvas>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Columna derecha: tabla de gastos -->
+        <div class="cg-card cg-gastos-card">
+        <table class="cg-gastos-tabla">
+            <thead>
+            <tr>
+                <th>Fecha</th><th>Quién</th><th>Descripción</th>
+                <th>Categoría</th><th>Monto</th><th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for gasto in gastos %}
+            <tr>
+                <td>{{ gasto.fecha|date:"j/n" }}</td>
+                <td>{{ gasto.pagado_por.usuario.get_short_name|default:gasto.pagado_por.usuario.username }}</td>
+                <td>{{ gasto.concepto }}</td>
+                <td><span class="cg-pill">{{ gasto.get_categoria_display|truncatechars:12 }}</span></td>
+                <td class="monto">${{ gasto.monto|floatformat:0 }}</td>
+                <td>
+                <div class="cg-acciones-cell">
+                    <button class="cg-btn-icon" title="Editar"
+                    onclick="abrirModalEditar(
+                        {{ gasto.id }},'{{ gasto.concepto|escapejs }}','{{ gasto.monto }}',
+                        '{{ gasto.categoria }}','{{ gasto.fecha|date:"Y-m-d" }}',
+                        '{{ gasto.metodo_division }}',{{ gasto.pagado_por.id }})">
+                    <i class="bi bi-pencil-square" style="font-size:15px;"></i>
+                    </button>
+                    <button class="cg-btn-icon danger" title="Eliminar"
+                    onclick="confirmarEliminar({{ gasto.id }},'{{ gasto.concepto|escapejs }}')">
+                    <i class="bi bi-trash3" style="font-size:15px;"></i>
+                    </button>
+                </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6"><div class="cg-empty"><p>Aún no hay gastos registrados.</p></div></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="cg-gastos-footer">
+            <button class="cg-btn cg-btn-primario" onclick="abrirModalNuevo()">
+            <i class="bi bi-plus-lg"></i> Añadir gasto
+            </button>
+        </div>
+        </div>
+
+    </div>
+</div><!-- /tab resumen -->

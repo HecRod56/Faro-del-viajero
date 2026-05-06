@@ -1,0 +1,53 @@
+<div id="tab-billetera" class="cg-tab-content">
+    <div class="cg-billetera-grid">
+        <div class="cg-billetera-card">
+        <div class="lbl">Presupuesto personal</div>
+        <div class="val">
+            {% if mi_billetera.presupuesto_personal %}${{ mi_billetera.presupuesto_personal|floatformat:0 }}
+            {% else %}—{% endif %}
+        </div>
+        </div>
+        <div class="cg-billetera-card">
+        <div class="lbl">Mi parte del gasto</div>
+        <div class="val">${{ mi_billetera.total_gastado_personal|floatformat:0 }}</div>
+        </div>
+        <div class="cg-billetera-card">
+        <div class="lbl">Saldo disponible</div>
+        <div class="val {% if mi_billetera.saldo_personal is not None %}{% if mi_billetera.saldo_personal >= 0 %}positivo{% else %}negativo{% endif %}{% endif %}">
+            {% if mi_billetera.saldo_personal is not None %}${{ mi_billetera.saldo_personal|floatformat:0 }}
+            {% else %}—{% endif %}
+        </div>
+        </div>
+    </div>
+
+    <div class="pb-4">
+        {% if mi_billetera.deudas_que_tengo %}
+        <p class="cg-section-title">Le debo a…</p>
+        {% for d in mi_billetera.deudas_que_tengo %}
+        <div class="cg-deuda-row">
+            <span style="color:var(--cg-texto-2); font-size:13px;">
+            Le debo a <strong style="color:var(--cg-texto);">{{ d.a }}</strong>
+            </span>
+            <span class="cg-deuda-monto debes">-${{ d.monto|floatformat:2 }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if mi_billetera.deudas_hacia_mi %}
+        <p class="cg-section-title {% if mi_billetera.deudas_que_tengo %}mt-4{% endif %}">Me deben…</p>
+        {% for d in mi_billetera.deudas_hacia_mi %}
+        <div class="cg-deuda-row">
+            <span style="color:var(--cg-texto-2); font-size:13px;">
+            <strong style="color:var(--cg-texto);">{{ d.de }}</strong> me debe
+            </span>
+            <span class="cg-deuda-monto te-deben">+${{ d.monto|floatformat:2 }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if not mi_billetera.deudas_que_tengo and not mi_billetera.deudas_hacia_mi %}
+        <div class="cg-empty">
+            <i class="bi bi-check-circle fs-2 d-block mb-2" style="color:var(--cg-primario);"></i>
+            <p>Estás a mano con todos.</p>
+        </div>
+        {% endif %}
+    </div>
+</div><!-- /tab billetera -->
