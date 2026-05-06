@@ -1,3 +1,4 @@
+#urls.py core
 from django.urls import path
 from . import views
 from apps.autenticado.views import register

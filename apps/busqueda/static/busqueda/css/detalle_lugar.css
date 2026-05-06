@@ -1,0 +1,190 @@
+/* ── Galería ────────────────────────────────────────── */
+.galeria-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 320px;
+    margin-bottom: 24px;
+}
+.galeria-grid .foto-principal {
+    grid-row: 1 / 3;
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
+    height: 100%;
+}
+.galeria-grid .foto-sec {
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
+    height: 100%;
+}
+.galeria-placeholder {
+    background: #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+/* ── Panel izquierdo ────────────────────────────────── */
+.detalle-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.detalle-nombre {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--texto-limpio);
+    margin-bottom: 4px;
+}
+.detalle-ciudad {
+    font-size: 13px;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+.badge-categoria {
+    background: #E6F7F5;
+    color: var(--turquesa);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #B2E8E2;
+}
+.popularidad-link {
+    font-size: 13px;
+    color: var(--turquesa);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px 0 16px;
+}
+.seccion-titulo {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--texto-limpio);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    margin-top: 16px;
+}
+.detalle-descripcion {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.65;
+    margin-bottom: 0;
+}
+.lo-incluye-lista {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.8;
+}
+.lo-incluye-lista span::before {
+    content: "· ";
+    color: var(--turquesa);
+    font-weight: 700;
+}
+
+/* ── Panel derecho ──────────────────────────────────── */
+.panel-precio {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 110px;
+}
+.precio-label {
+    font-size: 12px;
+    color: #94A3B8;
+    margin-bottom: 2px;
+}
+.precio-monto {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--turquesa);
+    line-height: 1.1;
+}
+.precio-usd {
+    font-size: 12px;
+    color: #94A3B8;
+    margin-top: 2px;
+    margin-bottom: 20px;
+}
+.btn-agregar-detalle {
+    display: block;
+    width: 100%;
+    background: var(--turquesa);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 10px;
+    font-family: 'Montserrat', sans-serif;
+}
+.btn-agregar-detalle:hover {
+    background: var(--turquesa-oscuro);
+    transform: translateY(-1px);
+}
+.btn-sitio-oficial {
+    display: block;
+    width: 100%;
+    background: white;
+    color: var(--texto-limpio);
+    font-weight: 700;
+    font-size: 14px;
+    border: 2px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 11px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    font-family: 'Montserrat', sans-serif;
+}
+.btn-sitio-oficial:hover {
+    border-color: var(--turquesa);
+    color: var(--turquesa);
+}
+.aviso-faro {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #92400E;
+    margin-top: 14px;
+    line-height: 1.5;
+}
+.aviso-faro strong { color: #78350F; }
+
+/* ── Toast ──────────────────────────────────────────── */
+.toast-faro {
+    display: none;
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--turquesa);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 28px;
+    border-radius: 30px;
+    box-shadow: 0 4px 16px rgba(14,158,142,0.35);
+    z-index: 9999;
+    font-family: 'Montserrat', sans-serif;
+}
