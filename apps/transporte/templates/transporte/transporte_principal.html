@@ -288,7 +288,7 @@
                 <div class="empty-state">
                     <div class="mb-2 fs-4">✈️ / 🚌</div>
                     Aún no hay trayectos registrados.<br>
-                    <a href="{% url 'transporte:registrar_trayecto' %}" class="text-naranja text-decoration-underline mt-1 d-inline-block">+ Registrar el primer trayecto</a>
+                    <a href="{% url 'transporte:registrar_trayecto' viaje.id %}" class="text-naranja text-decoration-underline mt-1 d-inline-block">+ Registrar el primer trayecto</a>
                 </div>
             {% endif %}
         </div>
