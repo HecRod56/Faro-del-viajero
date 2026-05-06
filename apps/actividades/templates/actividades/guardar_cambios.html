@@ -1,0 +1,28 @@
+<div class="modal fade" id="guardarModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content delete-modal-content">
+            <div class="modal-body text-center">
+
+                <div class="mb-4">
+                    <div class="delete-modal-icon">💾</div>
+                </div>
+
+                <h3 class="fw-bold mb-4 delete-modal-title">¿GUARDAR CAMBIOS?</h3>
+
+                <div class="mb-4 save-modal-name">
+                    <h4>"{{ actividad.titulo }}"</h4>
+                </div>
+
+                <p class="text-muted mb-5">
+                    Se sobrescribirán los datos actuales de esta actividad.
+                </p>
+
+                <div class="d-flex gap-3">
+                    <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">CANCELAR</button>
+                    <button type="submit" class="btn btn-modal-save" form="form-editar-actividad">Sí, guardar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

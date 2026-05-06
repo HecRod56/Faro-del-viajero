@@ -4,7 +4,7 @@ from apps.gestion_viajes.mixins import ViajeContextMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from apps.gestion_viajes.models import Viaje, Participante
-from .models import MensajeChat
+from .models import MensajeChat, ChatAbandonado
 
 
 @login_required
@@ -12,28 +12,40 @@ def lista_chats(request):
     viajes = Viaje.objects.filter(participantes__usuario=request.user)
     for v in viajes:
         v.ultimo_msg = MensajeChat.objects.filter(viaje=v).last()
-        print(f"Viaje: {v.nombre} | Último msg: {v.ultimo_msg}")
     return render(request, 'chat/lista_chats.html', {'viajes': viajes})
+
 
 class ChatViajeView(LoginRequiredMixin, ViajeContextMixin, TemplateView):
     template_name = 'chat/chat_viaje.html'
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        viaje_obj = getattr(self, 'viaje', getattr(self, 'viaje_actual', None))
+
+        if viaje_obj:
+            abandono = ChatAbandonado.objects.filter(
+                viaje=viaje_obj, usuario=request.user
+            ).exists()
+            if abandono:
+                return render(request, 'chat/chat_sin_acceso.html', {'viaje': viaje_obj})
+        return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # self.viaje ya existe gracias al Mixin
-        
-        # Obtenemos la lista de viajes para la barra lateral
+        viaje_obj = getattr(self, 'viaje', getattr(self, 'viaje_actual', None))
+
         viajes = Viaje.objects.filter(participantes__usuario=self.request.user)
         for v in viajes:
             v.ultimo_msg = MensajeChat.objects.filter(viaje=v).last()
-            
+
         context.update({
+            'viaje': viaje_obj,
             'viajes': viajes,
-            'mensajes': MensajeChat.objects.filter(viaje=self.viaje),
-            'integrantes': Participante.objects.filter(viaje=self.viaje),
-            # 'viaje_actual' ya lo pone el Mixin automáticamente
+            'mensajes': MensajeChat.objects.filter(viaje=viaje_obj),
+            'integrantes': Participante.objects.filter(viaje=viaje_obj),
         })
         return context
+
 
 @login_required
 def chat_integrantes(request, viaje_id):
@@ -67,6 +79,6 @@ def enviar_mensaje(request, viaje_id):
 def abandonar_viaje(request, viaje_id):
     if request.method == 'POST':
         viaje = get_object_or_404(Viaje, id=viaje_id)
-        Participante.objects.filter(viaje=viaje, usuario=request.user).delete()
+        ChatAbandonado.objects.get_or_create(viaje=viaje, usuario=request.user)
         return redirect('chat:lista_chats')
-    return redirect('chat:chat_viaje', viaje_id=viaje_id)   
+    return redirect('chat:chat_viaje', viaje_id=viaje_id)

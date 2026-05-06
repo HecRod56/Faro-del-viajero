@@ -1,0 +1,143 @@
+/* static/autenticado/css/register.css */
+
+/* Imagen de fondo específica del register */
+.register-image-panel {
+    background-image: url('https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1931&auto=format&fit=crop');
+}
+
+/* Overlay más oscuro en register (0.8 vs 0.7 del login) */
+.register-image-overlay {
+    background: linear-gradient(180deg, rgba(26, 46, 53, 0) 0%, rgba(26, 46, 53, 0.8) 100%);
+}
+
+.register-title {
+    font-size: 32px;
+    letter-spacing: -0.5px;
+}
+
+/* ==========================================
+   Indicador de pasos (step indicator)
+   ========================================== */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+}
+
+.step-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.step-dot.active {
+    background-color: var(--color-primary);
+}
+
+.step-dot.inactive {
+    background-color: transparent;
+    border: 2px solid #E4E4E2;
+}
+
+.step-line {
+    height: 2px;
+    width: 30px;
+    background-color: #E4E4E2;
+    transition: background-color 0.3s;
+}
+
+.step-line.active {
+    background-color: var(--color-primary);
+}
+
+.step-text {
+    font-size: 14px;
+    font-weight: var(--font-weight-semibold);
+    color: #888;
+    margin-left: 8px;
+}
+
+/* ==========================================
+   Input group para teléfono con prefijo
+   ========================================== */
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1.5px solid #E4E4E2;
+    border-right: none;
+    border-radius: 14px 0 0 14px;
+    font-weight: var(--font-weight-semibold);
+    color: #555;
+    padding: 16px 20px;
+    font-size: 15px;
+}
+
+.input-phone {
+    border-radius: 0 14px 14px 0;
+    border-left: none;
+}
+
+.input-phone:focus {
+    border-left: 1.5px solid var(--color-primary);
+    margin-left: -1.5px;
+}
+
+/* ==========================================
+   Medidor de fortaleza de contraseña
+   ========================================== */
+.strength-meter {
+    height: 6px;
+    background-color: #E4E4E2;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+.strength-text {
+    font-size: 12px;
+    font-weight: var(--font-weight-semibold);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Estados de fortaleza */
+.strength-low {
+    background-color: var(--color-danger);
+}
+
+.strength-medium {
+    background-color: var(--color-warning);
+}
+
+.strength-high {
+    background-color: var(--color-primary);
+}
+
+.strength-text-low { color: var(--color-danger); }
+.strength-text-medium { color: var(--color-warning); }
+.strength-text-high { color: var(--color-primary); }
+.strength-text-default { color: #888; }
+
+/* ==========================================
+   Modal de privacidad
+   ========================================== */
+.register-modal-content {
+    border-radius: 16px;
+    border: none;
+}
+
+.register-modal-header {
+    border-radius: 16px 16px 0 0;
+}
+
+.info-link {
+    font-size: 13px;
+    border-bottom: 1px dashed #ccc;
+}

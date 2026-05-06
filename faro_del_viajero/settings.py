@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
+  
     #CLOUDINARY
     'cloudinary_storage',
     'cloudinary',
@@ -53,9 +54,12 @@ INSTALLED_APPS = [
     'apps.autenticado',
     'apps.gestion_viajes',
     'apps.integrantes',
-    'actividades',
+    'apps.actividades',
     'chat',
     'apps.galeria',
+    'apps.control_gastos',
+    #ES LA DE APIS
+    'apps.busqueda',
     ]
 
 MIDDLEWARE = [
@@ -98,6 +102,16 @@ CLOUDINARY_STORAGE = {
     'API_KEY':    config('CLOUDINARY_API_KEY'),
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
+
+
+import cloudinary
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+)
+
+
 
 #USAR CLOUDINARY COMO ESTANDAR PARA BACKEND DE ARCHIVOS
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -150,20 +164,27 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
+USE_L10N = False
+
 USE_TZ = True
+
+DATE_INPUT_FORMATS = ['%d/%m/%Y']
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'apps'),
+]
 
 # Le indicamos a Django que el CustomUser vive en la app "autenticado"
 AUTH_USER_MODEL = 'autenticado.CustomUser'
@@ -189,3 +210,12 @@ Luego, puedes usarlo en tus vistas o servicios:
     response = requests.get(f"{settings.API_URL}/endpoint", headers={"Authorization": f"Bearer {settings.API_KEY}"})
     data = response.json()
 """
+# CONFIGURACIÓN DE CORREO (con API BREVO)
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+ANYMAIL = {
+    "BREVO_API_KEY": config("BREVO_API_KEY", default="None"),
+}
+DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
+
+GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY")
+PEXELS_API_KEY = config("PEXELS_API_KEY")

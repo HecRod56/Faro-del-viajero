@@ -1,87 +1,28 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block head %}
+<link rel="stylesheet" href="{% static 'autenticado/css/auth-shared.css' %}">
+<link rel="stylesheet" href="{% static 'autenticado/css/register.css' %}">
+{% endblock %}
+
 {% block content %}
-<style>
-    :root {
-        --turquesa: #0E9E8E;
-        --texto-oscuro: #1A2E35;
-        --fondo-gris: #F2F2F0;
-        --borde-gris: #E4E4E2;
-        --dorado: #F5C518;
-    }
-
-    body {
-        font-family: 'Montserrat', sans-serif;
-        background-color: var(--fondo-gris);
-    }
-    .text-oscuro { color: var(--texto-oscuro); }
-    .text-turquesa { color: var(--turquesa); }
-
-    .form-label {
-        color: var(--texto-oscuro); font-weight: 700; font-size: 14px; margin-bottom: 8px;
-    }
-
-    .form-control, .form-select {
-        border: 1.5px solid var(--borde-gris); border-radius: 14px; padding: 16px 20px;
-        font-size: 15px; color: var(--texto-oscuro); transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(14, 158, 142, 0.1); outline: none;
-    }
-
-    .input-group-text {
-        background-color: #f8f9fa; border: 1.5px solid var(--borde-gris); 
-        border-right: none; border-radius: 14px 0 0 14px; font-weight: 600; color: #555; padding: 16px 20px; font-size: 15px;
-    }
-    .input-phone { border-radius: 0 14px 14px 0; border-left: none; }
-    .input-phone:focus { border-left: 1.5px solid var(--turquesa); margin-left: -1.5px; }
-
-    .btn-primary-custom {
-        background: var(--turquesa); color: white; border: none; border-radius: 28px;
-        padding: 16px 24px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-        display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%;
-    }
-    .btn-primary-custom:hover:not(:disabled) { background: #0b8a7c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14, 158, 142, 0.2); }
-    .btn-primary-custom:disabled { background: #a8d5d1; cursor: not-allowed; }
-
-    .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
-    .step-dot { width: 12px; height: 12px; border-radius: 50%; transition: background-color 0.3s; }
-    .step-dot.active { background-color: var(--turquesa); }
-    .step-dot.inactive { background-color: transparent; border: 2px solid var(--borde-gris); }
-    .step-line { height: 2px; width: 30px; background-color: var(--borde-gris); transition: background-color 0.3s; }
-    .step-line.active { background-color: var(--turquesa); }
-    .step-text { font-size: 14px; font-weight: 600; color: #888; margin-left: 8px; }
-
-    .strength-meter { height: 6px; background-color: var(--borde-gris); border-radius: 3px; margin-top: 8px; overflow: hidden; }
-    .strength-bar { height: 100%; width: 0; transition: width 0.3s, background-color 0.3s; }
-    .strength-text { font-size: 12px; font-weight: 600; margin-top: 4px; display: block; }
-    .password-toggle { position: absolute; right: 18px; top: 44px; cursor: pointer; color: #888; font-size: 18px; }
-    
-    /* Estilo para errores de validación */
-    .error-feedback {
-        display: none; color: #dc3545; font-size: 13px; font-weight: 600; margin-top: 6px;
-    }
-</style>
-
 <div class="container-fluid p-0 vh-100 d-flex">
     <div class="row g-0 w-100 h-100">
-        <div class="d-none d-lg-block col-lg-6 bg-image position-relative" 
-             style="background-image: url('https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1931&auto=format&fit=crop'); 
-                    background-size: cover; background-position: center;">
-            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, rgba(26, 46, 53, 0) 0%, rgba(26, 46, 53, 0.8) 100%);"></div>
-            <div class="position-absolute bottom-0 start-0 p-5 text-white w-100">
-                <h2 class="fw-bold mb-2">Planifica. Viaja. Disfruta.</h2>
-                <p class="fs-6" style="opacity: 0.9;">La herramienta colaborativa para los viajeros modernos.</p>
+        <div class="d-none d-lg-block col-lg-6 auth-image-panel register-image-panel position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-100 register-image-overlay"></div>
+            <div class="position-absolute bottom-0 start-0 p-5 text-white w-100 auth-image-content">
+                <h2 class="auth-image-title">Planifica. Viaja. Disfruta.</h2>
+                <p class="auth-image-subtitle">La herramienta colaborativa para los viajeros modernos.</p>
             </div>
         </div>
 
         <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center bg-white" style="overflow-y: auto;">
-            <div style="width: 100%; max-width: 540px; padding: 40px 30px;">
+            <div class="auth-form-wrapper">
                 
                 <div class="d-flex align-items-center mb-4 gap-3">
                     <img src="{% static 'core/img/logo.png' %}" alt="Logo" width="65" height="65" class="rounded shadow-sm" style="object-fit: cover;">
-                    <h1 class="fw-bold text-oscuro mb-0" style="font-size: 32px; letter-spacing: -0.5px;">Crear cuenta</h1>
+                    <h1 class="fw-bold text-oscuro mb-0 register-title">Crear cuenta</h1>
                 </div>
 
                 <div class="step-indicator">
@@ -111,18 +52,18 @@
                             <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
                             <span class="password-toggle" id="togglePassword">👁️</span>
                             <div class="strength-meter"><div class="strength-bar" id="strengthBar"></div></div>
-                            <span class="strength-text" id="strengthText" style="color: #888;">Fortaleza: Baja</span>
+                            <span class="strength-text strength-text-default" id="strengthText">Fortaleza: Baja</span>
                         </div>
 
                         <div class="mb-5">
                             <label class="form-label">Confirmar contraseña *</label>
                             <input type="password" id="confirmPassword" name="confirm_password" class="form-control" placeholder="••••••••">
-                            <div class="invalid-feedback" id="passwordError" style="display: none; color: #dc3545; font-size: 13px; font-weight: 600; margin-top: 6px;">Las contraseñas no coinciden.</div>
+                            <div class="error-feedback" id="passwordError">Las contraseñas no coinciden.</div>
                         </div>
 
-                        <button type="button" id="btnNext" class="btn-primary-custom w-100" disabled>
+                        <button type="button" id="btnNext" class="btn-auth" disabled>
                             SIGUIENTE
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-left:8px;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </button>
 
                         <p class="text-center mt-4" style="font-size: 14px; color: #888;">
@@ -142,8 +83,8 @@
 
                         <div class="mb-4">
                             <label class="form-label">Fecha de nacimiento *</label>
-                            <input type="date" id="dob" name="dob" class="form-control">
-                            <div class="invalid-feedback mt-2" id="ageError" style="font-size: 13px; display: none; color: #dc3545; font-weight: bold;">
+                            <input type="date" id="dob" name="dob" class="form-control" required>
+                            <div class="error-feedback" id="ageError">
                                 ⚠ Debes tener 18+ años para crear una cuenta.
                             </div>
                         </div>
@@ -161,21 +102,21 @@
                         <div class="mb-3 form-check"> 
                             <input type="checkbox" class="form-check-input" id="termsCheck" style="margin-top: 0.3rem;">
                             <label class="form-check-label text-oscuro" style="font-size: 14px;" for="termsCheck">
-                                Acepto los <a href="#" class="text-turquesa text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Términos y condiciones</a>
+                                Acepto los <a href="#" class="text-turquesa text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#infoModal">Términos y condiciones</a>
                             </label>
                         </div>
 
                         <div class="mb-5 ms-4"> 
-                            <a href="#" class="text-muted text-decoration-none" style="font-size: 13px; border-bottom: 1px dashed #ccc;" data-bs-toggle="modal" data-bs-target="#infoModal">
+                            <a href="#" class="text-muted text-decoration-none info-link" data-bs-toggle="modal" data-bs-target="#infoModal">
                                 ℹ ¿Por qué pedimos estos datos?
                             </a>
                         </div>
 
                         <div class="d-flex gap-3">
-                            <button type="button" id="btnBack" class="btn btn-light fw-bold" style="border-radius: 28px; padding: 16px 24px; border: 2px solid var(--borde-gris); color: #555;">
+                            <button type="button" id="btnBack" class="btn btn-auth-back">
                                 Atrás
                             </button>
-                            <button type="submit" id="btnSubmit" class="btn-primary-custom flex-grow-1" disabled>
+                            <button type="submit" id="btnSubmit" class="btn-auth flex-grow-1" disabled>
                                 CREAR CUENTA
                             </button>
                         </div>
@@ -188,8 +129,8 @@
 
 <div class="modal fade" id="infoModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: none;">
-            <div class="modal-header bg-light border-0" style="border-radius: 16px 16px 0 0;">
+        <div class="modal-content register-modal-content">
+            <div class="modal-header bg-light border-0 register-modal-header">
                 <h6 class="modal-title fw-bold text-oscuro">Privacidad y Uso de Datos</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -234,20 +175,18 @@
         btnNext.disabled = true;
 
         try {
-            // Petición a la API que creamos en views.py
             const response = await fetch(`/api/validar-correo/?email=${encodeURIComponent(email.value)}`);
             const data = await response.json();
 
             if (data.existe) {
                 emailError.style.display = 'block';
-                email.style.borderColor = '#dc3545';
+                email.classList.add('is-invalid');
                 btnNext.innerHTML = originalContent;
                 btnNext.disabled = false;
             } else {
                 emailError.style.display = 'none';
-                email.style.borderColor = 'var(--borde-gris)';
+                email.classList.remove('is-invalid');
                 
-                // Transición al paso 2
                 step1Container.classList.add('d-none');
                 step2Container.classList.remove('d-none');
                 lineIndicator.classList.add('active');
@@ -275,7 +214,7 @@
 
     // --- LÓGICA PASO 2 (Teléfono y Envío Final) ---
     unifiedForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Detener envío para validar teléfono
+        e.preventDefault();
         
         const originalText = btnSubmit.innerHTML;
         btnSubmit.innerHTML = 'Validando...';
@@ -287,12 +226,11 @@
 
             if (data.existe) {
                 phoneError.style.display = 'block';
-                phoneInput.style.borderColor = '#dc3545';
+                phoneInput.classList.add('is-invalid');
                 btnSubmit.innerHTML = originalText;
                 btnSubmit.disabled = false;
             } else {
                 phoneError.style.display = 'none';
-                // Si todo está bien, enviamos el formulario manualmente
                 unifiedForm.submit();
             }
         } catch (e) {
@@ -302,7 +240,7 @@
         }
     });
 
-    // --- VALIDACIONES DE FORMATO Y CONTROLES ---
+    // --- VALIDACIONES DE FORMATO ---
     const togglePassword = document.getElementById('togglePassword');
     const strengthBar = document.getElementById('strengthBar');
     const strengthText = document.getElementById('strengthText');
@@ -314,6 +252,31 @@
         this.textContent = type === 'password' ? '👁️' : '🙈';
     });
 
+    function setStrength(level, widthPercent) {
+        // Limpiar clases previas
+        strengthBar.classList.remove('strength-low', 'strength-medium', 'strength-high');
+        strengthText.classList.remove('strength-text-low', 'strength-text-medium', 'strength-text-high', 'strength-text-default');
+        
+        strengthBar.style.width = widthPercent;
+        
+        if (level === 'low') {
+            strengthBar.classList.add('strength-low');
+            strengthText.classList.add('strength-text-low');
+            strengthText.textContent = 'Fortaleza: Baja';
+        } else if (level === 'medium') {
+            strengthBar.classList.add('strength-medium');
+            strengthText.classList.add('strength-text-medium');
+            strengthText.textContent = 'Fortaleza: Media';
+        } else if (level === 'high') {
+            strengthBar.classList.add('strength-high');
+            strengthText.classList.add('strength-text-high');
+            strengthText.textContent = 'Fortaleza: Alta';
+        } else {
+            strengthText.classList.add('strength-text-default');
+            strengthText.textContent = 'Fortaleza: Baja';
+        }
+    }
+
     function validateStep1() {
         const val = password.value;
         let strength = 0;
@@ -322,14 +285,12 @@
         if (val.match(/[0-9]/)) strength += 1;
         if (val.match(/[^a-zA-Z0-9]/)) strength += 1;
 
-        switch(strength) {
-            case 0: case 1:
-                strengthBar.style.width = val.length > 0 ? '25%' : '0%';
-                strengthBar.style.backgroundColor = '#dc3545'; strengthText.textContent = 'Fortaleza: Baja'; strengthText.style.color = '#dc3545'; break;
-            case 2: case 3:
-                strengthBar.style.width = '50%'; strengthBar.style.backgroundColor = '#F5C518'; strengthText.textContent = 'Fortaleza: Media'; strengthText.style.color = '#F5C518'; break;
-            case 4:
-                strengthBar.style.width = '100%'; strengthBar.style.backgroundColor = '#0E9E8E'; strengthText.textContent = 'Fortaleza: Alta'; strengthText.style.color = '#0E9E8E'; break;
+        if (strength <= 1) {
+            setStrength('low', val.length > 0 ? '25%' : '0%');
+        } else if (strength <= 3) {
+            setStrength('medium', '50%');
+        } else {
+            setStrength('high', '100%');
         }
 
         const isNameValid = fullName.value.trim().length > 0;
@@ -363,19 +324,18 @@
         btnSubmit.disabled = !isValid;
     }
 
-    // Escuchadores para inputs
     [fullName, email, password, confirmPassword].forEach(input => {
         input.addEventListener('input', () => {
-            emailError.style.display = 'none'; // Limpiar error de BD al escribir
-            email.style.borderColor = 'var(--borde-gris)';
+            emailError.style.display = 'none';
+            email.classList.remove('is-invalid');
             validateStep1();
         });
     });
 
     phoneInput.addEventListener('input', function(e) { 
         this.value = this.value.replace(/[^0-9]/g, ''); 
-        phoneError.style.display = 'none'; // Limpiar error de BD al escribir
-        this.style.borderColor = 'var(--borde-gris)';
+        phoneError.style.display = 'none';
+        this.classList.remove('is-invalid');
         validateStep2(); 
     });
     dobInput.addEventListener('change', validateStep2);

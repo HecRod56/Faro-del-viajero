@@ -3,7 +3,7 @@
 {% load cloudinary %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'galeria/galeria.css' %}" />
+  <link rel="stylesheet" href="{% static 'galeria/css/galeria.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -30,11 +30,19 @@
 
   <!-- ── IMAGEN DEL VIAJE ───────────────────────────────── -->
   <div class="position-relative mb-4">
-    <img
-      src="{{ viaje.imagen_destino }}"
-      class="img-fluid rounded-4 w-100"
-      style="height: 180px; object-fit: cover;"
-    />
+
+    {% if viaje.imagen_destino %}
+      <img src="{{ viaje.imagen_destino.url }}" alt="{{ viaje.destino }}"
+        class="img-fluid rounded-4 w-100"
+        style="height: 180px; object-fit: cover;"
+      />
+    {% else %}
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80" alt="Viaje"
+        class="img-fluid rounded-4 w-100"
+        style="height: 180px; object-fit: cover;"
+      />
+    {% endif %}
+    
     <div class="position-absolute top-0 end-0 p-2">
       <span class="badge bg-white text-dark rounded-pill px-3 shadow-sm">
         <span class="text-success me-1">●</span>{{ viaje.get_estado_display }}

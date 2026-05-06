@@ -1,0 +1,141 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'actividades/css/actividades-shared.css' %}">
+<link rel="stylesheet" href="{% static 'actividades/css/actividades-form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card-wrapper">
+    <div class="form-card">
+
+        <h2 class="form-card-title">✏️ Editar Actividad</h2>
+
+        <form id="form-editar-actividad" method="POST">
+            {% csrf_token %}
+
+            <!-- Nombre -->
+            <div class="form-group">
+                <label class="form-label-upper">Nombre de la actividad *</label>
+                <input type="text" name="nombre_actividad" value="{{ actividad.titulo }}" class="form-input">
+            </div>
+
+            <!-- Fecha y Hora -->
+            <div class="form-row-group">
+                <div>
+                    <label class="form-label-upper">Fecha *</label>
+                    <input type="date" name="fecha" value="{{ actividad.fecha|date:'Y-m-d' }}" class="form-input">
+                </div>
+                <div>
+                    <label class="form-label-upper">Hora *</label>
+                    <input type="time" name="hora" value="{{ actividad.hora|time:'H:i' }}" class="form-input">
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="form-group">
+                <label class="form-label-upper">Ubicación *</label>
+                <div class="form-input-icon-wrapper">
+                    <input type="text" name="ubicacion" value="{{ actividad.ubicacion }}" class="form-input" style="padding-right: 40px;">
+                    <span class="form-input-icon">📍</span>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group">
+                <label class="form-label-upper">Descripción *</label>
+                <textarea name="descripcion" class="form-textarea">{{ actividad.descripcion }}</textarea>
+            </div>
+
+            <!-- Responsable -->
+            <div class="mb-4">
+                <label class="form-label">Responsable <span class="text-danger">*</span></label>
+                <select name="responsable" class="form-select" required>
+                    {% for p in participantes %}
+                        {% if es_lista_usuarios %}
+                            <option value="{{ p.id }}" selected>
+                                {{ p.get_full_name|default:p.username }} (Tú)
+                            </option>
+                        {% else %}
+                            <option value="{{ p.usuario.id }}" {% if p.usuario == user %}selected{% endif %}>
+                                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Participantes -->
+            <div class="mb-4">
+                <label class="form-label d-block">Participantes (Todos seleccionados por defecto)</label>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for p in participantes %}
+                        <span class="participante-badge selected">
+                            {% if es_lista_usuarios %}
+                                {{ p.get_full_name|default:p.username }} (Tú)
+                            {% else %}
+                                {{ p.usuario.get_full_name|default:p.usuario.username }} {% if p.usuario == user %}(Tú){% endif %}
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Transporte -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <label class="form-label">Transporte</label>
+                    <select id="selectorTransporte" name="categoria" class="form-select mb-2">
+                        <option value="-">-</option>
+                        <option value="Avión" {% if actividad.transporte == "Avión" %}selected{% endif %}>Avión</option>
+                        <option value="Bus" {% if actividad.transporte == "Bus" %}selected{% endif %}>Bus</option>
+                        <option value="Taxi" {% if actividad.transporte == "Taxi" %}selected{% endif %}>Taxi</option>
+                        <option value="Otro" {% if actividad.transporte == "Otro" %}selected{% endif %}>Otro</option>
+                    </select>
+                    
+                    <div id="contenedorOtroTransporte" class="otro-transporte-container">
+                        <label class="form-label otro-transporte-label">Especifique el transporte <span class="text-danger">*</span></label>
+                        <textarea name="otro_transporte_detalle" id="inputOtro" class="form-control" placeholder="Ej. Lancha, Rafting, etc."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hospedaje -->
+            <div class="form-group-lg">
+                <label class="form-label-upper">Hospedaje</label>
+                <input type="text" name="hospedaje" value="{{ actividad.hospedaje }}" placeholder="Escriba el nombre del lugar de hospedaje..." class="form-input">
+            </div>
+
+            <!-- Botones -->
+            <div class="form-buttons-row">
+                <button type="button" class="btn-form-save" data-bs-toggle="modal" data-bs-target="#guardarModal">
+                    Guardar Cambios
+                </button>
+                <a href="{% url 'actividades:lista' actividad.viaje.id %}" class="btn-form-cancel">Cancelar</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById("confirmarGuardar");
+        if (btn) {
+            btn.addEventListener("click", function () {
+                document.querySelector("form").submit();
+            });
+        }
+    });
+
+    const selector = document.getElementById("selectorTransporte");
+    const contenedor = document.getElementById("contenedorOtroTransporte");
+
+    selector.addEventListener("change", function() {
+        contenedor.style.display = this.value === "Otro" ? "block" : "none";
+    });
+</script>
+
+{% include "actividades/guardar_cambios.html" %}
+{% endblock %}
