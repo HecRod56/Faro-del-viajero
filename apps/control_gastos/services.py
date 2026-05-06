@@ -13,6 +13,12 @@ from .models import GastoParticipante, Liquidacion, AuditoriaGasto
 
 CENTAVO = Decimal('0.01')
 
+def _nombre_usuario(user):
+    return (
+        user.get_full_name()
+        or user.get_short_name()
+        or user.username
+    )
 
 def _redondear(valor: Decimal) -> Decimal:
     return valor.quantize(CENTAVO, rounding=ROUND_HALF_UP)
@@ -401,9 +407,19 @@ def calcular_resumen_grupal(viaje) -> dict:
 
     for gp in participaciones:
         pid = gp.participante_id
+
+        user = gp.participante.usuario
+
+        nombre = (
+            user.get_full_name()
+            or user.get_short_name()
+            or user.username
+        )
+
         if pid not in aportaciones:
             aportaciones[pid] = {
-                'participante': gp.participante.usuario,
+                #'participante': gp.participante.usuario,
+                'participante': nombre,
                 'total_pagado': Decimal('0.00'),
                 'total_deuda':  Decimal('0.00'),
             }
@@ -452,8 +468,8 @@ def calcular_resumen_grupal(viaje) -> dict:
         'liquidaciones_pendientes': [
             {
                 'id':    liq.id,
-                'de':    str(liq.deudor.usuario),
-                'a':     str(liq.acreedor.usuario),
+                'de':    _nombre_usuario(liq.deudor.usuario),
+                'a':     _nombre_usuario(liq.acreedor.usuario),
                 'monto': liq.monto,
                 'monto_pagado':    liq.monto_pagado,       # NUEVO
                 'monto_pendiente': liq.monto_pendiente, 
@@ -510,7 +526,7 @@ def calcular_mi_billetera(viaje, participante) -> dict:
         'saldo_personal':         saldo_personal,
         'deudas_que_tengo': [
     {
-        'a':               str(liq.acreedor.usuario),
+        'a':               _nombre_usuario(liq.acreedor.usuario),
         'monto':           liq.monto,
         'monto_pagado':    liq.monto_pagado,       # NUEVO
         'monto_pendiente': liq.monto_pendiente,    # NUEVO
@@ -519,7 +535,7 @@ def calcular_mi_billetera(viaje, participante) -> dict:
 ],
 'deudas_hacia_mi': [
     {
-        'de':              str(liq.deudor.usuario),
+        'de':              _nombre_usuario(liq.deudor.usuario),
         'monto':           liq.monto,
         'monto_pagado':    liq.monto_pagado,       # NUEVO
         'monto_pendiente': liq.monto_pendiente,    # NUEVO

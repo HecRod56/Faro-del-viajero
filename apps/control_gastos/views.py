@@ -70,9 +70,14 @@ def resumen_grupal(request, viaje_id):
     participantes_viaje = Participante.objects.filter(viaje=viaje).select_related('usuario')
 
     # Historial de auditoría
+    from apps.control_gastos.models import Gasto as GastoModel
     from apps.control_gastos.models import AuditoriaGasto
+    
+    ids_gastos = GastoModel.todos.filter(viaje=viaje).values_list('id', flat=True)
+
     historial = AuditoriaGasto.objects.filter(
-        gasto_id__in=gastos.values_list('id', flat=True)
+        #gasto_id__in=gastos.values_list('id', flat=True)
+        gasto_id__in=ids_gastos
     ).select_related('realizado_por')[:50]
 
     context = {
