@@ -8,13 +8,14 @@
         font-family: 'Poppins', sans-serif;
         background-color: #F3F4F6;
         color: #1e293b;
-        padding-top: 80px;
+        padding-top: 100px;
     }
 
     /* ── Hero ── */
     .hero-wrapper {
         width: 100%;
         position: relative;
+        z-index: 1;
         height: 150px;
         padding: 0;
         box-sizing: border-box;

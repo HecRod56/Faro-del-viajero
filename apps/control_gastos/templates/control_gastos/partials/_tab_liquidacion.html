@@ -1,0 +1,25 @@
+<div id="tab-liquidacion" class="cg-tab-content">
+    <div class="py-4">
+        {% for liq in resumen.liquidaciones_pendientes %}
+        <div class="cg-liq-row">
+        <span class="cg-liq-texto">
+            <strong>{{ liq.de }}</strong> le debe a <strong>{{ liq.a }}</strong>
+        </span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="cg-liq-monto">${{ liq.monto|floatformat:2 }}</span>
+            <form method="POST" action="{% url 'gastos:marcar_pagada' viaje.id liq.id %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit" class="cg-btn cg-btn-primario" style="font-size:12px; padding:7px 14px;">
+                <i class="bi bi-check-lg"></i> Marcar como pagado
+            </button>
+            </form>
+        </div>
+        </div>
+        {% empty %}
+        <div class="cg-empty">
+        <i class="bi bi-check-circle fs-2 d-block mb-2" style="color:var(--cg-primario);"></i>
+        <p>No hay deudas pendientes. ¡Todos están a mano!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div><!-- /tab liquidacion -->

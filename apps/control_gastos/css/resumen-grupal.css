@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+/* 🔴 Encapsulamos TODO */
+.resumen-grupal {
+  --verde:       #0d9e72;
+  --verde-dark:  #0a7d5a;
+  --verde-light: #e8f7f2;
+  --texto:       #1a1a1a;
+  --texto-2:     #5a6476;
+  --borde:       #e4e8ee;
+  --fondo:       #f5f6f8;
+  --blanco:      #ffffff;
+  --rojo:        #e5534b;
+  --radio:       10px;
+  --shadow:      0 1px 4px rgba(0,0,0,.07);
+
+  font-family: 'DM Sans', sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-size: 14px;
+}
+
+/* RESET SOLO LOCAL */
+.resumen-grupal * {
+  box-sizing: border-box;
+}
+
+/* Banner */
+.resumen-grupal .banner {
+  position: relative;
+  height: 130px;
+  overflow: hidden;
+}
+
+.resumen-grupal .banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.resumen-grupal .banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.1), rgba(0,0,0,.35));
+}
+
+.resumen-grupal .banner-badge {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: var(--blanco);
+  color: var(--verde);
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+/* Tabs */
+.resumen-grupal .tabs-wrap {
+  background: var(--blanco);
+  border-bottom: 1px solid var(--borde);
+  padding: 0 24px;
+}
+
+.resumen-grupal .tabs {
+  display: flex;
+  list-style: none;
+}
+
+.resumen-grupal .tabs a {
+  padding: 14px 20px;
+  text-decoration: none;
+  color: var(--texto-2);
+}
+
+.resumen-grupal .tabs a.activa {
+  color: var(--verde);
+  border-bottom: 2px solid var(--verde);
+}
+
+/* Grid */
+.resumen-grupal .grid {
+  display: grid;
+  grid-template-columns: 450px 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Cards */
+.resumen-grupal .card {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--shadow);
+}
+
+/* Tablas */
+.resumen-grupal table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resumen-grupal th,
+.resumen-grupal td {
+  padding: 10px;
+}
+
+/* Botones */
+.resumen-grupal .btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.resumen-grupal .btn-verde {
+  background: var(--verde);
+  color: white;
+}
