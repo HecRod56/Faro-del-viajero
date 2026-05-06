@@ -4,21 +4,23 @@
 # ==========================================
 from datetime import datetime
 from django.utils.timezone import make_aware
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-
+from apps.gestion_viajes.models import Viaje
 from .servicios_cbus import buscar_autobuses_cbus
 from .services import buscar_vuelos
 from .models import Trayecto, TrayectoAutobus
 
 
 @login_required
-def transporte_principal(request):
+def transporte_principal(request, viaje_id):
     """
     Vista principal del dashboard de transporte (RF-70, RF-75)
     """
+    viaje = get_object_or_404(Viaje, id=viaje_id, participantes__usuario=request.user)
+
     from .currency import convertir_precio, formatear_precio
 
     moneda_usuario = request.user.currency
@@ -31,7 +33,7 @@ def transporte_principal(request):
     # 1. Obtener y procesar VUELOS
     # ==========================================
     # Ya no filtramos por tipo aquí, traemos todos los del usuario
-    vuelos = list(Trayecto.objects.filter(registrado_por=request.user))
+    vuelos = list(Trayecto.objects.filter(viaje_id=viaje.id, registrado_por=request.user))
 
     for v in vuelos:
         v.es_autobus = False  
@@ -48,7 +50,7 @@ def transporte_principal(request):
     # ==========================================
     # 2. Obtener y procesar AUTOBUSES
     # ==========================================
-    buses = list(TrayectoAutobus.objects.filter(registrado_por=request.user))
+    buses = list(TrayectoAutobus.objects.filter(viaje_id=viaje.id, registrado_por=request.user))
 
     for b in buses:
         b.es_autobus = True   
@@ -77,6 +79,7 @@ def transporte_principal(request):
     costo_total_formateado = formatear_precio(costo_total, moneda_usuario)
 
     context = {
+        'viaje': viaje,
         'trayectos_ida': trayectos_ida,
         'trayectos_regreso': trayectos_regreso,
         'tiene_trayectos': len(trayectos_ida) + len(trayectos_regreso) > 0,
@@ -87,13 +90,15 @@ def transporte_principal(request):
 
 
 @login_required
-def registrar_trayecto(request):
+def registrar_trayecto(request, viaje_id):
     """
     Vista para buscar y registrar trayectos principales (RF-70, RF-71)
     """
+    viaje = get_object_or_404(Viaje, id=viaje_id, participantes__usuario=request.user)
     context = {
         'vuelos': [],
         'busqueda_realizada': False,
+        'viaje': viaje,
     }
 
     if request.method == 'POST':
@@ -113,7 +118,7 @@ def registrar_trayecto(request):
 
                 if modo == 'vuelo':
                     Trayecto.objects.create(
-                        viaje_id=request.POST.get('viaje_id', 1), # TODO: Pasar ID real
+                        viaje_id=viaje.id,
                         registrado_por=request.user,
                         # Usamos 'IDA_VUELTA' como salvavidas por defecto
                         tipo=request.POST.get('tipo_trayecto', 'IDA_VUELTA'), 
@@ -134,7 +139,7 @@ def registrar_trayecto(request):
                     emoji = "✈️"
                 else:
                     TrayectoAutobus.objects.create(
-                        viaje_id=request.POST.get('viaje_id', 1), # TODO: Pasar ID real
+                        viaje_id=viaje.id,
                         registrado_por=request.user,
                         tipo=request.POST.get('tipo_trayecto', 'IDA_VUELTA'), 
                         linea_autobus=request.POST.get('aerolinea', ''), 
@@ -152,7 +157,7 @@ def registrar_trayecto(request):
                     emoji = "🚌"
 
                 messages.success(request, f"{emoji} Trayecto registrado correctamente en el itinerario.")
-                return redirect('transporte:principal')
+                return redirect('transporte:principal', viaje_id=viaje.id)
 
             except Exception as e:
                 print(f"[ERROR] Error al guardar trayecto: {e}")
@@ -202,6 +207,7 @@ def registrar_trayecto(request):
                 )
 
             context = {
+                'viaje': viaje,
                 'vuelos': resultados,
                 'busqueda_realizada': True,
                 'total_resultados': len(resultados),
@@ -221,27 +227,32 @@ def registrar_trayecto(request):
 
 
 @login_required
-def buscar_ruta_interna(request):
+def buscar_ruta_interna(request, viaje_id):
     """Vista para buscar rutas de transporte interno (RF-72)"""
-    return render(request, 'transporte/buscar_ruta_interna.html')
+    # ¡AQUÍ ESTABA EL FANTASMA! Ya lo cambiamos a participantes__usuario
+    viaje = get_object_or_404(Viaje, id=viaje_id, participantes__usuario=request.user)
+    return render(request, 'transporte/buscar_ruta_interna.html', {'viaje': viaje})
 
 
 @login_required
-def eliminar_trayecto(request, trayecto_id):
+def eliminar_trayecto(request, viaje_id, trayecto_id): # <-- Corregido el orden: viaje_id, trayecto_id
     """Eliminar un trayecto registrado (Verificando en ambas tablas)"""
+    # Validamos primero que el usuario tenga acceso a este viaje
+    viaje = get_object_or_404(Viaje, id=viaje_id, participantes__usuario=request.user)
+    
     if request.method == 'POST':
-        # Buscamos primero si es un vuelo
-        vuelo = Trayecto.objects.filter(id=trayecto_id, registrado_por=request.user).first()
+        # Buscamos primero si es un vuelo del viaje actual
+        vuelo = Trayecto.objects.filter(id=trayecto_id, viaje_id=viaje.id, registrado_por=request.user).first()
         if vuelo:
             vuelo.delete()
             messages.success(request, "✈️ Vuelo eliminado correctamente.")
         else:
             # Si no fue vuelo, buscamos en la tabla de autobuses
-            autobus = TrayectoAutobus.objects.filter(id=trayecto_id, registrado_por=request.user).first()
+            autobus = TrayectoAutobus.objects.filter(id=trayecto_id, viaje_id=viaje.id, registrado_por=request.user).first()
             if autobus:
                 autobus.delete()
                 messages.success(request, "🚌 Autobús eliminado correctamente.")
             else:
                 messages.error(request, "⚠️ No se encontró el trayecto a eliminar.")
                 
-    return redirect('transporte:principal')
+    return redirect('transporte:principal', viaje_id=viaje.id)

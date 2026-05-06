@@ -7,19 +7,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
-    <!-- Breadcrumb -->
+    <!-- Breadcrumb 
     <nav class="breadcrumb-custom" aria-label="Migas de pan">
         <a href="#">Mis viajes</a>
         <span>›</span>
-        <a href="#">Cancún 2025</a>
+        
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">{{ viaje.destino }} {{ viaje.fecha_inicio|date:"Y" }}</a>
         <span>›</span>
-        <a href="{% url 'transporte:principal' %}">Transporte</a>
+         URL dinámica al principal de transporte 
+        <a href="{% url 'transporte:principal' viaje.id %}">Transporte</a>
         <span>›</span>
         <span class="breadcrumb-current">Registrar trayecto</span>
-    </nav>
-
+    </nav> -->
+<div class="container mt-4"> 
     <!-- Header -->
     <div class="mb-4">
         <h2 class="fw-bold mb-1" style="font-size: 28px; color: var(--color-heading);">Registrar Trayecto Principal</h2>
@@ -272,9 +274,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="confirmar_vuelo" value="1">
                         
-                        <!-- SEGURO ANTI-FALLOS: El id="inputModoConfirm" es vital -->
                         <input type="hidden" name="modo_transporte" id="inputModoConfirm" value="{{ modo_transporte|default:'vuelo' }}">
-                        <!-- CÁMBIALO A ESTO: -->
                         <input type="hidden" name="tipo_trayecto" id="inputTipoTrayecto" value="{{ tipo_trayecto_val|default:'IDA_VUELTA' }}">
                         
                         <input type="hidden" name="offer_id" id="inputOfferId">
@@ -319,14 +319,12 @@
     const inputRegreso = document.getElementById('fecha-regreso');
     const labelFechaIda = document.getElementById('labelFechaIda');
     
-    // Inputs ocultos para enviar al backend
     const inputTipoViajeBusqueda = document.getElementById('tipoViajeBusqueda');
     const inputTipoTrayectoConfirm = document.getElementById('inputTipoTrayecto');
     const sumTipoViaje = document.getElementById('sumTipoViaje');
 
     tabBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            // Actualizar diseño de botones
             tabBtns.forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
@@ -337,27 +335,29 @@
             const tipo = this.dataset.tipo;
             if(inputTipoViajeBusqueda) inputTipoViajeBusqueda.value = tipo;
 
-            // Manejar validaciones y campos visuales
+            if (tipo === 'ida_vuelta') {
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA_VUELTA';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Ida y vuelta';
+            } else if (tipo === 'regreso') {
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'REGRESO';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo regreso';
+            } else {
+                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA';
+                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo ida';
+            }
+
             if (tipo === 'ida') {
                 inputIda.disabled = false; inputIda.required = true;
                 inputRegreso.disabled = true; inputRegreso.required = false; inputRegreso.value = '';
                 labelFechaIda.textContent = 'Fecha de viaje';
-                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo ida';
-                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA';
-                
             } else if (tipo === 'regreso') {
                 inputIda.disabled = true; inputIda.required = false; inputIda.value = '';
                 inputRegreso.disabled = false; inputRegreso.required = true;
-                labelFechaIda.textContent = 'Fecha de ida'; // Visualmente oculto o ignorado
-                if(sumTipoViaje) sumTipoViaje.textContent = 'Solo regreso';
-                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'REGRESO';
-                
-            } else { // ida_vuelta
+                labelFechaIda.textContent = 'Fecha de ida'; 
+            } else { 
                 inputIda.disabled = false; inputIda.required = true;
                 inputRegreso.disabled = false; inputRegreso.required = true;
                 labelFechaIda.textContent = 'Fecha de ida';
-                if(sumTipoViaje) sumTipoViaje.textContent = 'Ida y vuelta';
-                if(inputTipoTrayectoConfirm) inputTipoTrayectoConfirm.value = 'IDA_VUELTA';
             }
         });
     });
@@ -367,7 +367,7 @@
     // ==========================================
     const modeBtns = document.querySelectorAll('.mode-btn');
     const inputModoBusqueda = document.getElementById('modoTransporte'); 
-    const inputModoConfirm = document.getElementById('inputModoConfirm'); // Crucial para la DB
+    const inputModoConfirm = document.getElementById('inputModoConfirm'); 
     const labelOrigen = document.getElementById('labelOrigen');
     const labelDestino = document.getElementById('labelDestino');
     const searchBtnSpan = document.querySelector('#searchBtn span');
@@ -388,7 +388,6 @@
             if(emptyStateIcon) emptyStateIcon.textContent = '✈️';
         }
         
-        // Mantener sincronizado el input final que guarda en DB
         if(inputModoConfirm) {
             inputModoConfirm.value = modo;
         }
@@ -409,17 +408,12 @@
         });
     });
 
-    // Ejecutar al cargar
     actualizarInterfaz(inputModoBusqueda.value);
 
-    // Convertir inputs a mayúsculas
     function formatearInput(e) { e.target.value = e.target.value.toUpperCase(); }
     if (origenInput) origenInput.addEventListener('input', formatearInput);
     if (destinoInput) destinoInput.addEventListener('input', formatearInput);
 
-    // ==========================================
-    // SELECCIONAR RESULTADO Y LLENAR RESUMEN
-    // ==========================================
     function seleccionarVuelo(card) {
         document.querySelectorAll('.flight-result').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
@@ -447,7 +441,6 @@
         document.getElementById('inputPrecio').value = data.precio;
         document.getElementById('inputMoneda').value = data.moneda;
 
-        // Asegurar que el modo transporte se vaya correcto en el POST
         if(inputModoConfirm) {
             inputModoConfirm.value = document.getElementById('modoTransporte').value;
         }
@@ -460,7 +453,7 @@
         const tipoViajeGuardado = document.getElementById('tipoViajeBusqueda').value;
         const tabActiva = document.querySelector(`.trip-type-btn[data-tipo="${tipoViajeGuardado}"]`);
         if (tabActiva) {
-            tabActiva.click(); // Esto arregla visualmente la UI y sincroniza los valores
+            tabActiva.click(); 
         }
 
         const primerVuelo = document.querySelector('.flight-result.selected');
