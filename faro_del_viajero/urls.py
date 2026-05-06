@@ -15,8 +15,8 @@ def home_temporal(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),
-    path('viajes/integrantes/', include('apps.integrantes.urls')),  # ← cambiado
+    path('', include('core.urls')),  # ← como estaba antes
+    path('viajes/integrantes/', include('apps.integrantes.urls')),
     path('', include('apps.autenticado.urls')),
     path('viajes/', include('apps.gestion_viajes.urls')),
     path('actividades/', include('apps.actividades.urls')),
@@ -24,5 +24,6 @@ urlpatterns = [
     path('chat/', include('chat.urls')),
     path('', include('galeria.urls')),
     path('viajes/gastos/', include('apps.control_gastos.urls')),
+    path('busqueda/', include('apps.busqueda.urls')),
     path('', include('apps.transporte.urls')),
 ]

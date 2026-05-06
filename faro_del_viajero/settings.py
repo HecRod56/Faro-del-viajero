@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
+  
     #CLOUDINARY
     'cloudinary_storage',
     'cloudinary',
@@ -57,6 +58,8 @@ INSTALLED_APPS = [
     'chat',
     'apps.galeria',
     'apps.control_gastos'
+    #ES LA DE APIS
+    'apps.busqueda',
     ]
 
 MIDDLEWARE = [
@@ -99,6 +102,16 @@ CLOUDINARY_STORAGE = {
     'API_KEY':    config('CLOUDINARY_API_KEY'),
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
+
+
+import cloudinary
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+)
+
+
 
 #USAR CLOUDINARY COMO ESTANDAR PARA BACKEND DE ARCHIVOS
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -203,3 +216,6 @@ ANYMAIL = {
     "BREVO_API_KEY": config("BREVO_API_KEY", default="None"),
 }
 DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
+
+GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY")
+PEXELS_API_KEY = config("PEXELS_API_KEY")
