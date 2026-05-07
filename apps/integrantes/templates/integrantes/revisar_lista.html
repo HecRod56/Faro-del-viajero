@@ -62,11 +62,7 @@
 
       <!-- Avatar + Nombre + Rol -->
       <div class="d-flex align-items-center gap-3 flex-wrap">
-        <a
-          href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
-        >
-          <div class="avatar-circle">{{ user.nombre|first }}</div>
-        </a>
+        <div class="avatar-circle">{{ user.nombre|first }}</div>
         
         <div class="fw-semibold">
           {{ user.nombre }}
@@ -84,12 +80,12 @@
 
         <!-- Llamar (visible para todos) -->
         <a
-          href="tel:{{ user.telefono }}"
+          href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
           class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
           style="width: 36px; height: 36px"
-          title="Llamar a {{ user.nombre }}"
+          title="Ver perfil de {{ user.nombre }}"
         >
-          <i class="bi bi-telephone-fill"></i>
+          <i class="bi bi-person"></i>
         </a>
 
         {% if not user.es_organizador %}
