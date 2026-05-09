@@ -4,6 +4,154 @@ import requests
 import unicodedata
 from django.conf import settings
 
+
+# ─── Diccionarios de precios por nombre de lugar ─────────────────────────────
+# Detecta por palabras clave en el NOMBRE del lugar (en español)
+# Se usa como fallback cuando OSM no tiene precio real
+
+# ── ATRACCIONES ───────────────────────────────────────────────────────────────
+ATRACCIONES_GRATIS = [
+    # Monumentos y estatuas
+    "monumento", "estatua", "obelisco", "columna", "fuente", "memorial",
+    "cenotafio", "mural", "placa", "busto",
+    # Plazas y espacios públicos
+    "plaza", "zócalo", "jardín", "jardin", "parque", "alameda", "paseo",
+    "boulevard", "malecón", "malecon", "explanada", "glorieta",
+    # Miradores
+    "mirador", "mirador", "punto panorámico", "panoramico", "viewpoint",
+    # Iglesias y templos (entrada libre generalmente)
+    "iglesia", "catedral", "templo", "parroquia", "capilla", "santuario",
+    "basílica", "basilica", "convento", "ex convento",
+    # Naturaleza gratuita
+    "cerro", "volcán", "volcan", "laguna", "lago", "rio", "río",
+    "cascada", "playa", "reserva", "bosque", "selva",
+    # Mercados y espacios culturales gratuitos
+    "mercado", "tianguis", "corredor", "andador",
+]
+
+ATRACCIONES_BAJO = [  # $50 - $150 MXN
+    "museo", "galeria", "galería", "pinacoteca", "exposición", "exposicion",
+    "centro cultural", "casa de la cultura", "archivo", "biblioteca",
+    "planetario", "observatorio", "acuario pequeño",
+    "zona arqueológica", "zona arqueologica", "ruinas", "pirámide", "piramide",
+    "hacienda", "ex hacienda", "palacio", "casa museo",
+]
+
+ATRACCIONES_MEDIO = [  # $150 - $500 MXN
+    "zoológico", "zoologico", "zoo", "acuario", "vivarium",
+    "jardín botánico", "jardin botanico", "mariposario",
+    "museo interactivo", "museo de ciencias", "papalote",
+    "parque ecológico", "parque ecologico", "ecoparque",
+    "temazcal", "granja", "rancho",
+    "teatro", "auditorio", "foro", "sala de conciertos",
+    "cinema", "cine",
+]
+
+ATRACCIONES_ALTO = [  # $400 - $1,500 MXN
+    "parque acuático", "parque acuatico", "parque de diversiones",
+    "parque temático", "parque tematico", "parque de atracciones",
+    "xcaret", "xel-ha", "xplor", "xenses", "xenotes",
+    "six flags", "reino aventura", "kidzania",
+    "tour", "excursión", "excursion", "recorrido", "aventura",
+    "tirolesa", "zip line", "rapel", "escalada",
+    "cenote", "snorkel", "buceo", "kayak", "rafting",
+    "catamaran", "catamarán", "yate", "lancha", "barco",
+    "globo", "vuelo",
+]
+
+# ── GASTRONOMÍA ───────────────────────────────────────────────────────────────
+GASTRO_MUY_BAJO = [  # $50 - $150 MXN
+    # Antojitos y comida rápida
+    "taqueria", "taquería", "tacos", "taco", "antojitos",
+    "tortas", "torta", "sandwiches", "loncheria", "lonchería",
+    "quesadillas", "quesadilla", "sopes", "gorditas", "gordita",
+    "tamales", "tamal", "elotes", "tlayuda",
+    "hot dog", "hot dogs", "hamburguesa", "hamburguesería", "hamburguesas",
+    "pizza", "pizzeria", "pizzería",
+    "helados", "heladería", "neveria", "nevería", "nieve", "paletas",
+    "jugos", "jugería", "jugeria", "licuados", "smoothie",
+    "café de olla", "atole", "champurrado",
+    # Mercados y fondas
+    "fonda", "comedor", "cocina económica", "cocina economica",
+    "comida corrida", "menú del día", "menu del dia",
+    "puesto", "mercado", "tianguis",
+]
+
+GASTRO_BAJO = [  # $150 - $350 MXN
+    "cafe", "café", "cafetería", "cafeteria", "coffee",
+    "pastelería", "pasteleria", "repostería", "reposteria", "panadería", "panaderia",
+    "crepas", "crepes", "waffles",
+    "sushi", "ramen", "pho", "thai", "chino", "chifa",
+    "mariscos", "ceviche", "tostadas",
+    "vegetariano", "vegano", "organico", "orgánico",
+    "buffet", "smorgasbord",
+    "cantina", "pulquería", "pulqueria",
+    "cervecería", "cerveceria", "brewery",
+]
+
+GASTRO_MEDIO = [  # $350 - $700 MXN
+    "restaurante", "restaurant", "cocina", "cuisine",
+    "bar", "bar restaurante", "gastropub",
+    "marisquería", "marisqueria", "pescados",
+    "parrilla", "asador", "bbq", "barbacoa", "carnitas",
+    "italiano", "pasta", "trattoria",
+    "francés", "frances", "bistro", "brasserie",
+    "japonés", "japones", "teppanyaki", "tempura",
+    "tapas", "español", "espanol",
+    "libanés", "libanes", "árabe", "arabe", "shawarma",
+    "indio", "hindú", "hindu", "thai", "vietnamita",
+]
+
+GASTRO_ALTO = [  # $700 - $2,000 MXN
+    "grill", "steakhouse", "cortes", "carne premium",
+    "roof", "rooftop", "sky", "terraza panorámica", "terraza panoramica",
+    "fine dining", "alta cocina", "gastronomía", "gastronomia",
+    "chef", "gran chef", "michelin",
+    "vino", "wine bar", "bodega", "cava",
+    "mariscos finos", "langosta", "langostinos", "ostiones",
+    "hotel restaurante", "boutique",
+    "gran", "grand", "palacio", "real", "imperial",
+]
+
+# ── HOTELES ───────────────────────────────────────────────────────────────────
+HOTEL_MUY_BAJO = [  # $300 - $700 MXN/noche
+    "hostal", "hostel", "backpacker", "mochilero",
+    "albergue", "dormitorio", "posada económica", "posada economica",
+    "cuarto", "habitación", "habitacion", "casa de huéspedes", "casa de huespedes",
+    "pensión", "pension",
+]
+
+HOTEL_BAJO = [  # $700 - $1,500 MXN/noche
+    "posada", "motel", "auto hotel", "autohotel",
+    "inn", "bed and breakfast", "b&b",
+    "bungalow", "cabaña", "cabana", "cabañas",
+    "villa", "casita",
+]
+
+HOTEL_MEDIO = [  # $1,500 - $3,000 MXN/noche
+    "hotel", "suites", "aparthotel",
+    "holiday", "express", "select",
+    "fiesta", "camino real", "misión", "mission",
+    "best western", "comfort", "quality",
+]
+
+HOTEL_ALTO = [  # $3,000 - $6,000 MXN/noche
+    "grand", "gran", "real", "royal",
+    "marriott", "hilton", "hyatt", "sheraton", "westin",
+    "crowne", "intercontinental", "four points",
+    "presidente", "reforma",
+    "boutique", "design hotel",
+]
+
+HOTEL_LUJO = [  # $6,000+ MXN/noche
+    "palace", "palacio", "five star", "cinco estrellas",
+    "ritz", "waldorf", "st regis", "four seasons",
+    "live aqua", "paradisus", "excellence",
+    "presidential", "penthouse", "resort & spa",
+    "grand velas", "vidanta", "banyan tree",
+]
+
+
 GEOAPIFY_BASE     = "https://api.geoapify.com/v1"
 GEOAPIFY_PLACES   = "https://api.geoapify.com/v2/places"
 FOURSQUARE_PLACES = "https://api.foursquare.com/v3/places/search"
@@ -284,16 +432,18 @@ _PRECIO_FALLBACK = {
 }
 
 
-def extraer_precio_real(raw: dict, acc: dict, categoria: str):
+def extraer_precio_real(raw: dict, acc: dict, categoria: str, categorias_geo: list = None):
     """
     Intenta obtener un precio real del campo OSM `raw`.
     Devuelve (precio_str, precio_max_num).
     """
+    cats_str = " ".join(categorias_geo or []).lower()
+
     # 1. Entrada gratuita explícita
     if str(raw.get("fee", "")).lower() == "no":
         return "Gratis", 0
 
-    # 2. Campo `charge` con precio real: "MXN 150", "150 MXN", "150", "$150"
+    # 2. Campo `charge` con precio real
     charge = str(raw.get("charge", "") or raw.get("entrance_fee", "")).strip()
     if charge:
         nums = re.findall(r'[\d,\.]+', charge.replace(",", ""))
@@ -303,27 +453,56 @@ def extraer_precio_real(raw: dict, acc: dict, categoria: str):
                 return f"${valor:,.0f} MXN", int(valor)
             except ValueError:
                 pass
-
-    # 3. `price_range` para restaurantes ("$" a "$$$$")
+# 3. Restaurantes
     if categoria == "gastronomia":
-        pr = str(raw.get("price_range", "") or raw.get("price_level", "")).strip()
+        pr = str(raw.get("price_range","") or raw.get("price_level","")).strip()
         if pr in _PRECIO_FALLBACK["gastronomia"]:
             txt, num = _PRECIO_FALLBACK["gastronomia"][pr]
             return txt + " por persona", num
-        return "$150 - $500 MXN por persona", 500
+        nombre_lower = str(raw.get("name","")).lower()
+        if any(k in nombre_lower for k in GASTRO_MUY_BAJO) or any(k in cats_str for k in ["fast_food","food_court","ice_cream"]):
+            return "$50 - $150 MXN por persona", 150
+        elif any(k in nombre_lower for k in GASTRO_BAJO) or "cafe" in cats_str:
+            return "$150 - $350 MXN por persona", 350
+        elif any(k in nombre_lower for k in GASTRO_ALTO):
+            return "$700 - $2,000 MXN por persona", 2000
+        elif any(k in nombre_lower for k in GASTRO_MEDIO) or "restaurant" in cats_str:
+            return "$350 - $700 MXN por persona", 700
+        else:
+            return "$150 - $500 MXN por persona", 500
 
-    # 4. Hoteles: usar estrellas
+    # 4. Hoteles
     if categoria == "hoteles":
-        estrellas = int(acc.get("stars") or raw.get("stars", 3))
-        estrellas = max(1, min(estrellas, 5))
-        txt, num = _PRECIO_FALLBACK["hoteles"].get(estrellas, ("$2,000 - $4,000", 4000))
-        return txt + " MXN/noche", num
+        estrellas_val = acc.get("stars") or raw.get("stars")
+        if estrellas_val:
+            estrellas = max(1, min(int(estrellas_val), 5))
+            txt, num = _PRECIO_FALLBACK["hoteles"].get(estrellas, ("$2,000 - $4,000", 4000))
+            return txt + " MXN/noche", num
+        nombre_lower = str(raw.get("name","")).lower()
+        if any(k in nombre_lower for k in HOTEL_MUY_BAJO):
+            return "$300 - $700 MXN/noche", 700
+        elif any(k in nombre_lower for k in HOTEL_BAJO):
+            return "$700 - $1,500 MXN/noche", 1500
+        elif any(k in nombre_lower for k in HOTEL_ALTO):
+            return "$3,000 - $6,000 MXN/noche", 6000
+        elif any(k in nombre_lower for k in HOTEL_LUJO):
+            return "$6,000+ MXN/noche", 15000
+        else:
+            return "$500 - $4,000 MXN/noche", 4000
 
-    # 5. Atracciones: fallback genérico
-    if str(raw.get("fee", "")).lower() == "yes":
-        return "$200 - $1,500 MXN por persona", 1500
-    return "$200 - $1,500 MXN por persona", 1500
-
+    # 5. Atracciones
+    if categoria == "atracciones":
+        nombre_lower = str(raw.get("name", "")).lower()
+        if any(k in nombre_lower for k in ATRACCIONES_ALTO):
+            return "$400 - $1,500 MXN por persona", 1500
+        elif any(k in nombre_lower for k in ATRACCIONES_MEDIO):
+            return "$150 - $500 MXN por persona", 500
+        elif any(k in nombre_lower for k in ATRACCIONES_BAJO):
+            return "$50 - $150 MXN por persona", 150
+        elif any(k in nombre_lower for k in ATRACCIONES_GRATIS) or any(k in cats_str for k in ["monument","artwork","viewpoint","historic","memorial","park","garden","beach"]):
+            return "Gratis", 0
+        else:
+         return "$300 - $1000 MXN por persona", 500  # ← fallback genérico, no gratis
 
 def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
                    precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, 
@@ -394,7 +573,7 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
             rating = float(acc["stars"])
 
         # Precio real desde OSM / fallback por categoría
-        precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria)
+        precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria, p.get("categories", []))
 
         # ── Popularidad: Foursquare (real) con fallback inteligente por categoría ────────
         # Foursquare Places API v3 /search está deprecado (devuelve 410 Gone).
