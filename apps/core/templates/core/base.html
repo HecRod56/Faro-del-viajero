@@ -17,6 +17,7 @@
     {% block extra_css %}{% endblock %}
     {% block head %}{% endblock %}
     
+    
     <style>
         :root {
             --turquesa: #0E9E8E;
@@ -62,12 +63,17 @@
             background-color: var(--naranja); color: white; border: none; font-weight: 700; transition: all 0.2s ease;
         }
         .btn-naranja:hover { background-color: #d66415; color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232, 114, 28, 0.2); }
+        
+        #mainNav {
+            background: linear-gradient(rgba(14, 158, 142, 0.88), rgba(14, 158, 142, 0.88)),
+                        url("{% static 'core/img/fondo.jpeg' %}") center/cover no-repeat;
+        }
     </style>
 </head>
 <body>
-
+    
     {% block navbar %}
-    <nav class="navbar fixed-top bg-turquesa shadow-sm py-3" id="mainNav">
+    <nav class="navbar fixed-top shadow-sm py-3" id="mainNav">
         <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
             
             <a href="{% url 'core:home' %}" class="text-decoration-none d-flex align-items-center me-4">

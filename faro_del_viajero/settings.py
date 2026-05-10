@@ -14,6 +14,15 @@ from pathlib import Path
 import os
 import sys
 from decouple import config, Csv
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# ==========================================
+# API de Duffel (Búsqueda de vuelos)
+# ==========================================
+DUFFEL_ACCESS_TOKEN = os.getenv('DUFFEL_ACCESS_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,6 +66,8 @@ INSTALLED_APPS = [
     'apps.actividades',
     'chat',
     'apps.galeria',
+    'apps.transporte',
+    'apps.control_gastos',
     #ES LA DE APIS
     'apps.busqueda',
     ]
@@ -212,9 +223,9 @@ Luego, puedes usarlo en tus vistas o servicios:
 # CONFIGURACIÓN DE CORREO (con API BREVO)
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {
-    "BREVO_API_KEY": config("BREVO_API_KEY"),
+    "BREVO_API_KEY": config("BREVO_API_KEY", default="None"),
 }
-DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE')}>"
+DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
 
 GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY")
 PEXELS_API_KEY = config("PEXELS_API_KEY")

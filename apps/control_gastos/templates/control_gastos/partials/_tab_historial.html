@@ -1,0 +1,22 @@
+<div id="tab-historial" class="cg-tab-content">
+    <div class="cg-card mt-4 mb-4" style="padding: 4px 16px;">
+        {% for h in historial %}
+        <div class="cg-hist-row">
+        <span class="cg-hist-fecha">{{ h.fecha|date:"d/m/Y H:i" }}</span>
+        <span class="cg-hist-accion {{ h.accion }}">{{ h.accion }}</span>
+        <span style="color:var(--cg-texto-2);">
+            Gasto #{{ h.gasto_id }}
+            {% if h.realizado_por %}
+            por <strong style="color:var(--cg-texto);">
+                {{ h.realizado_por.get_full_name|default:h.realizado_por.username }}
+            </strong>
+            {% endif %}
+            {% if h.detalle_despues %}— <em>{{ h.detalle_despues.concepto }}</em> ${{ h.detalle_despues.monto }}
+            {% elif h.detalle_antes %}— <em>{{ h.detalle_antes.concepto }}</em>{% endif %}
+        </span>
+        </div>
+        {% empty %}
+        <div class="cg-empty"><p>Sin movimientos registrados aún.</p></div>
+        {% endfor %}
+    </div>
+</div><!-- /tab historial -->
