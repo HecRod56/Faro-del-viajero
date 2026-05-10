@@ -121,6 +121,10 @@ def obtener_coordenadas(destino: str):
         print(f"Error Geoapify geocode: {e}")
     return {"lat": None, "lon": None, "nombre": destino}
 
+def _validar_resolucion_minima(ancho: int, alto: int, ancho_min: int = 1920, alto_min: int = 1080) -> bool:
+    """Valida que la imagen tenga resolución mínima."""
+    return ancho >= ancho_min and alto >= alto_min
+
 def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     # Intentar con Wikimedia Commons primero
     queries = [nombre, f"{nombre} {ciudad}", f"{ciudad} Mexico"]
@@ -133,7 +137,7 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
             "gsrlimit": 10,
             "prop": "imageinfo",
             "iiprop": "url|size|mime",
-            "iiurlwidth": 800,
+            "iiurlwidth": 1920,  # Solicitar Full HD (1920px de ancho)
             "format": "json",
         }
         try:
@@ -145,8 +149,11 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
                 ii = p.get("imageinfo", [{}])[0]
                 mime = ii.get("mime", "")
                 url = ii.get("thumburl", "")
-                # Solo fotos, no logos ni SVGs
-                if url and "image/jpeg" in mime or "image/png" in mime:
+                ancho = ii.get("thumbwidth", 0)
+                alto = ii.get("thumbheight", 0)
+                # Solo fotos, no logos ni SVGs, con resolución mínima 1920x1080
+                if (url and ("image/jpeg" in mime or "image/png" in mime) and 
+                    _validar_resolucion_minima(ancho, alto)):
                     fotos.append(url)
             if fotos:
                 return fotos[indice % len(fotos)]
@@ -165,7 +172,13 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
         resp.raise_for_status()
         fotos = resp.json().get("photos", [])
         if fotos:
-            return fotos[indice % len(fotos)]["src"]["medium"]
+            # Filtrar por resolución mínima 1920x1080
+            fotos_filtradas = [
+                foto for foto in fotos 
+                if _validar_resolucion_minima(foto.get("width", 0), foto.get("height", 0))
+            ]
+            if fotos_filtradas:
+                return fotos_filtradas[indice % len(fotos_filtradas)]["src"]["original"]
     except Exception:
         pass
 
@@ -496,21 +509,27 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
     return lugares
 
 def obtener_foto_destino(destino: str):
+    """Obtiene una foto de portada para un destino con resolución mínima 1920x1080."""
     headers = {"Authorization": settings.PEXELS_API_KEY}
-    params = {"query": f"{destino} Mexico travel", "per_page": 1, "orientation": "landscape"}
+    params = {"query": f"{destino} Mexico travel", "per_page": 20, "orientation": "landscape"}
     try:
         resp = requests.get(f"{PEXELS_BASE}/search", headers=headers, params=params, timeout=6)
         resp.raise_for_status()
         fotos = resp.json().get("photos", [])
-        if fotos:
-            return fotos[0]["src"]["large"]
+        # Filtrar por resolución mínima 1920x1080
+        fotos_filtradas = [
+            foto for foto in fotos 
+            if _validar_resolucion_minima(foto.get("width", 0), foto.get("height", 0))
+        ]
+        if fotos_filtradas:
+            return fotos_filtradas[0]["src"]["original"]
     except Exception as e:
         print(f"Error Pexels: {e}")
     return None
 
 def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
     """
-    Obtiene múltiples fotos en calidad Full HD para la galería.
+    Obtiene múltiples fotos en calidad Full HD para la galería (resolución mínima 1920x1080).
     Intenta primero Wikimedia Commons, luego completa con Pexels si es necesario.
     Omite la primera imagen de Wikimedia para evitar redundancia con la portada de grid.
     """
@@ -549,27 +568,36 @@ def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
                 ii = p.get("imageinfo", [{}])[0]
                 mime = ii.get("mime", "")
                 url = ii.get("thumburl", "")
-                # Solo fotos, no logos ni SVGs
-                if url and ("image/jpeg" in mime or "image/png" in mime):
+                ancho = ii.get("thumbwidth", 0)
+                alto = ii.get("thumbheight", 0)
+                # Solo fotos, no logos ni SVGs, con resolución mínima 1920x1080
+                if (url and ("image/jpeg" in mime or "image/png" in mime) and 
+                    _validar_resolucion_minima(ancho, alto)):
                     fotos.append(url)
         except Exception as e:
             print(f"Error Wikimedia: {e}")
         
         primera_consulta = False
     
-    # 2. Completar con Pexels si no hay suficientes fotos (original quality)
+    # 2. Completar con Pexels si no hay suficientes fotos (resolución mínima 1920x1080)
     if len(fotos) < cantidad:
         headers = {"Authorization": settings.PEXELS_API_KEY}
+        # Solicitar más fotos de lo necesario para filtrar por resolución
         params = {
             "query": f"{nombre} {ciudad} Mexico",
-            "per_page": cantidad - len(fotos),
+            "per_page": max(10, (cantidad - len(fotos)) * 2),
             "orientation": "landscape",
         }
         try:
             resp = requests.get(f"{PEXELS_BASE}/search", headers=headers, params=params, timeout=5)
             resp.raise_for_status()
             fotos_pexels = resp.json().get("photos", [])
-            fotos.extend([f["src"]["original"] for f in fotos_pexels])
+            # Filtrar por resolución mínima 1920x1080 y tomar solo las necesarias
+            fotos_filtradas = [
+                f["src"]["original"] for f in fotos_pexels 
+                if _validar_resolucion_minima(f.get("width", 0), f.get("height", 0))
+            ]
+            fotos.extend(fotos_filtradas[:cantidad - len(fotos)])
         except Exception as e:
             print(f"Error Pexels en obtener_fotos_lugar: {e}")
     
