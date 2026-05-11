@@ -16,11 +16,13 @@
         width: 100%;
         position: relative;
         z-index: 1;
-        height: 150px;
         padding: 0;
         box-sizing: border-box;
         background-color: #F3F4F6;
         margin-top: 10px;
+        height: 350px; /* Ajusta la altura a una medida razonable */
+        object-fit: cover; /* Esto recorta la imagen en lugar de estirarla */
+        object-position: center; /* Centra la parte más importante de la foto */
     }
 
     .hero-wrapper img {
