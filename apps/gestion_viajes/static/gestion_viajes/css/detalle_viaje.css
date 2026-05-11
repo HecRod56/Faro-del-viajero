@@ -8,18 +8,21 @@
         font-family: 'Poppins', sans-serif;
         background-color: #F3F4F6;
         color: #1e293b;
-        padding-top: 80px;
+        padding-top: 100px;
     }
 
     /* ── Hero ── */
     .hero-wrapper {
         width: 100%;
         position: relative;
-        height: 150px;
+        z-index: 1;
         padding: 0;
         box-sizing: border-box;
         background-color: #F3F4F6;
         margin-top: 10px;
+        height: 350px; /* Ajusta la altura a una medida razonable */
+        object-fit: cover; /* Esto recorta la imagen en lugar de estirarla */
+        object-position: center; /* Centra la parte más importante de la foto */
     }
 
     .hero-wrapper img {

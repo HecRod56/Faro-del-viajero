@@ -25,7 +25,7 @@ def lista_integrantes(request, id_viaje, id_usuario=None):
     for p in participantes:
         integrantes.append({
             'id':            p.usuario.id,
-            'nombre':        p.usuario.username,
+            'nombre':        p.usuario.get_full_name() or p.usuario.email,
             'rol':           p.get_rol_display(),
             'telefono':      p.usuario.phone or '',
             'es_organizador': p.rol == 'organizador',

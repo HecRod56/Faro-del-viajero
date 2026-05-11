@@ -1,0 +1,489 @@
+/* static/transporte/css/transporte-ruta-interna.css */
+
+/* ============================================
+   Formulario de búsqueda rápida
+   ============================================ */
+.quick-search-card {
+    background: var(--color-white);
+    border-radius: 24px;
+    border: 1px solid #E4E4E2;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.quick-search-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+}
+
+@media (max-width: 768px) {
+    .quick-search-row { grid-template-columns: 1fr; }
+}
+
+.quick-search-btn {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: 14px;
+    padding: 13px 22px;
+    font-size: var(--font-size-small);
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    font-family: var(--font-family-base);
+}
+
+.quick-search-btn:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 158, 142, 0.3);
+}
+
+/* Icono de campo destino (naranja) */
+.field-icon.dest {
+    color: #E8721C;
+}
+
+/* ============================================
+   Sugerencias desde itinerario
+   ============================================ */
+.suggestions-label {
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.suggestions-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-top: 14px;
+}
+
+.suggestion-chip {
+    background: var(--color-white);
+    border: 1px solid #E4E4E2;
+    border-radius: 24px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.suggestion-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.suggestion-chip .arrow {
+    color: #aaa;
+}
+
+/* ============================================
+   Layout mapa + resultados
+   ============================================ */
+.results-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 992px) {
+    .results-layout { grid-template-columns: 1fr; }
+}
+
+/* ============================================
+   Mapa interactivo
+   ============================================ */
+.map-container {
+    background: var(--color-white);
+    border-radius: 20px;
+    border: 1px solid #E4E4E2;
+    overflow: hidden;
+    height: 600px;
+    position: sticky;
+    top: 110px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 992px) {
+    .map-container { position: relative; top: 0; height: 400px; }
+}
+
+.map-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #E4E4E2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-white);
+    z-index: 2;
+}
+
+.map-title {
+    font-size: var(--font-size-small);
+    font-weight: 800;
+    color: var(--color-heading);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.map-fullscreen-btn {
+    background: var(--color-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.map-fullscreen-btn:hover {
+    background: #E4E4E2;
+}
+
+.map-canvas {
+    flex-grow: 1;
+    background: linear-gradient(135deg, #c8e6d9 0%, #d4ebe0 50%, #e0f0e8 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.map-canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(0deg, transparent 49%, rgba(255, 255, 255, 0.6) 49%, rgba(255, 255, 255, 0.6) 51%, transparent 51%),
+        linear-gradient(90deg, transparent 49%, rgba(255, 255, 255, 0.6) 49%, rgba(255, 255, 255, 0.6) 51%, transparent 51%),
+        linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.4) 49%, rgba(255, 255, 255, 0.4) 50%, transparent 50%);
+    background-size: 80px 80px, 80px 80px, 140px 140px;
+}
+
+/* Marcadores */
+.map-marker {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--color-white);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 3;
+    transition: transform 0.2s;
+}
+
+.map-marker:hover {
+    transform: rotate(-45deg) scale(1.15);
+}
+
+.map-marker .marker-number {
+    transform: rotate(45deg);
+    color: var(--color-white);
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.map-marker.origin { background: var(--color-primary); }
+.map-marker.destination { background: #E8721C; }
+
+/* Etiqueta de duración en mapa */
+.map-duration-label {
+    position: absolute;
+    background: var(--color-white);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-heading);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 3;
+}
+
+/* Controles del mapa */
+.map-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.map-control-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--color-white);
+    border: 1px solid #E4E4E2;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 18px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+}
+
+.map-control-btn:hover {
+    background: var(--color-bg);
+}
+
+.map-attribution {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    font-size: 10px;
+    color: #666;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 4;
+}
+
+/* ============================================
+   Opciones de ruta
+   ============================================ */
+.results-section h4 {
+    font-size: var(--font-size-body);
+    font-weight: 800;
+    color: var(--color-heading);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.route-option {
+    background: var(--color-white);
+    border: 1.5px solid #E4E4E2;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border-left: 5px solid #E4E4E2;
+}
+
+.route-option.metro { border-left-color: #2563eb; }
+.route-option.uber { border-left-color: #6366f1; }
+.route-option.walk { border-left-color: #10b981; }
+.route-option.bus { border-left-color: #E8721C; }
+.route-option.rental { border-left-color: var(--color-danger); }
+
+.route-option:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.route-option.selected {
+    border-color: var(--color-primary);
+    border-left-width: 5px;
+    background: rgba(14, 158, 142, 0.03);
+    box-shadow: 0 0 0 3px rgba(14, 158, 142, 0.1);
+}
+
+/* Header de opción */
+.route-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.route-mode {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.route-mode-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.route-option.metro .route-mode-icon { background: rgba(37, 99, 235, 0.1); }
+.route-option.uber .route-mode-icon { background: rgba(99, 102, 241, 0.1); }
+.route-option.walk .route-mode-icon { background: rgba(16, 185, 129, 0.1); }
+.route-option.bus .route-mode-icon { background: rgba(232, 114, 28, 0.1); }
+.route-option.rental .route-mode-icon { background: rgba(220, 53, 69, 0.1); }
+
+.route-mode-info .name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--color-heading);
+}
+
+.route-mode-info .submode {
+    font-size: 12px;
+    color: #888;
+    font-weight: var(--font-weight-semibold);
+}
+
+.route-price {
+    text-align: right;
+    font-size: var(--font-size-h3);
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.route-price small {
+    font-size: 11px;
+    color: #888;
+    font-weight: var(--font-weight-semibold);
+    display: block;
+}
+
+.route-price-free {
+    color: #28a745;
+}
+
+/* Stats de ruta */
+.route-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.route-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666;
+    font-weight: var(--font-weight-semibold);
+}
+
+.route-stat strong {
+    color: var(--color-heading);
+}
+
+.route-stat-eco { color: #28a745; }
+.route-stat-warning { color: var(--color-danger); }
+
+/* Pasos del recorrido */
+.route-steps {
+    background: var(--color-bg);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.route-steps-arrow {
+    margin: 0 6px;
+    color: #ccc;
+}
+
+/* Acciones de ruta */
+.route-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #E4E4E2;
+}
+
+.route-action-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: var(--font-weight-bold);
+    border: 1.5px solid #E4E4E2;
+    background: var(--color-white);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--color-heading);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.route-action-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.route-action-btn.primary {
+    background: var(--color-heading);
+    border-color: var(--color-heading);
+    color: var(--color-white);
+}
+
+.route-action-btn.primary:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.route-action-btn-vote {
+    border-color: #E8721C;
+    color: #E8721C;
+}
+
+/* Badge recomendado */
+.recommended-badge {
+    background: var(--color-warning);
+    color: var(--color-heading);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+/* ============================================
+   Banner de fallback API
+   ============================================ */
+.fallback-banner {
+    background: rgba(245, 197, 24, 0.1);
+    border: 1px solid rgba(245, 197, 24, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+}
+
+.fallback-banner.show {
+    display: flex;
+}

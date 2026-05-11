@@ -192,14 +192,19 @@ def pagina_editar_viaje(request, viaje_id):
         viaje.fecha_fin = request.POST.get('fecha_fin')
         viaje.capacidad_max = request.POST.get('capacidad_max')
         viaje.presupuesto_estimado = request.POST.get('presupuesto_estimado')
-        viaje.estado = request.POST.get('estado') # Agregamos estado por si quieren cambiarlo
+        viaje.estado = request.POST.get('estado')
         
-        viaje.save() # Guardamos los cambios en Postgres
+        # --- Lógica para la nueva imagen de fondo ---
+        # Verificamos si el usuario subió un archivo en el input llamado 'imagen_fondo'
+        if 'imagen_fondo' in request.FILES:
+            viaje.imagen_fondo = request.FILES['imagen_fondo']
+        
+        viaje.save() # Guarda cambios en Postgres y sube la imagen a Cloudinary automáticamente
         return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
     # Si es GET, enviamos el objeto 'viaje' para rellenar los inputs
     return render(request, 'gestion_viajes/editar_viaje.html', {'viaje': viaje})
-
+    
 # 7. Vista para ELIMINAR un viaje
 def eliminar_viaje(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)

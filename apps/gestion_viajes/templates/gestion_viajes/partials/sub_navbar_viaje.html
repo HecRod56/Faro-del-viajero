@@ -1,6 +1,7 @@
+<!-- sub_navbar_viaje.html -->
 <style>
     /* Estilos del diseño de Actividades */
-    .trip-subnav { background-color: white; border-bottom: 1px solid #E4E4E2; position: sticky; top: 80px; z-index: 1020; }
+    .trip-subnav { background-color: white; border-bottom: 1px solid #E4E4E2; position: sticky; top: 70px; z-index: 1030; }
     .breadcrumb-item + .breadcrumb-item::before {content: ">";}
     .breadcrumb-item a { color: #9CA3AF; font-weight: 600; text-decoration: none; transition: color 0.2s ease; }
     .breadcrumb-item.active { color: #0E9E8E; font-weight: 700; }
@@ -27,8 +28,9 @@
         <ul class="nav nav-tabs-custom">
             <li><a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="nav-link {% if request.resolver_match.url_name == 'p_detalle_viaje' %}active{% endif %}">Resumen</a></li>
             <li><a href="{% url 'actividades:lista' viaje.id %}" class="nav-link {% if request.resolver_match.namespace == 'actividades' %}active{% endif %}">Actividades</a></li>
-            <li><a href="{% url 'busqueda:p_destinos' viaje.id %}" class="nav-link {% if request.resolver_match.namespace == 'busqueda' %}active{% endif %}">Destinos</a></li>              
-            <li><a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}#gastos" class="nav-link">Gastos</a></li>
+            <li><a href="{% url 'busqueda:p_destinos' viaje.id %}" class="nav-link {% if request.resolver_match.namespace == 'busqueda' %}active{% endif %}">Destinos</a></li>
+            <li><a href="{% url 'transporte:principal' viaje.id %}" class="nav-link {% if request.resolver_match.namespace == 'transporte' %}active{% endif %}">Transporte</a></li>              
+            <li><a href="{% url 'gastos:resumen' viaje.id %}"class="nav-link {% if request.resolver_match.namespace == 'gastos' %}active{% endif %}">Gastos</a></li>
             <li><a href="{% url 'chat:chat_viaje' viaje.id %}" class="nav-link {% if request.resolver_match.url_name == 'chat_viaje' %}active{% endif %}">Chat</a></li>
             <li><a href="{% url 'galeria:ver_galeria' id_viaje=viaje.id %}" class="nav-link">Galería</a></li>
             <li>

@@ -74,9 +74,20 @@
                 {% endif %}
 
                 <!-- Descripción -->
+<<<<<<< HEAD
 
                 <p class="seccion-titulo">DESCRIPCIÓN</p>
                 <p class="detalle-descripcion">{{ lugar.descripcion }}</p>
+=======
+                {% if lugar.descripcion %}
+                <p class="seccion-titulo">DESCRIPCIÓN</p>
+                <div class="description-container">
+                    <p class="text-muted">
+                        {{ lugar.descripcion }}
+                    </p>
+                </div>
+                {% endif %}
+>>>>>>> develop
 
                 <!-- Lo incluye (opcional: viene del servicio o se omite) -->
                 {% if lugar.lo_incluye %}

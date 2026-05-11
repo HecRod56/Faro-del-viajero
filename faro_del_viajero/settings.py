@@ -14,6 +14,15 @@ from pathlib import Path
 import os
 import sys
 from decouple import config, Csv
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# ==========================================
+# API de Duffel (Búsqueda de vuelos)
+# ==========================================
+DUFFEL_ACCESS_TOKEN = os.getenv('DUFFEL_ACCESS_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,6 +66,8 @@ INSTALLED_APPS = [
     'apps.actividades',
     'chat',
     'apps.galeria',
+    'apps.transporte',
+    'apps.control_gastos',
     #ES LA DE APIS
     'apps.busqueda',
     ]
@@ -180,7 +191,10 @@ DATE_INPUT_FORMATS = ['%d/%m/%Y']
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'apps'),
+]
 
 # Le indicamos a Django que el CustomUser vive en la app "autenticado"
 AUTH_USER_MODEL = 'autenticado.CustomUser'
@@ -206,17 +220,12 @@ Luego, puedes usarlo en tus vistas o servicios:
     response = requests.get(f"{settings.API_URL}/endpoint", headers={"Authorization": f"Bearer {settings.API_KEY}"})
     data = response.json()
 """
-# CONFIGURACIÓN DE CORREO (Usando python-decouple)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-# El nombre que aparecerá en la bandeja de entrada
-DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
+# CONFIGURACIÓN DE CORREO (con API BREVO)
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+ANYMAIL = {
+    "BREVO_API_KEY": config("BREVO_API_KEY", default="None"),
+}
+DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
 
-#KEYS DE LAS APIS
-GEOAPIFY_API_KEY   = config('GEOAPIFY_API_KEY')
-FOURSQUARE_API_KEY = config('FOURSQUARE_API_KEY')
-PEXELS_API_KEY     = config('PEXELS_API_KEY')
+GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY")
+PEXELS_API_KEY = config("PEXELS_API_KEY")

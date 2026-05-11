@@ -1,0 +1,245 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'transporte/css/transporte.css' %}">
+<link rel="stylesheet" href="{% static 'transporte/css/transporte_registro.css' %}">
+<link rel="stylesheet" href="{% static 'transporte/css/transporte_ruta_interna.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+<!-- Breadcrumb 
+    <nav class="breadcrumb-custom" aria-label="Migas de pan">
+        <a href="#">Mis viajes</a>
+        <span>›</span>
+        <a href="#">Cancún 2025</a>
+        <span>›</span>
+        <a href="{% url 'transporte:principal' viaje.id %}">Transporte</a>
+        <span>›</span>
+        <span class="breadcrumb-current">Buscar ruta interna</span>
+    </nav>
+-->
+
+<div class="container mt-4">
+    <div class="mb-3">
+        <h2 class="fw-bold mb-1" style="font-size: 28px; color: var(--color-heading);">Buscar Ruta de Transporte Interno</h2>
+        <p class="text-muted mb-0" style="font-size: 14px;">
+            Encuentra cómo moverte entre puntos del destino. Las opciones se calculan con
+            <strong style="color: var(--color-primary);">Google Maps</strong> en tiempo real.
+        </p>
+    </div>
+
+    <div class="fallback-banner" id="fallbackBanner">
+        <span aria-hidden="true">⚠️</span>
+        <div class="flex-grow-1">
+            <strong>Modo sin conexión:</strong> Mostrando rutas alternativas almacenadas previamente.
+        </div>
+    </div>
+
+    <div class="quick-search-card">
+        <div class="quick-search-row">
+            <div class="form-field">
+                <label for="origen">Desde</label>
+                <span class="field-icon origin" aria-hidden="true">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg>
+                </span>
+                <input type="text" id="origen" placeholder="Hotel, dirección o lugar" value="Hotel Riu Cancún">
+            </div>
+            <div class="form-field">
+                <label for="destino">Hasta</label>
+                <span class="field-icon dest" aria-hidden="true">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <input type="text" id="destino" placeholder="¿A dónde vamos?" value="Museo Maya de Cancún">
+            </div>
+            <button type="button" class="quick-search-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                Buscar rutas
+            </button>
+        </div>
+
+        <div class="mt-3">
+            <div class="suggestions-label">
+                <span aria-hidden="true">⚡</span> Sugerencias del itinerario
+            </div>
+            <div class="suggestions-strip">
+                <button class="suggestion-chip" type="button">
+                    <span aria-hidden="true">🏨</span> Hotel <span class="arrow">→</span> <span aria-hidden="true">🏛️</span> Museo Maya
+                </button>
+                <button class="suggestion-chip" type="button">
+                    <span aria-hidden="true">🏛️</span> Museo <span class="arrow">→</span> <span aria-hidden="true">🍽️</span> Restaurante La Habichuela
+                </button>
+                <button class="suggestion-chip" type="button">
+                    <span aria-hidden="true">🏖️</span> Playa Delfines <span class="arrow">→</span> <span aria-hidden="true">🏨</span> Hotel
+                </button>
+                <button class="suggestion-chip" type="button">
+                    <span aria-hidden="true">🏨</span> Hotel <span class="arrow">→</span> <span aria-hidden="true">🛍️</span> La Isla Shopping
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-layout">
+
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-title">
+                    <span aria-hidden="true">🗺️</span> Vista en mapa
+                </div>
+                <button class="map-fullscreen-btn" type="button">
+                    <span aria-hidden="true">⛶</span> Pantalla completa
+                </button>
+            </div>
+
+            <div class="map-canvas" role="img" aria-label="Mapa de la ruta entre Hotel Riu Cancún y Museo Maya de Cancún">
+                <div class="map-marker origin" style="top: 30%; left: 25%;" title="Hotel Riu Cancún">
+                    <span class="marker-number">A</span>
+                </div>
+                <div class="map-marker destination" style="top: 60%; left: 70%;" title="Museo Maya">
+                    <span class="marker-number">B</span>
+                </div>
+
+                <svg style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;" aria-hidden="true">
+                    <path d="M 25% 32% Q 40% 40%, 50% 50% T 70% 62%"
+                          stroke="#0E9E8E" stroke-width="4" fill="none"
+                          stroke-dasharray="0" stroke-linecap="round"
+                          style="filter: drop-shadow(0 2px 6px rgba(14,158,142,0.4));"/>
+                </svg>
+
+                <div class="map-duration-label" style="top: 45%; left: 45%;">
+                    <span aria-hidden="true">⏱</span> 15 min · 5.2 km
+                </div>
+
+                <div class="map-controls">
+                    <button class="map-control-btn" type="button" aria-label="Acercar">+</button>
+                    <button class="map-control-btn" type="button" aria-label="Alejar">−</button>
+                    <button class="map-control-btn" type="button" aria-label="Mi ubicación" title="Mi ubicación">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                    </button>
+                </div>
+
+                <div class="map-attribution">© Google Maps</div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <h4>
+                <span aria-hidden="true">🚦</span> Opciones de ruta
+                <span style="font-size: 13px; color: #888; font-weight: 600; margin-left: auto;">4 alternativas</span>
+            </h4>
+
+            <article class="route-option uber selected">
+                <div class="route-option-header">
+                    <div class="route-mode">
+                        <div class="route-mode-icon" aria-hidden="true">🚕</div>
+                        <div class="route-mode-info">
+                            <div class="name">Uber <span class="recommended-badge">Recomendado</span></div>
+                            <div class="submode">Auto privado · UberX</div>
+                        </div>
+                    </div>
+                    <div class="route-price">$120<small>MXN</small></div>
+                </div>
+                <div class="route-stats">
+                    <div class="route-stat"><span aria-hidden="true">⏱</span> <strong>15 min</strong></div>
+                    <div class="route-stat"><span aria-hidden="true">📏</span> <strong>5.2 km</strong></div>
+                    <div class="route-stat"><span aria-hidden="true">👥</span> Hasta 4 personas</div>
+                </div>
+                <div class="route-steps">
+                    <span aria-hidden="true">🏨</span> Hotel Riu Cancún
+                    <span class="route-steps-arrow">→</span>
+                    <strong>Av. Bonampak</strong>
+                    <span class="route-steps-arrow">→</span>
+                    <span aria-hidden="true">🏛️</span> Museo Maya
+                </div>
+                <div class="route-actions">
+                    <button class="route-action-btn" type="button"><span aria-hidden="true">📍</span> Ver en mapa</button>
+                    <button class="route-action-btn primary" type="button"><span aria-hidden="true">＋</span> Agregar al itinerario</button>
+                </div>
+            </article>
+
+            <article class="route-option bus">
+                <div class="route-option-header">
+                    <div class="route-mode">
+                        <div class="route-mode-icon" aria-hidden="true">🚌</div>
+                        <div class="route-mode-info">
+                            <div class="name">Autobús urbano</div>
+                            <div class="submode">Ruta R-1 · Transporte público</div>
+                        </div>
+                    </div>
+                    <div class="route-price">$12<small>MXN / persona</small></div>
+                </div>
+                <div class="route-stats">
+                    <div class="route-stat"><span aria-hidden="true">⏱</span> <strong>32 min</strong></div>
+                    <div class="route-stat"><span aria-hidden="true">📏</span> <strong>6.1 km</strong></div>
+                    <div class="route-stat"><span aria-hidden="true">🚏</span> 1 transbordo</div>
+                </div>
+                <div class="route-steps">
+                    <span aria-hidden="true">🚶</span> 4 min a parada
+                    <span class="route-steps-arrow">→</span>
+                    <span aria-hidden="true">🚌</span> R-1 (22 min)
+                    <span class="route-steps-arrow">→</span>
+                    <span aria-hidden="true">🚶</span> 6 min a destino
+                </div>
+                <div class="route-actions">
+                    <button class="route-action-btn" type="button"><span aria-hidden="true">📍</span> Ver en mapa</button>
+                    <button class="route-action-btn primary" type="button"><span aria-hidden="true">＋</span> Agregar al itinerario</button>
+                </div>
+            </article>
+
+            <article class="route-option walk">
+                <div class="route-option-header">
+                    <div class="route-mode">
+                        <div class="route-mode-icon" aria-hidden="true">🚶</div>
+                        <div class="route-mode-info">
+                            <div class="name">A pie</div>
+                            <div class="submode">Caminata · Ruta segura</div>
+                        </div>
+                    </div>
+                    <div class="route-price route-price-free">Gratis<small>0 MXN</small></div>
+                </div>
+                <div class="route-stats">
+                    <div class="route-stat"><span aria-hidden="true">⏱</span> <strong>1h 5min</strong></div>
+                    <div class="route-stat"><span aria-hidden="true">📏</span> <strong>5.4 km</strong></div>
+                    <div class="route-stat route-stat-eco"><span aria-hidden="true">🌱</span> Eco-friendly</div>
+                </div>
+                <div class="route-steps">
+                    <span aria-hidden="true">🏨</span> Hotel
+                    <span class="route-steps-arrow">→</span>
+                    <strong>Av. Kukulkán</strong>
+                    <span class="route-steps-arrow">→</span>
+                    <span aria-hidden="true">🏛️</span> Museo
+                </div>
+                <div class="route-actions">
+                    <button class="route-action-btn" type="button"><span aria-hidden="true">📍</span> Ver en mapa</button>
+                    <button class="route-action-btn primary" type="button"><span aria-hidden="true">＋</span> Agregar al itinerario</button>
+                </div>
+            </article>
+
+            <article class="route-option rental">
+                <div class="route-option-header">
+                    <div class="route-mode">
+                        <div class="route-mode-icon" aria-hidden="true">🚗</div>
+                        <div class="route-mode-info">
+                            <div class="name">Renta de auto compartida</div>
+                            <div class="submode">Costo alto · Requiere votación grupal</div>
+                        </div>
+                    </div>
+                    <div class="route-price">$850<small>MXN / día</small></div>
+                </div>
+                <div class="route-stats">
+                    <div class="route-stat"><span aria-hidden="true">⏱</span> <strong>12 min</strong></div>
+                    <div class="route-stat"><span aria-hidden="true">📏</span> <strong>5.2 km</strong></div>
+                    <div class="route-stat route-stat-warning"><span aria-hidden="true">🗳️</span> Necesita aprobación</div>
+                </div>
+                <div class="route-actions">
+                    <button class="route-action-btn route-action-btn-vote" type="button">
+                        <span aria-hidden="true">🗳️</span> Lanzar votación al grupo
+                    </button>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+{% endblock %}
