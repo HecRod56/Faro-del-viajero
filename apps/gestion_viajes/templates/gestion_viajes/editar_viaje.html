@@ -23,14 +23,13 @@
                 <div class="section-card">
                     <p class="section-label">Información General</p>
                     
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         
                         <div class="row g-4">
                             <div class="col-12 col-md-8">
                                 <label class="fw-bold mb-2">Nombre del Viaje</label>
-                                <input type="text" name="nombre" class="form-control input-field" 
-                                       value="{{ viaje.nombre }}" required>
+                                <input type="text" name="nombre" class="form-control input-field" value="{{ viaje.nombre }}" required>
                             </div>
 
                             <div class="col-12 col-md-4">
@@ -46,9 +45,7 @@
                                 <label class="fw-bold mb-2">Destino</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
-                                    <input type="text" name="destino" class="form-control input-field" 
-                                           style="border-radius: 0 0.75rem 0.75rem 0;"
-                                           value="{{ viaje.destino }}" required>
+                                    <input type="text" name="destino" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" value="{{ viaje.destino }}" required>
                                 </div>
                             </div>
 
@@ -57,40 +54,44 @@
                                 <textarea name="descripcion" class="form-control input-field" rows="4">{{ viaje.descripcion }}</textarea>
                             </div>
 
+                            <div class="col-12 mt-3">
+                                <label class="fw-bold mb-2">Imagen de Portada (Fondo)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">🖼️</span>
+                                    <input type="file" name="imagen_fondo" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" accept="image/*">
+                                </div>
+                                {% if viaje.imagen_fondo %}
+                                    <div class="mt-2 d-flex align-items-center gap-2">
+                                        <small class="text-muted">Actual:</small>
+                                        <img src="{{ viaje.imagen_fondo.url }}" class="rounded shadow-sm" style="width: 80px; height: 50px; object-fit: cover;">
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-1">Sube una foto personalizada para el encabezado de este viaje.</small>
+                            </div>
+
                             <p class="section-label mt-5">Logística y Presupuesto</p>
 
                             <div class="col-12 col-md-6">
                                 <label class="fw-bold mb-2">Fecha de Inicio</label>
-                                <input type="date" name="fecha_inicio" class="form-control input-field" 
-                                       value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
+                                <input type="date" name="fecha_inicio" class="form-control input-field" value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="fw-bold mb-2">Fecha de Fin</label>
-                                <input type="date" name="fecha_fin" class="form-control input-field" 
-                                       value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
-                            </div>
-
-                            <div class="col-12">
-                                <div id="errores-fechas" class="d-none p-2 rounded-3"
-                                    style="background-color:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:0.75rem;">
-                                </div>
+                                <input type="date" name="fecha_fin" class="form-control input-field" value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
-                                    <input type="number" name="presupuesto_estimado" step="0.01" class="form-control input-field" 
-                                           style="border-radius: 0 0.75rem 0.75rem 0;"
-                                           value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
+                                    <input type="number" name="presupuesto_estimado" step="0.01" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
                                 </div>
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
-                                <input type="number" name="capacidad_max" class="form-control input-field" 
-                                       value="{{ viaje.capacidad_max }}">
+                                <input type="number" name="capacidad_max" class="form-control input-field" value="{{ viaje.capacidad_max }}">
                             </div>
 
                             <div class="col-12 d-flex justify-content-end gap-3 mt-4">
