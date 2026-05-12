@@ -31,9 +31,12 @@
         <div class="section-card">
             <div class="card-body" style="padding-bottom: 0.75rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h1 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
+                    <h1
+                        style="font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: #0f172a; margin: 0;">
+                        {{ viaje.nombre }}</h1>
                     <div style="display: flex; gap: 6px;">
-                        <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
+                        <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️
+                            Editar</a>
                     </div>
                 </div>
             </div>
@@ -42,12 +45,13 @@
 
             <div class="card-body">
                 <p class="section-label">Descripción y destino</p>
-                <h5 style="font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
+                <h5 style="font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); margin: 0 0 0.5rem;">📍
+                    {{ viaje.destino }}</h5>
                 <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
                     {% if viaje.descripcion %}
-                        {{ viaje.descripcion }}
+                    {{ viaje.descripcion }}
                     {% else %}
-                        No hay una descripción detallada para este viaje todavía.
+                    No hay una descripción detallada para este viaje todavía.
                     {% endif %}
                 </p>
             </div>
@@ -61,17 +65,17 @@
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div class="resp-avatar">
                             {% if organizador %}
-                                {{ organizador.usuario.first_name|first }}{{ organizador.usuario.last_name|first }}
+                            {{ organizador.usuario.first_name|first }}{{ organizador.usuario.last_name|first }}
                             {% else %}
-                                --
+                            --
                             {% endif %}
                         </div>
                         <div>
                             <div class="txt-bold txt-sm">
                                 {% if organizador %}
-                                    {{ organizador.usuario.get_full_name }}
+                                {{ organizador.usuario.get_full_name }}
                                 {% else %}
-                                    Sin organizador
+                                Sin organizador
                                 {% endif %}
                             </div>
                             <div class="txt-muted">Organizador</div>
@@ -79,29 +83,34 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
                         <p class="section-label" style="margin: 0;">Integrantes</p>
-                        
+
                         {% if not es_participante %}
-                            {% if participantes|length < viaje.capacidad_max %}
-                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: var(--font-size-small); padding: 0.25rem 0.8rem;">
-                                    + Unirme
-                                </a>
+                        {% if participantes|length < viaje.capacidad_max %} <a
+                            href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal"
+                            style="font-size: var(--font-size-small); padding: 0.25rem 0.8rem;">
+                            + Unirme
+                            </a>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: var(--font-size-small);">⚠️ Viaje Lleno</span>
+                            <span class="badge bg-danger-subtle text-danger rounded-pill"
+                                style="font-size: var(--font-size-small);">⚠️ Viaje Lleno</span>
                             {% endif %}
-                        {% else %}
-                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: var(--font-size-small);">Ya eres parte</span>
-                        {% endif %}
+                            {% else %}
+                            <span class="badge bg-success-subtle text-success rounded-pill"
+                                style="font-size: var(--font-size-small);">Ya eres parte</span>
+                            {% endif %}
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
                         <div style="display: flex; align-items: center;">
                             {% for p in participantes %}
-                                <div class="organizer-avatar" title="{{ p.usuario.username }}">
-                                    {{ p.usuario.username|first|upper }}
-                                </div>
+                            <div class="organizer-avatar" title="{{ p.usuario.username }}">
+                                {{ p.usuario.username|first|upper }}
+                            </div>
                             {% empty %}
-                                <span class="txt-muted">Sin integrantes</span>
+                            <span class="txt-muted">Sin integrantes</span>
                             {% endfor %}
                         </div>
                     </div>
@@ -152,11 +161,16 @@
                 {% if puede_registrar_gasto %}
                 <form action="{% url 'gestion_viajes:p_registrar_gasto' viaje.id %}" method="POST">
                     {% csrf_token %}
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
+                    <div
+                        style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
                         <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
-                        <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
-                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB;">$</span>
-                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%;" placeholder="0.00" required>
+                        <div
+                            style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
+                            <span
+                                style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB;">$</span>
+                            <input type="number" name="cantidad" step="0.01"
+                                style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%;"
+                                placeholder="0.00" required>
                         </div>
                         <select name="categoria" class="input-field">
                             <option value="comida">🍕 Comida</option>
@@ -169,7 +183,8 @@
                     </div>
                 </form>
                 {% else %}
-                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: var(--font-size-small); text-align: center;">
+                <div
+                    style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: var(--font-size-small); text-align: center;">
                     <strong>⚠️ {{ razon_no_puede_registrar }}</strong>
                 </div>
                 {% endif %}
@@ -195,27 +210,26 @@
                 </tr>
             </thead>
             <tbody>
-                {% for gasto in viaje.gastos.all %}
+                {% for gasto in gastos %}
                 <tr>
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
                     <td>{{ gasto.pagado_por.usuario.get_full_name }}</td>
                     <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">-${{ gasto.cantidad }}</td>
                     <td style="text-align: center;">
-                        {% if request.user.is_authenticated and request.user == gasto.pagado_por.usuario or rol_usuario == 'organizador' %}
-                            <button type="button"
-                               class="delete-link delete-gasto-btn"
-                               data-gasto-id="{{ gasto.id }}"
-                               data-concepto="{{ gasto.concepto }}"
-                               style="font-size: var(--font-size-small); background: none; border: none; cursor: pointer; padding: 0;">
-                                🗑️ Eliminar
-                            </button>
+                        {% if gasto.puede_eliminar %}
+                        <button type="button" class="delete-link delete-gasto-btn" data-gasto-id="{{ gasto.id }}"
+                            data-concepto="{{ gasto.concepto }}"
+                            style="font-size: var(--font-size-small); background: none; border: none; cursor: pointer; padding: 0;">
+                            🗑️ Eliminar
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos registrados.</td>
+                    <td colspan="5" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos
+                        registrados.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -231,12 +245,15 @@
             </div>
             <div class="budget-summary-item">
                 <p class="section-label" style="margin-bottom: 0.3rem; color: #EF4444;">Gastado</p>
-                <div style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold); color: #EF4444;">-${{ total_gastado }}</div>
+                <div style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold); color: #EF4444;">
+                    -${{ total_gastado }}</div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="margin-bottom: 0.3rem;">Disponible</p>
-                    
-                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}" style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold);">
+                <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}"
+                    style="margin-bottom: 0.3rem;">Disponible</p>
+
+                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}"
+                    style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold);">
                     ${{ presupuesto_restante }}
                 </div>
             </div>
@@ -266,11 +283,13 @@
 
 
     <!-- ══ ACCIONES FINALES — ANCHO COMPLETO ══ -->
-    <div class="full-width" style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">← Regresar a mis viajes</a>
-        <a href="{% url 'gestion_viajes:p_eliminar_viaje' viaje.id %}"
-           class="delete-link"
-           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar viaje</a>
+    <div class="full-width"
+        style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">←
+            Regresar a mis viajes</a>
+        <a href="{% url 'gestion_viajes:p_eliminar_viaje' viaje.id %}" class="delete-link"
+            onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar
+            viaje</a>
     </div>
 
     <!-- ══ TOAST DE NOTIFICACIÓN (ESTILO GMAIL) ══ -->
@@ -321,6 +340,7 @@
                 transform: translateX(-100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -332,6 +352,7 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+
             to {
                 transform: translateX(-100%);
                 opacity: 0;
@@ -349,7 +370,7 @@
         const toastMessage = document.getElementById('toast-message');
         const undoBtn = document.getElementById('undo-btn');
         const timerProgress = document.getElementById('timer-progress');
-        
+
         let currentDeletedGasto = null;
         let undoTimeout = null;
         let timerInterval = null;
@@ -358,12 +379,12 @@
 
         // Agregar listeners a todos los botones de eliminar
         document.querySelectorAll('.delete-gasto-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
-                
+
                 const gastoId = this.dataset.gastoId;
                 const concepto = this.dataset.concepto;
-                
+
                 // Iniciar la eliminación
                 eliminarGastoConUndo(gastoId, concepto, this);
             });
@@ -383,76 +404,76 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Guardar los datos para posible restauración
-                    currentDeletedGasto = data.gasto_data;
-                    
-                    // Eliminar la fila de la tabla
-                    const row = button.closest('tr');
-                    row.style.opacity = '0.5';
-                    row.style.textDecoration = 'line-through';
-                    
-                    // Mostrar el toast
-                    toastMessage.innerHTML = `<strong>"${concepto}"</strong> eliminado`;
-                    undoToast.style.display = 'flex';
-                    
-                    // Reiniciar la barra de progreso
-                    timerProgress.style.width = '100%';
-                    
-                    // Limpiar timeout e intervalo anterior si existe
-                    if (undoTimeout) {
-                        clearTimeout(undoTimeout);
-                    }
-                    if (timerInterval) {
-                        clearInterval(timerInterval);
-                    }
-                    
-                    // Iniciar el contador regresivo de la barra
-                    let timeRemaining = UNDO_DELAY;
-                    timerInterval = setInterval(() => {
-                        timeRemaining -= 100;
-                        const percentage = (timeRemaining / UNDO_DELAY) * 100;
-                        timerProgress.style.width = percentage + '%';
-                        
-                        if (timeRemaining <= 0) {
-                            clearInterval(timerInterval);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Guardar los datos para posible restauración
+                        currentDeletedGasto = data.gasto_data;
+
+                        // Eliminar la fila de la tabla
+                        const row = button.closest('tr');
+                        row.style.opacity = '0.5';
+                        row.style.textDecoration = 'line-through';
+
+                        // Mostrar el toast
+                        toastMessage.innerHTML = `<strong>"${concepto}"</strong> eliminado`;
+                        undoToast.style.display = 'flex';
+
+                        // Reiniciar la barra de progreso
+                        timerProgress.style.width = '100%';
+
+                        // Limpiar timeout e intervalo anterior si existe
+                        if (undoTimeout) {
+                            clearTimeout(undoTimeout);
                         }
-                    }, 100);
-                    
-                    // Auto-confirmar eliminación después de 5 segundos
-                    undoTimeout = setTimeout(() => {
                         if (timerInterval) {
                             clearInterval(timerInterval);
                         }
-                        confirmarEliminacionPermanente(row);
-                    }, UNDO_DELAY);
-                    
-                    // Configurar evento para deshacer
-                    undoBtn.onclick = () => deshacerEliminacion(row);
-                } else {
-                    // Error en la eliminación
-                    alert('Error al eliminar el gasto: ' + (data.error || 'Error desconocido'));
+
+                        // Iniciar el contador regresivo de la barra
+                        let timeRemaining = UNDO_DELAY;
+                        timerInterval = setInterval(() => {
+                            timeRemaining -= 100;
+                            const percentage = (timeRemaining / UNDO_DELAY) * 100;
+                            timerProgress.style.width = percentage + '%';
+
+                            if (timeRemaining <= 0) {
+                                clearInterval(timerInterval);
+                            }
+                        }, 100);
+
+                        // Auto-confirmar eliminación después de 5 segundos
+                        undoTimeout = setTimeout(() => {
+                            if (timerInterval) {
+                                clearInterval(timerInterval);
+                            }
+                            confirmarEliminacionPermanente(row);
+                        }, UNDO_DELAY);
+
+                        // Configurar evento para deshacer
+                        undoBtn.onclick = () => deshacerEliminacion(row);
+                    } else {
+                        // Error en la eliminación
+                        alert('Error al eliminar el gasto: ' + (data.error || 'Error desconocido'));
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al conectar con el servidor');
                     button.disabled = false;
                     button.textContent = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
-                button.disabled = false;
-                button.textContent = originalText;
-            });
+                });
         }
 
         function deshacerEliminacion(row) {
             if (!currentDeletedGasto || isUndoing) return;
-            
+
             isUndoing = true;
             undoBtn.disabled = true;
             undoBtn.textContent = 'Restaurando...';
-            
+
             // Limpiar timers
             if (undoTimeout) {
                 clearTimeout(undoTimeout);
@@ -472,50 +493,50 @@
                     gasto_data: currentDeletedGasto
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Restaurar la fila visualmente
-                    row.style.opacity = '1';
-                    row.style.textDecoration = 'none';
-                    
-                    // Ocultar el toast con animación
-                    undoToast.classList.add('toast-exit');
-                    
-                    setTimeout(() => {
-                        undoToast.style.display = 'none';
-                        undoToast.classList.remove('toast-exit');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Restaurar la fila visualmente
+                        row.style.opacity = '1';
+                        row.style.textDecoration = 'none';
+
+                        // Ocultar el toast con animación
+                        undoToast.classList.add('toast-exit');
+
+                        setTimeout(() => {
+                            undoToast.style.display = 'none';
+                            undoToast.classList.remove('toast-exit');
+                            isUndoing = false;
+                            // Refrescar la página después de ocultar el toast
+                            location.reload();
+                        }, 300);
+
+                        currentDeletedGasto = null;
+                    } else {
+                        alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
                         isUndoing = false;
-                        // Refrescar la página después de ocultar el toast
-                        location.reload();
-                    }, 300);
-                    
-                    currentDeletedGasto = null;
-                } else {
-                    alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
+                        undoBtn.disabled = false;
+                        undoBtn.textContent = 'Deshacer';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al conectar con el servidor');
                     isUndoing = false;
                     undoBtn.disabled = false;
                     undoBtn.textContent = 'Deshacer';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
-                isUndoing = false;
-                undoBtn.disabled = false;
-                undoBtn.textContent = 'Deshacer';
-            });
+                });
         }
 
         function confirmarEliminacionPermanente(row) {
             // Ocultar el toast
             undoToast.classList.add('toast-exit');
-            
+
             setTimeout(() => {
                 undoToast.style.display = 'none';
                 undoToast.classList.remove('toast-exit');
             }, 300);
-            
+
             // Recargar la página para sincronizar
             location.reload();
         }
