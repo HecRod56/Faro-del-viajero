@@ -116,7 +116,8 @@
                     </div>
                     <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
                         <span class="txt-muted">Ocupación:</span>
-                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
+                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">{{
+                            participantes|length }} / {{ viaje.capacidad_max }}</span>
                     </div>
                 </div>
             </div>
@@ -162,23 +163,37 @@
                 <form action="{% url 'gestion_viajes:p_registrar_gasto' viaje.id %}" method="POST">
                     {% csrf_token %}
                     <div
-                        style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
-                        <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
-                        <div
-                            style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
-                            <span
-                                style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB;">$</span>
-                            <input type="number" name="cantidad" step="0.01"
-                                style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%;"
-                                placeholder="0.00" required>
+                        style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: start;">
+                        <div>
+                            <input type="text" id="gasto-concepto" name="concepto" class="input-field"
+                                placeholder="¿En qué gastaste?" maxlength="100" required
+                                style="transition: border-color 0.3s;">
+                            <small id="concepto-help" class="txt-muted"
+                                style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 4px; transition: color 0.3s;">0/100
+                                caracteres</small>
                         </div>
-                        <select name="categoria" class="input-field">
-                            <option value="comida">🍕 Comida</option>
-                            <option value="transporte">🚗 Transporte</option>
-                            <option value="hospedaje">🏨 Hospedaje</option>
-                            <option value="entretenimiento">🎟️ Entretenimiento</option>
-                            <option value="otros">📦 Otros</option>
-                        </select>
+                        <div>
+                            <div id="cantidad-container"
+                                style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden; transition: border-color 0.3s;">
+                                <span id="cantidad-simbolo"
+                                    style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB; transition: color 0.3s, background-color 0.3s;">$</span>
+                                <input type="number" id="gasto-cantidad" name="cantidad" step="0.01" max="100000000"
+                                    style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%; background: transparent;"
+                                    placeholder="0.00" required>
+                            </div>
+                            <small id="cantidad-help" class="txt-muted"
+                                style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 4px; transition: color 0.3s;">Máx.
+                                un numero de 8 digitos</small>
+                        </div>
+                        <div>
+                            <select name="categoria" class="input-field">
+                                <option value="comida">🍕 Comida</option>
+                                <option value="transporte">🚗 Transporte</option>
+                                <option value="hospedaje">🏨 Hospedaje</option>
+                                <option value="entretenimiento">🎟️ Entretenimiento</option>
+                                <option value="otros">📦 Otros</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
                     </div>
                 </form>
@@ -215,7 +230,8 @@
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
                     <td>{{ gasto.pagado_por.usuario.get_full_name }}</td>
-                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">-${{ gasto.cantidad }}</td>
+                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">-${{
+                        gasto.cantidad }}</td>
                     <td style="text-align: center;">
                         {% if gasto.puede_eliminar %}
                         <button type="button" class="delete-link delete-gasto-btn" data-gasto-id="{{ gasto.id }}"
@@ -263,7 +279,8 @@
 
         <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
             <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
-                <span class="txt-bold" style="font-size: var(--font-size-small);">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
+                <span class="txt-bold" style="font-size: var(--font-size-small);">${{
+                    viaje.presupuesto_estimado|default:"0" }} MXN</span>
                 <span class="txt-muted">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
@@ -556,6 +573,62 @@
             }
             return cookieValue;
         }
+
+        // Validación en tiempo real para inputs de gasto
+        document.addEventListener('DOMContentLoaded', function () {
+            const conceptoInput = document.getElementById('gasto-concepto');
+            const conceptoHelp = document.getElementById('concepto-help');
+
+            if (conceptoInput && conceptoHelp) {
+                conceptoInput.addEventListener('input', function () {
+                    const length = this.value.length;
+                    conceptoHelp.textContent = `${length}/100 caracteres`;
+
+                    if (length >= 100) {
+                        conceptoHelp.style.color = '#EF4444'; // Color rojo nativo
+                        conceptoHelp.style.fontWeight = 'bold';
+                        this.style.borderColor = '#EF4444';
+                        this.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+                    } else {
+                        conceptoHelp.style.color = '';
+                        conceptoHelp.style.fontWeight = 'normal';
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    }
+                });
+            }
+
+            const cantidadInput = document.getElementById('gasto-cantidad');
+            const cantidadContainer = document.getElementById('cantidad-container');
+            const cantidadHelp = document.getElementById('cantidad-help');
+            const cantidadSimbolo = document.getElementById('cantidad-simbolo');
+
+            if (cantidadInput && cantidadHelp && cantidadContainer) {
+                cantidadInput.addEventListener('input', function () {
+                    const value = parseFloat(this.value) || 0;
+
+                    if (value >= 100000000) {
+                        cantidadHelp.textContent = '¡Límite máximo alcanzado!';
+                        cantidadHelp.style.color = '#EF4444';
+                        cantidadHelp.style.fontWeight = 'bold';
+                        cantidadContainer.style.borderColor = '#EF4444';
+                        cantidadContainer.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+                        cantidadSimbolo.style.color = '#EF4444';
+                        cantidadSimbolo.style.backgroundColor = '#FEF2F2';
+                        cantidadSimbolo.style.borderColor = '#EF4444';
+                    } else {
+                        cantidadHelp.textContent = 'Máx. un numero de 8 digitos';
+                        cantidadHelp.style.color = '';
+                        cantidadHelp.style.fontWeight = 'normal';
+                        cantidadContainer.style.borderColor = '#E5E7EB';
+                        cantidadContainer.style.boxShadow = '';
+                        cantidadSimbolo.style.color = '#9CA3AF';
+                        cantidadSimbolo.style.backgroundColor = '#F9FAFB';
+                        cantidadSimbolo.style.borderColor = '#E5E7EB';
+                    }
+                });
+            }
+        });
     </script>
 
 </div>
