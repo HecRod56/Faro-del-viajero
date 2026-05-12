@@ -496,6 +496,8 @@
                         undoToast.style.display = 'none';
                         undoToast.classList.remove('toast-exit');
                         isUndoing = false;
+                        // Refrescar la página después de ocultar el toast
+                        location.reload();
                     }, 300);
                     
                     currentDeletedGasto = null;
