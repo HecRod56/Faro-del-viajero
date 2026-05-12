@@ -10,14 +10,18 @@
 <!-- Sub-Navbar de secciones -->
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
-<div class="container mt-4">
+<div class="container-xxl px-4 mt-4">
 
   <!-- ── HEADER ──────────────────────────────────────────── -->
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
     <div class="d-flex align-items-center gap-2">
-      <h5 class="fw-bold mb-0">Integrantes - {{ viaje.nombre }}</h5>
-      <i class="bi bi-people-fill fs-5 text-success"></i>
-      <span class="fw-semibold text-muted">{{ viaje.cupos_ocupados }}/{{ viaje.cupos_totales }}</span>
+      <h5 class="fw-bold mb-0" style="font-size: var(--font-size-h2); color: var(--color-heading);">
+        Integrantes - {{ viaje.nombre }}
+      </h5>
+      <i class="bi bi-people-fill fs-5" style="color: var(--color-primary);"></i>
+      <span class="fw-semibold" style="font-size: var(--font-size-body); color: var(--color-text-secondary);">
+        {{ viaje.cupos_ocupados }}/{{ viaje.cupos_totales }}
+      </span>
     </div>
 
     {% if es_organizador_actual %}
@@ -25,7 +29,7 @@
       class="btn btn-success btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
       data-bs-toggle="modal"
       data-bs-target="#modalAnadirIntegrante"
-      style="cursor: pointer"
+      style="cursor: pointer; font-size: var(--font-size-body);"
     >
       <i class="bi bi-plus-lg"></i>
       Agregar integrante
@@ -46,7 +50,7 @@
         style="height: 180px; object-fit: cover;"
       />
     {% endif %}
-    
+
     <div class="position-absolute top-0 end-0 p-2">
       <span class="badge bg-white text-dark rounded-pill px-3 shadow-sm">
         <span class="text-success me-1">●</span>{{ viaje.estado }}
@@ -63,14 +67,15 @@
       <!-- Avatar + Nombre + Rol -->
       <div class="d-flex align-items-center gap-3 flex-wrap">
         <div class="avatar-circle">{{ user.nombre|first }}</div>
-        
-        <div class="fw-semibold">
+
+        <div class="fw-semibold" style="font-size: var(--font-size-body); color: var(--color-heading);">
           {{ user.nombre }}
           {% if user.es_actual %}
-            <span class="text-muted fw-normal">(Tú)</span>
+            <span style="color: var(--color-text-secondary); font-weight: var(--font-weight-regular);">(Tú)</span>
           {% endif %}
         </div>
-        <span class="badge bg-secondary-subtle text-dark rounded-pill px-3">
+        <span class="badge bg-secondary-subtle text-dark rounded-pill px-3"
+              style="font-size: var(--font-size-small);">
           {{ user.rol }}
         </span>
       </div>
@@ -78,7 +83,7 @@
       <!-- ── Botones de acción ────────────────────────── -->
       <div class="d-flex align-items-center gap-2">
 
-        <!-- Llamar (visible para todos) -->
+        <!-- Ver perfil (visible para todos) -->
         <a
           href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
           class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
@@ -132,6 +137,7 @@
     <div class="mt-4">
       <button
         class="btn btn-danger rounded-pill px-4"
+        style="font-size: var(--font-size-body);"
         data-bs-toggle="modal"
         data-bs-target="#modalAbandonarViaje"
       >
