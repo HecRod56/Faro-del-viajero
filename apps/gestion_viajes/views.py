@@ -205,7 +205,12 @@ def pagina_editar_viaje(request, viaje_id):
         return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
     # Si es GET, enviamos el objeto 'viaje' para rellenar los inputs
-    return render(request, 'gestion_viajes/editar_viaje.html', {'viaje': viaje})
+    return render(request, 'gestion_viajes/editar_viaje.html', {
+        'viaje': viaje,
+        'estado_planeado': viaje.estado == 'planeado',
+        'estado_en_curso': viaje.estado == 'en curso',
+        'estado_finalizado': viaje.estado == 'finalizado',
+    })
 
 # 7. Vista para ELIMINAR un viaje
 def eliminar_viaje(request, viaje_id):
