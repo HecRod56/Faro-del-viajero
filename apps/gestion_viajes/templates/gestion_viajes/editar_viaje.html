@@ -21,39 +21,77 @@
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="section-card">
-                <p class="section-label">Información General</p>
+                <p class="section-label" style="font-size: var(--font-size-h3);">Información General</p>
 
                 <form method="POST">
                     {% csrf_token %}
 
                     <div class="row g-4">
                         <div class="col-12 col-md-8">
-                            <label class="fw-bold mb-2">Nombre del Viaje</label>
-                            <input id="editar-nombre" type="text" name="nombre" class="form-control input-field" maxlength="100" style="transition: border-color 0.3s;" value="{{ viaje.nombre }}" required>
-                            <small id="nombre-help" class="txt-muted" style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 2px; transition: color 0.3s;">0/100 caracteres</small>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Nombre del Viaje</label>
+                            <input id="editar-nombre" type="text" name="nombre" class="form-control input-field"
+                                maxlength="100" style="transition: border-color 0.3s;" value="{{ viaje.nombre }}"
+                                required>
+                            <small id="nombre-help" class="txt-muted"
+                                style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 2px; transition: color 0.3s;">0/100
+                                caracteres</small>
                         </div>
 
                         <div class="col-12 col-md-4">
-                            <label class="fw-bold mb-2">Estado</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Estado</label>
                             <select name="estado" class="form-select input-field">
                                 <option value="planeado" {% if estado_planeado %}selected{% endif %}>Planeado</option>
                                 <option value="en curso" {% if estado_en_curso %}selected{% endif %}>En curso</option>
-                                <option value="finalizado" {% if estado_finalizado %}selected{% endif %}>Finalizado</option>
+                                <option value="finalizado" {% if estado_finalizado %}selected{% endif %}>Finalizado
+                                </option>
                             </select>
                         </div>
 
                         <div class="col-12">
-                            <label class="fw-bold mb-2">Destino</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Destino</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0"
                                     style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
-                                <input type="text" name="destino" class="form-control input-field"
-                                    style="border-radius: 0 0.75rem 0.75rem 0;" value="{{ viaje.destino }}" required>
+                                <select id="destino" name="destino" class="form-select input-field" required>
+                                    <option value="" disabled selected>Selecciona el estado de destino</option>
+                                    <option value="Aguascalientes">Aguascalientes</option>
+                                    <option value="Baja California">Baja California</option>
+                                    <option value="Baja California Sur">Baja California Sur</option>
+                                    <option value="Campeche">Campeche</option>
+                                    <option value="Coahuila">Coahuila</option>
+                                    <option value="Colima">Colima</option>
+                                    <option value="Chiapas">Chiapas</option>
+                                    <option value="Chihuahua">Chihuahua</option>
+                                    <option value="Ciudad de México">Ciudad de México</option>
+                                    <option value="Durango">Durango</option>
+                                    <option value="Guanajuato">Guanajuato</option>
+                                    <option value="Guerrero">Guerrero</option>
+                                    <option value="Hidalgo">Hidalgo</option>
+                                    <option value="Jalisco">Jalisco</option>
+                                    <option value="México">México</option>
+                                    <option value="Michoacán">Michoacán</option>
+                                    <option value="Morelos">Morelos</option>
+                                    <option value="Nayarit">Nayarit</option>
+                                    <option value="Nuevo León">Nuevo León</option>
+                                    <option value="Oaxaca">Oaxaca</option>
+                                    <option value="Puebla">Puebla</option>
+                                    <option value="Querétaro">Querétaro</option>
+                                    <option value="Quintana Roo">Quintana Roo</option>
+                                    <option value="San Luis Potosí">San Luis Potosí</option>
+                                    <option value="Sinaloa">Sinaloa</option>
+                                    <option value="Sonora">Sonora</option>
+                                    <option value="Tabasco">Tabasco</option>
+                                    <option value="Tamaulipas">Tamaulipas</option>
+                                    <option value="Tlaxcala">Tlaxcala</option>
+                                    <option value="Veracruz">Veracruz</option>
+                                    <option value="Yucatán">Yucatán</option>
+                                    <option value="Zacatecas">Zacatecas</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="col-12">
-                            <label class="fw-bold mb-2">Descripción</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Descripción</label>
                             <textarea id="editar-descripcion" name="descripcion" class="form-control input-field"
                                 rows="4" maxlength="5000"
                                 style="transition: border-color 0.3s;">{{ viaje.descripcion }}</textarea>
@@ -62,16 +100,17 @@
                                 caracteres</small>
                         </div>
 
-                        <p class="section-label mt-5">Logística y Presupuesto</p>
+                        <p class="section-label mt-5" style="font-size: var(--font-size-h3);">Logística y Presupuesto
+                        </p>
 
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-2">Fecha de Inicio</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Fecha de Inicio</label>
                             <input type="date" name="fecha_inicio" class="form-control input-field"
                                 value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-2">Fecha de Fin</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Fecha de Fin</label>
                             <input type="date" name="fecha_fin" class="form-control input-field"
                                 value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
                         </div>
@@ -83,7 +122,8 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Presupuesto Estimado
+                                (MXN)</label>
                             <div id="presupuesto-container" class="input-group" style="transition: border-color 0.3s;">
                                 <span id="presupuesto-simbolo" class="input-group-text bg-light border-end-0"
                                     style="border-radius: 0.75rem 0 0 0.75rem; transition: color 0.3s, background-color 0.3s;">$</span>
@@ -98,7 +138,8 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
+                            <label class="fw-bold mb-2" style="font-size: var(--font-size-h3);">Capacidad Máxima
+                                (Personas)</label>
                             <input type="number" name="capacidad_max" class="form-control input-field"
                                 value="{{ viaje.capacidad_max }}">
                         </div>
