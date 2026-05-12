@@ -9,18 +9,6 @@
 {% block content %}
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
-    <!-- Breadcrumb 
-    <nav class="breadcrumb-custom" aria-label="Migas de pan">
-        <a href="#">Mis viajes</a>
-        <span>›</span>
-        
-        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">{{ viaje.destino }} {{ viaje.fecha_inicio|date:"Y" }}</a>
-        <span>›</span>
-         URL dinámica al principal de transporte 
-        <a href="{% url 'transporte:principal' viaje.id %}">Transporte</a>
-        <span>›</span>
-        <span class="breadcrumb-current">Registrar trayecto</span>
-    </nav> -->
 <div class="container mt-4"> 
     <!-- Header -->
     <div class="mb-4">
@@ -106,14 +94,21 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                         </span>
-                        <input type="date" id="fecha-ida" name="fecha_ida" value="{{ fecha_ida|default:'' }}" required>
+                        <input type="date" id="fecha-ida" name="fecha_ida" 
+                               value="{{ fecha_ida|default:'' }}" 
+                               min="{{ viaje.fecha_inicio|date:'Y-m-d' }}" 
+                               max="{{ viaje.fecha_fin|date:'Y-m-d' }}" 
+                               required>
                     </div>
                     <div class="form-field" id="containerRegreso">
                         <label for="fecha-regreso" id="labelFechaRegreso">Fecha de regreso</label>
                         <span class="field-icon" aria-hidden="true">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                         </span>
-                        <input type="date" id="fecha-regreso" name="fecha_regreso" value="{{ fecha_regreso|default:'' }}" required>
+                        <input type="date" id="fecha-regreso" name="fecha_regreso" value="{{ fecha_regreso|default:'' }}" 
+                               min="{{ viaje.fecha_inicio|date:'Y-m-d' }}" 
+                               max="{{ viaje.fecha_fin|date:'Y-m-d' }}" 
+                               required>
                     </div>
                     <div class="form-field">
                         <label for="pasajeros">Pasajeros</label>
@@ -133,7 +128,7 @@
                 <!-- Botón de búsqueda -->
                 <button type="submit" class="search-btn" id="searchBtn">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                    <span>Buscar vuelos con Duffel</span>
+                    <span>Buscar vuelos</span>
                 </button>
 
                 <!-- Aviso de bloqueo en itinerario -->
@@ -384,7 +379,7 @@
         } else {
             labelOrigen.textContent = 'Desde (código IATA)';
             labelDestino.textContent = 'Hasta (código IATA)';
-            searchBtnSpan.textContent = 'Buscar vuelos con Duffel';
+            searchBtnSpan.textContent = 'Buscar vuelos';
             if(emptyStateIcon) emptyStateIcon.textContent = '✈️';
         }
         
@@ -461,5 +456,53 @@
             seleccionarVuelo(primerVuelo);
         }
     });
+
+    // ==========================================
+    // VALIDACIÓN DE FECHAS DE BÚSQUEDA
+    // ==========================================
+    const formBusqueda = document.getElementById('formBusqueda');
+    
+    // Traemos las fechas exactas del viaje desde Django
+    const limiteInicio = new Date('{{ viaje.fecha_inicio|date:"Y-m-d" }}T00:00:00');
+    const limiteFin = new Date('{{ viaje.fecha_fin|date:"Y-m-d" }}T23:59:59');
+
+    if (formBusqueda) {
+        formBusqueda.addEventListener('submit', function(event) {
+            const valIda = document.getElementById('fecha-ida').value;
+            const valRegreso = document.getElementById('fecha-regreso').value;
+            const tipoViaje = document.getElementById('tipoViajeBusqueda').value;
+
+            // 1. Validar fecha de Ida
+            if (valIda) {
+                const fechaIda = new Date(valIda + 'T00:00:00');
+                if (fechaIda < limiteInicio || fechaIda > limiteFin) {
+                    alert('⚠️ La fecha de ida debe estar dentro de las fechas de tu viaje ({{ viaje.fecha_inicio|date:"d/m/Y" }} al {{ viaje.fecha_fin|date:"d/m/Y" }}).');
+                    event.preventDefault(); // Detiene el envío del formulario
+                    return;
+                }
+            }
+
+            // 2. Validar fecha de Regreso (solo si no es "Solo ida")
+            if ((tipoViaje === 'ida_vuelta' || tipoViaje === 'regreso') && valRegreso) {
+                const fechaRegreso = new Date(valRegreso + 'T00:00:00');
+                
+                if (fechaRegreso < limiteInicio || fechaRegreso > limiteFin) {
+                    alert('⚠️ La fecha de regreso debe estar dentro de las fechas de tu viaje ({{ viaje.fecha_inicio|date:"d/m/Y" }} al {{ viaje.fecha_fin|date:"d/m/Y" }}).');
+                    event.preventDefault();
+                    return;
+                }
+
+                // Extra: Que no viajen al pasado
+                if (valIda) {
+                    const fechaIda = new Date(valIda + 'T00:00:00');
+                    if (fechaRegreso < fechaIda) {
+                        alert('⚠️ La fecha de regreso no puede ser anterior a la fecha de ida.');
+                        event.preventDefault();
+                        return;
+                    }
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}
