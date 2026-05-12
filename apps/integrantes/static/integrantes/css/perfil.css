@@ -1,54 +1,58 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-}
-
-.container {
-    display: flex;
-    height: 100vh;
-}
+/* ==========================================
+   perfil.css — visualizar_perfil
+   Usa variables de core/css/styles.css
+   ========================================== */
 
 /* Panel izquierdo */
-.sidebar {
-    width: 35%;
-    background: #0f766e;
+.perfil-card-left {
+    background-color: var(--color-white);
+    border: 1px solid #e0e0e0;
+    min-height: 340px;
+}
+
+/* Avatar con foto */
+.perfil-avatar {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+}
+
+/* Avatar sin foto */
+.perfil-avatar-placeholder {
+    width: 160px;
+    height: 160px;
+    font-size: 56px;
+    background-color: var(--color-primary);
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Badge de rol */
+.perfil-badge-rol {
+    background-color: #e8f5f3;
+    color: var(--color-primary);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-family-base);
+    border: 1px solid var(--color-primary);
+    padding: 5px 16px;
     border-radius: 20px;
-    margin: 20px;
-    position: relative;
 }
 
-/* Panel derecho */
-.content {
-    width: 65%;
-    padding: 20px;
-    position: relative;
+/* Card de información (teléfono / correo) */
+.perfil-info-card {
+    background-color: var(--color-white);
+    border: 1px solid #e0e0e0;
 }
 
-h2 {
-    margin-top: 0;
+/* Tarjeta individual de viaje compartido */
+.perfil-viaje-card {
+    background-color: var(--color-white);
+    border: 1px solid #e0e0e0;
+    transition: var(--transition-fast);
 }
 
-.card {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-}
-
-/* Botón volver */
-.btn-volver {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: #0f766e;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-}
-
-.btn-volver:hover {
-    background: #115e59;
+.perfil-viaje-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(14, 158, 142, 0.1);
 }
