@@ -307,10 +307,14 @@
         style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
         <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">←
             Regresar a mis viajes</a>
-        <a href="{% url 'gestion_viajes:p_eliminar_viaje' viaje.id %}" class="delete-link"
-            onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar
-            viaje</a>
+        <button type="button" class="delete-link"
+            onclick="document.getElementById('modalEliminarViaje').classList.remove('d-none')"
+            style="border: none; background: none; padding: 0; cursor: pointer;">
+            Eliminar viaje
+        </button>
     </div>
+
+    {% include "gestion_viajes/modals/modal_abandonar_viaje.html" %}
 
     <!-- ══ TOAST DE NOTIFICACIÓN (ESTILO GMAIL) ══ -->
     <div id="undo-toast" style="
