@@ -28,7 +28,7 @@
     <div class="col-left">
 
         <!-- Info principal + acciones -->
-        <div class="section-card">
+        <div class="section-card" id="card-descripcion">
             <div class="card-body" style="padding-bottom: 0.75rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <h1
@@ -47,7 +47,7 @@
                 <p class="section-label">Descripción y destino</p>
                 <h5 style="font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); margin: 0 0 0.5rem;">📍
                     {{ viaje.destino }}</h5>
-                <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
+                <p id="texto-descripcion" class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
                     {% if viaje.descripcion %}
                     {{ viaje.descripcion }}
                     {% else %}
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Responsable + Integrantes -->
-        <div class="section-card">
+        <div class="section-card" id="card-responsable">
             <div style="display: grid; grid-template-columns: 1fr 1fr;">
                 <div class="card-body" style="border-right: 1px solid #F3F4F6;">
                     <p class="section-label">Responsable</p>
@@ -116,8 +116,9 @@
                     </div>
                     <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
                         <span class="txt-muted">Ocupación:</span>
-                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">{{
-                            participantes|length }} / {{ viaje.capacidad_max }}</span>
+                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">
+                            {{ participantes|length }} / {{ viaje.capacidad_max }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -126,10 +127,10 @@
     </div>
 
     <!-- ══ COLUMNA DERECHA ══ -->
-    <div class="col-right">
+    <div class="col-right" id="col-right-container">
 
         <!-- Fechas del viaje — rediseñado -->
-        <div class="section-card">
+        <div class="section-card" id="card-fechas">
             <div class="card-body">
                 <p class="section-label">Fechas del viaje</p>
                 <div class="dates-grid">
@@ -156,7 +157,7 @@
         </div>
 
         <!-- Añadir gasto rápido -->
-        <div class="section-card">
+        <div class="section-card" id="card-gasto-rapido">
             <div class="card-body">
                 <p class="section-label">Añadir gasto rápido</p>
                 {% if puede_registrar_gasto %}
@@ -230,8 +231,9 @@
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
                     <td>{{ gasto.pagado_por.usuario.get_full_name }}</td>
-                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">-${{
-                        gasto.cantidad }}</td>
+                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">
+                        -${{ gasto.cantidad }}
+                    </td>
                     <td style="text-align: center;">
                         {% if gasto.puede_eliminar %}
                         <button type="button" class="delete-link delete-gasto-btn" data-gasto-id="{{ gasto.id }}"
@@ -279,8 +281,9 @@
 
         <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
             <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
-                <span class="txt-bold" style="font-size: var(--font-size-small);">${{
-                    viaje.presupuesto_estimado|default:"0" }} MXN</span>
+                <span class="txt-bold" style="font-size: var(--font-size-small);">
+                    ${{ viaje.presupuesto_estimado|default:"0" }} MXN
+                </span>
                 <span class="txt-muted">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
@@ -629,6 +632,90 @@
                 });
             }
         });
+
+        // ══ LAYOUT DINÁMICO: Feature 1 + Feature 2 ══
+        (function () {
+            const TOLERANCE = 20; // px de margen para evitar oscilaciones
+            const MOBILE_BREAKPOINT = 768;
+
+            const cardDescripcion = document.getElementById('card-descripcion');
+            const cardResponsable = document.getElementById('card-responsable');
+            const colLeft = cardDescripcion ? cardDescripcion.closest('.col-left') : null;
+            const colRight = document.getElementById('col-right-container');
+            const cardFechas = document.getElementById('card-fechas');
+            const cardGastoRapido = document.getElementById('card-gasto-rapido');
+            const textoDescripcion = document.getElementById('texto-descripcion');
+
+            if (!cardDescripcion || !cardResponsable || !colLeft || !colRight || !cardFechas || !cardGastoRapido || !textoDescripcion) {
+                return;
+            }
+
+            let responsableEnDerecha = false;
+
+            function aplicarScrollDescripcion() {
+                // Feature 2: igualar altura de col-left con col-right usando max-height + scroll
+                // Se calcula DESPUÉS de haber movido el card de responsable a col-right
+                const alturaColRight = colRight.offsetHeight;
+                // La altura del card que NO es el texto: todo menos el párrafo de descripción
+                const alturaHeader = cardDescripcion.offsetHeight - textoDescripcion.offsetHeight;
+                const alturaDisponible = alturaColRight - alturaHeader;
+
+                textoDescripcion.style.maxHeight = Math.max(alturaDisponible, 60) + 'px';
+                textoDescripcion.style.overflowY = 'auto';
+                textoDescripcion.style.paddingRight = '4px';
+            }
+
+            function revertirScrollDescripcion() {
+                // Feature 2 reversion: devolver comportamiento natural
+                textoDescripcion.style.maxHeight = '';
+                textoDescripcion.style.overflowY = '';
+                textoDescripcion.style.paddingRight = '';
+            }
+
+            function evaluarLayout() {
+                // En móvil no aplica ninguna feature
+                if (window.innerWidth < MOBILE_BREAKPOINT) {
+                    if (responsableEnDerecha) {
+                        colLeft.appendChild(cardResponsable);
+                        responsableEnDerecha = false;
+                    }
+                    revertirScrollDescripcion();
+                    return;
+                }
+
+                const alturaDescripcion = cardDescripcion.offsetHeight;
+                const alturaFechas = cardFechas.offsetHeight;
+                const alturaGasto = cardGastoRapido.offsetHeight;
+                const alturaDerechaBase = alturaFechas + alturaGasto;
+
+                const debeEstarEnDerecha = alturaDescripcion >= (alturaDerechaBase - TOLERANCE);
+
+                if (debeEstarEnDerecha && !responsableEnDerecha) {
+                    // Feature 1: mover card responsable a col-right
+                    colRight.appendChild(cardResponsable);
+                    responsableEnDerecha = true;
+                    // Feature 2: ajustar scroll en descripción (esperar 1 frame para medir col-right ya actualizado)
+                    requestAnimationFrame(aplicarScrollDescripcion);
+                } else if (!debeEstarEnDerecha && responsableEnDerecha) {
+                    // Feature 1 reversion: devolver card a col-left
+                    colLeft.appendChild(cardResponsable);
+                    responsableEnDerecha = false;
+                    // Feature 2 reversion
+                    revertirScrollDescripcion();
+                } else if (debeEstarEnDerecha && responsableEnDerecha) {
+                    // Ya está en la derecha pero puede que la altura cambió (resize)
+                    requestAnimationFrame(aplicarScrollDescripcion);
+                }
+            }
+
+            window.addEventListener('load', evaluarLayout);
+            window.addEventListener('resize', evaluarLayout);
+
+            if (window.ResizeObserver) {
+                const observer = new ResizeObserver(evaluarLayout);
+                observer.observe(cardDescripcion);
+            }
+        })();
     </script>
 
 </div>
