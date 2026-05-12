@@ -31,7 +31,7 @@
         <div class="section-card">
             <div class="card-body" style="padding-bottom: 0.75rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h1 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
+                    <h1 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
                     <div style="display: flex; gap: 6px;">
                         <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
                     </div>
@@ -42,7 +42,7 @@
 
             <div class="card-body">
                 <p class="section-label">Descripción y destino</p>
-                <h5 style="font-size: 0.92rem; font-weight: 700; margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
+                <h5 style="font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
                 <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
                     {% if viaje.descripcion %}
                         {{ viaje.descripcion }}
@@ -84,14 +84,14 @@
                         
                         {% if not es_participante %}
                             {% if participantes|length < viaje.capacidad_max %}
-                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
+                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: var(--font-size-small); padding: 0.25rem 0.8rem;">
                                     + Unirme
                                 </a>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: 0.65rem;">⚠️ Viaje Lleno</span>
+                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: var(--font-size-small);">⚠️ Viaje Lleno</span>
                             {% endif %}
                         {% else %}
-                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: 0.65rem;">Ya eres parte</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: var(--font-size-small);">Ya eres parte</span>
                         {% endif %}
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
@@ -107,7 +107,7 @@
                     </div>
                     <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
                         <span class="txt-muted">Ocupación:</span>
-                        <span class="txt-muted" style="font-weight: 600;">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
+                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
                     </div>
                 </div>
             </div>
@@ -155,8 +155,8 @@
                     <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
                         <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
                         <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
-                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: 0.78rem; border-right: 1px solid #E5E7EB;">$</span>
-                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: 0.78rem; width: 100%;" placeholder="0.00" required>
+                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB;">$</span>
+                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%;" placeholder="0.00" required>
                         </div>
                         <select name="categoria" class="input-field">
                             <option value="comida">🍕 Comida</option>
@@ -169,7 +169,7 @@
                     </div>
                 </form>
                 {% else %}
-                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: 0.78rem; text-align: center;">
+                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: var(--font-size-small); text-align: center;">
                     <strong>⚠️ {{ razon_no_puede_registrar }}</strong>
                 </div>
                 {% endif %}
@@ -200,14 +200,14 @@
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
                     <td>{{ gasto.pagado_por.usuario.get_full_name }}</td>
-                    <td style="text-align: right; font-weight: 700; color: #EF4444;">-${{ gasto.cantidad }}</td>
+                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">-${{ gasto.cantidad }}</td>
                     <td style="text-align: center;">
                         {% if request.user.is_authenticated and request.user == gasto.pagado_por.usuario or rol_usuario == 'organizador' %}
                             <button type="button"
                                class="delete-link delete-gasto-btn"
                                data-gasto-id="{{ gasto.id }}"
                                data-concepto="{{ gasto.concepto }}"
-                               style="font-size: 0.7rem; background: none; border: none; cursor: pointer; padding: 0;">
+                               style="font-size: var(--font-size-small); background: none; border: none; cursor: pointer; padding: 0;">
                                 🗑️ Eliminar
                             </button>
                         {% endif %}
@@ -227,16 +227,16 @@
         <div class="budget-summary-grid">
             <div class="budget-summary-item">
                 <p class="section-label" style="margin-bottom: 0.3rem;">Presupuesto</p>
-                <div class="txt-bold" style="font-size: 1rem;">${{ viaje.presupuesto_estimado }}</div>
+                <div class="txt-bold" style="font-size: var(--font-size-body);">${{ viaje.presupuesto_estimado }}</div>
             </div>
             <div class="budget-summary-item">
                 <p class="section-label" style="margin-bottom: 0.3rem; color: #EF4444;">Gastado</p>
-                <div style="font-size: 1rem; font-weight: 700; color: #EF4444;">-${{ total_gastado }}</div>
+                <div style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold); color: #EF4444;">-${{ total_gastado }}</div>
             </div>
             <div class="budget-summary-item">
                 <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="margin-bottom: 0.3rem;">Disponible</p>
                     
-                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}" style="font-size: 1rem; font-weight: 700;">
+                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}" style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold);">
                     ${{ presupuesto_restante }}
                 </div>
             </div>
@@ -246,7 +246,7 @@
 
         <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
             <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
-                <span class="txt-bold" style="font-size: 0.85rem;">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
+                <span class="txt-bold" style="font-size: var(--font-size-small);">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
                 <span class="txt-muted">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
@@ -278,11 +278,12 @@
         position: fixed;
         bottom: 20px;
         left: 20px;
-        background: #323232;
-        color: white;
+        background: var(--color-bg);
+        font-family: var(--font-family-base);
+        color: var(--color-text, #333);
         padding: 16px 24px;
         border-radius: 4px;
-        font-size: 0.875rem;
+        font-size: var(--font-size-body);
         box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
         display: none;
         z-index: 1000;
@@ -295,32 +296,21 @@
             <div id="toast-message">Gasto eliminado</div>
             <div id="timer-bar" style="
                 height: 2px;
-                background: rgba(255,255,255,0.3);
+                background: rgba(0,0,0,0.1);
                 border-radius: 1px;
                 margin-top: 8px;
                 overflow: hidden;
             ">
                 <div id="timer-progress" style="
                     height: 100%;
-                    background: #4FC3F7;
+                    background: var(--color-primary);
                     border-radius: 1px;
                     width: 100%;
                     transition: width 0.1s linear;
                 "></div>
             </div>
         </div>
-        <button id="undo-btn" style="
-            background: #4FC3F7;
-            color: #323232;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background 0.2s;
-            white-space: nowrap;
-        " onmouseover="this.style.background='#29B6F6'" onmouseout="this.style.background='#4FC3F7'">
+        <button id="undo-btn" class="btn-primary" style="white-space: nowrap;">
             Deshacer
         </button>
     </div>
@@ -405,7 +395,7 @@
                     row.style.textDecoration = 'line-through';
                     
                     // Mostrar el toast
-                    toastMessage.textContent = `"${concepto}" eliminado`;
+                    toastMessage.innerHTML = `<strong>"${concepto}"</strong> eliminado`;
                     undoToast.style.display = 'flex';
                     
                     // Reiniciar la barra de progreso
