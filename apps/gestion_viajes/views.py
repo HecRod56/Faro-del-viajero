@@ -147,7 +147,13 @@ def pagina_detalle_viaje(request, viaje_id):
         puede_registrar_gasto = False
         razon_no_puede_registrar = "Presupuesto excedido. No se permiten más gastos."
 
-    # 6. RENDERIZADO FINAL
+    # 6. Evaluamos los permisos de eliminación de gastos desde Python
+    gastos_list = []
+    for gasto in viaje.gastos.all():
+        gasto.puede_eliminar = (request.user == gasto.pagado_por.usuario) or (rol_usuario == 'organizador')
+        gastos_list.append(gasto)
+
+    # 7. RENDERIZADO FINAL
     return render(request, 'gestion_viajes/detalle_viaje.html', {
         'viaje': viaje,
         'participantes': participantes_list,
@@ -159,7 +165,8 @@ def pagina_detalle_viaje(request, viaje_id):
         'porcentaje_gastado': porcentaje_gastado,
         'puede_registrar_gasto': puede_registrar_gasto,
         'razon_no_puede_registrar': razon_no_puede_registrar,
-        'rol_usuario': rol_usuario # Útil para mostrar/ocultar botones en el HTML
+        'rol_usuario': rol_usuario, # Útil para mostrar/ocultar botones en el HTML
+        'gastos': gastos_list
     })
 
 #5.1 Calculo de la duracion de un viaje 
@@ -198,7 +205,12 @@ def pagina_editar_viaje(request, viaje_id):
         return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
     # Si es GET, enviamos el objeto 'viaje' para rellenar los inputs
-    return render(request, 'gestion_viajes/editar_viaje.html', {'viaje': viaje})
+    return render(request, 'gestion_viajes/editar_viaje.html', {
+        'viaje': viaje,
+        'estado_planeado': viaje.estado == 'planeado',
+        'estado_en_curso': viaje.estado == 'en curso',
+        'estado_finalizado': viaje.estado == 'finalizado',
+    })
 
 # 7. Vista para ELIMINAR un viaje
 def eliminar_viaje(request, viaje_id):

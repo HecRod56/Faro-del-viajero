@@ -28,12 +28,15 @@
     <div class="col-left">
 
         <!-- Info principal + acciones -->
-        <div class="section-card">
+        <div class="section-card" id="card-descripcion">
             <div class="card-body" style="padding-bottom: 0.75rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h1 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
+                    <h1
+                        style="font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: #0f172a; margin: 0;">
+                        {{ viaje.nombre }}</h1>
                     <div style="display: flex; gap: 6px;">
-                        <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
+                        <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️
+                            Editar</a>
                     </div>
                 </div>
             </div>
@@ -42,36 +45,37 @@
 
             <div class="card-body">
                 <p class="section-label">Descripción y destino</p>
-                <h5 style="font-size: 0.92rem; font-weight: 700; margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
-                <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
+                <h5 style="font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); margin: 0 0 0.5rem;">📍
+                    {{ viaje.destino }}</h5>
+                <p id="texto-descripcion" class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
                     {% if viaje.descripcion %}
-                        {{ viaje.descripcion }}
+                    {{ viaje.descripcion }}
                     {% else %}
-                        No hay una descripción detallada para este viaje todavía.
+                    No hay una descripción detallada para este viaje todavía.
                     {% endif %}
                 </p>
             </div>
         </div>
 
         <!-- Responsable + Integrantes -->
-        <div class="section-card">
+        <div class="section-card" id="card-responsable">
             <div style="display: grid; grid-template-columns: 1fr 1fr;">
                 <div class="card-body" style="border-right: 1px solid #F3F4F6;">
                     <p class="section-label">Responsable</p>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div class="resp-avatar">
                             {% if organizador %}
-                                {{ organizador.usuario.first_name|first }}{{ organizador.usuario.last_name|first }}
+                            {{ organizador.usuario.first_name|first }}{{ organizador.usuario.last_name|first }}
                             {% else %}
-                                --
+                            --
                             {% endif %}
                         </div>
                         <div>
                             <div class="txt-bold txt-sm">
                                 {% if organizador %}
-                                    {{ organizador.usuario.get_full_name }}
+                                {{ organizador.usuario.get_full_name }}
                                 {% else %}
-                                    Sin organizador
+                                Sin organizador
                                 {% endif %}
                             </div>
                             <div class="txt-muted">Organizador</div>
@@ -79,35 +83,42 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
                         <p class="section-label" style="margin: 0;">Integrantes</p>
-                        
+
                         {% if not es_participante %}
-                            {% if participantes|length < viaje.capacidad_max %}
-                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
-                                    + Unirme
-                                </a>
+                        {% if participantes|length < viaje.capacidad_max %} <a
+                            href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal"
+                            style="font-size: var(--font-size-small); padding: 0.25rem 0.8rem;">
+                            + Unirme
+                            </a>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: 0.65rem;">⚠️ Viaje Lleno</span>
+                            <span class="badge bg-danger-subtle text-danger rounded-pill"
+                                style="font-size: var(--font-size-small);">⚠️ Viaje Lleno</span>
                             {% endif %}
-                        {% else %}
-                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: 0.65rem;">Ya eres parte</span>
-                        {% endif %}
+                            {% else %}
+                            <span class="badge bg-success-subtle text-success rounded-pill"
+                                style="font-size: var(--font-size-small);">Ya eres parte</span>
+                            {% endif %}
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
                         <div style="display: flex; align-items: center;">
                             {% for p in participantes %}
-                                <div class="organizer-avatar" title="{{ p.usuario.username }}">
-                                    {{ p.usuario.username|first|upper }}
-                                </div>
+                            <div class="organizer-avatar" title="{{ p.usuario.username }}">
+                                {{ p.usuario.username|first|upper }}
+                            </div>
                             {% empty %}
-                                <span class="txt-muted">Sin integrantes</span>
+                            <span class="txt-muted">Sin integrantes</span>
                             {% endfor %}
                         </div>
                     </div>
                     <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
                         <span class="txt-muted">Ocupación:</span>
-                        <span class="txt-muted" style="font-weight: 600;">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
+                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">
+                            {{ participantes|length }} / {{ viaje.capacidad_max }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -116,10 +127,10 @@
     </div>
 
     <!-- ══ COLUMNA DERECHA ══ -->
-    <div class="col-right">
+    <div class="col-right" id="col-right-container">
 
         <!-- Fechas del viaje — rediseñado -->
-        <div class="section-card">
+        <div class="section-card" id="card-fechas">
             <div class="card-body">
                 <p class="section-label">Fechas del viaje</p>
                 <div class="dates-grid">
@@ -146,30 +157,50 @@
         </div>
 
         <!-- Añadir gasto rápido -->
-        <div class="section-card">
+        <div class="section-card" id="card-gasto-rapido">
             <div class="card-body">
                 <p class="section-label">Añadir gasto rápido</p>
                 {% if puede_registrar_gasto %}
                 <form action="{% url 'gestion_viajes:p_registrar_gasto' viaje.id %}" method="POST">
                     {% csrf_token %}
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
-                        <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
-                        <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
-                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: 0.78rem; border-right: 1px solid #E5E7EB;">$</span>
-                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: 0.78rem; width: 100%;" placeholder="0.00" required>
+                    <div
+                        style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: start;">
+                        <div>
+                            <input type="text" id="gasto-concepto" name="concepto" class="input-field"
+                                placeholder="¿En qué gastaste?" maxlength="100" required
+                                style="transition: border-color 0.3s;">
+                            <small id="concepto-help" class="txt-muted"
+                                style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 4px; transition: color 0.3s;">0/100
+                                caracteres</small>
                         </div>
-                        <select name="categoria" class="input-field">
-                            <option value="comida">🍕 Comida</option>
-                            <option value="transporte">🚗 Transporte</option>
-                            <option value="hospedaje">🏨 Hospedaje</option>
-                            <option value="entretenimiento">🎟️ Entretenimiento</option>
-                            <option value="otros">📦 Otros</option>
-                        </select>
+                        <div>
+                            <div id="cantidad-container"
+                                style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden; transition: border-color 0.3s;">
+                                <span id="cantidad-simbolo"
+                                    style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB; transition: color 0.3s, background-color 0.3s;">$</span>
+                                <input type="number" id="gasto-cantidad" name="cantidad" step="0.01" max="100000000"
+                                    style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%; background: transparent;"
+                                    placeholder="0.00" required>
+                            </div>
+                            <small id="cantidad-help" class="txt-muted"
+                                style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 4px; transition: color 0.3s;">Máx.
+                                un numero de 8 digitos</small>
+                        </div>
+                        <div>
+                            <select name="categoria" class="input-field">
+                                <option value="comida">🍕 Comida</option>
+                                <option value="transporte">🚗 Transporte</option>
+                                <option value="hospedaje">🏨 Hospedaje</option>
+                                <option value="entretenimiento">🎟️ Entretenimiento</option>
+                                <option value="otros">📦 Otros</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
                     </div>
                 </form>
                 {% else %}
-                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: 0.78rem; text-align: center;">
+                <div
+                    style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: var(--font-size-small); text-align: center;">
                     <strong>⚠️ {{ razon_no_puede_registrar }}</strong>
                 </div>
                 {% endif %}
@@ -195,27 +226,28 @@
                 </tr>
             </thead>
             <tbody>
-                {% for gasto in viaje.gastos.all %}
+                {% for gasto in gastos %}
                 <tr>
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
                     <td>{{ gasto.pagado_por.usuario.get_full_name }}</td>
-                    <td style="text-align: right; font-weight: 700; color: #EF4444;">-${{ gasto.cantidad }}</td>
+                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: #EF4444;">
+                        -${{ gasto.cantidad }}
+                    </td>
                     <td style="text-align: center;">
-                        {% if request.user.is_authenticated and request.user == gasto.pagado_por.usuario or rol_usuario == 'organizador' %}
-                            <button type="button"
-                               class="delete-link delete-gasto-btn"
-                               data-gasto-id="{{ gasto.id }}"
-                               data-concepto="{{ gasto.concepto }}"
-                               style="font-size: 0.7rem; background: none; border: none; cursor: pointer; padding: 0;">
-                                🗑️ Eliminar
-                            </button>
+                        {% if gasto.puede_eliminar %}
+                        <button type="button" class="delete-link delete-gasto-btn" data-gasto-id="{{ gasto.id }}"
+                            data-concepto="{{ gasto.concepto }}"
+                            style="font-size: var(--font-size-small); background: none; border: none; cursor: pointer; padding: 0;">
+                            🗑️ Eliminar
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos registrados.</td>
+                    <td colspan="5" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos
+                        registrados.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -227,16 +259,19 @@
         <div class="budget-summary-grid">
             <div class="budget-summary-item">
                 <p class="section-label" style="margin-bottom: 0.3rem;">Presupuesto</p>
-                <div class="txt-bold" style="font-size: 1rem;">${{ viaje.presupuesto_estimado }}</div>
+                <div class="txt-bold" style="font-size: var(--font-size-body);">${{ viaje.presupuesto_estimado }}</div>
             </div>
             <div class="budget-summary-item">
                 <p class="section-label" style="margin-bottom: 0.3rem; color: #EF4444;">Gastado</p>
-                <div style="font-size: 1rem; font-weight: 700; color: #EF4444;">-${{ total_gastado }}</div>
+                <div style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold); color: #EF4444;">
+                    -${{ total_gastado }}</div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="margin-bottom: 0.3rem;">Disponible</p>
-                    
-                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}" style="font-size: 1rem; font-weight: 700;">
+                <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}"
+                    style="margin-bottom: 0.3rem;">Disponible</p>
+
+                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}"
+                    style="font-size: var(--font-size-body); font-weight: var(--font-weight-bold);">
                     ${{ presupuesto_restante }}
                 </div>
             </div>
@@ -246,7 +281,9 @@
 
         <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
             <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
-                <span class="txt-bold" style="font-size: 0.85rem;">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
+                <span class="txt-bold" style="font-size: var(--font-size-small);">
+                    ${{ viaje.presupuesto_estimado|default:"0" }} MXN
+                </span>
                 <span class="txt-muted">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
@@ -266,23 +303,30 @@
 
 
     <!-- ══ ACCIONES FINALES — ANCHO COMPLETO ══ -->
-    <div class="full-width" style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">← Regresar a mis viajes</a>
-        <a href="{% url 'gestion_viajes:p_eliminar_viaje' viaje.id %}"
-           class="delete-link"
-           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar viaje</a>
+    <div class="full-width"
+        style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">←
+            Regresar a mis viajes</a>
+        <button type="button" class="delete-link"
+            onclick="document.getElementById('modalEliminarViaje').classList.remove('d-none')"
+            style="border: none; background: none; padding: 0; cursor: pointer;">
+            Eliminar viaje
+        </button>
     </div>
+
+    {% include "gestion_viajes/modals/modal_abandonar_viaje.html" %}
 
     <!-- ══ TOAST DE NOTIFICACIÓN (ESTILO GMAIL) ══ -->
     <div id="undo-toast" style="
         position: fixed;
         bottom: 20px;
         left: 20px;
-        background: #323232;
-        color: white;
+        background: var(--color-bg);
+        font-family: var(--font-family-base);
+        color: var(--color-text, #333);
         padding: 16px 24px;
         border-radius: 4px;
-        font-size: 0.875rem;
+        font-size: var(--font-size-body);
         box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
         display: none;
         z-index: 1000;
@@ -295,32 +339,21 @@
             <div id="toast-message">Gasto eliminado</div>
             <div id="timer-bar" style="
                 height: 2px;
-                background: rgba(255,255,255,0.3);
+                background: rgba(0,0,0,0.1);
                 border-radius: 1px;
                 margin-top: 8px;
                 overflow: hidden;
             ">
                 <div id="timer-progress" style="
                     height: 100%;
-                    background: #4FC3F7;
+                    background: var(--color-primary);
                     border-radius: 1px;
                     width: 100%;
                     transition: width 0.1s linear;
                 "></div>
             </div>
         </div>
-        <button id="undo-btn" style="
-            background: #4FC3F7;
-            color: #323232;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background 0.2s;
-            white-space: nowrap;
-        " onmouseover="this.style.background='#29B6F6'" onmouseout="this.style.background='#4FC3F7'">
+        <button id="undo-btn" class="btn-primary" style="white-space: nowrap;">
             Deshacer
         </button>
     </div>
@@ -331,6 +364,7 @@
                 transform: translateX(-100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -342,6 +376,7 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+
             to {
                 transform: translateX(-100%);
                 opacity: 0;
@@ -359,7 +394,7 @@
         const toastMessage = document.getElementById('toast-message');
         const undoBtn = document.getElementById('undo-btn');
         const timerProgress = document.getElementById('timer-progress');
-        
+
         let currentDeletedGasto = null;
         let undoTimeout = null;
         let timerInterval = null;
@@ -368,12 +403,12 @@
 
         // Agregar listeners a todos los botones de eliminar
         document.querySelectorAll('.delete-gasto-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
-                
+
                 const gastoId = this.dataset.gastoId;
                 const concepto = this.dataset.concepto;
-                
+
                 // Iniciar la eliminación
                 eliminarGastoConUndo(gastoId, concepto, this);
             });
@@ -393,76 +428,76 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Guardar los datos para posible restauración
-                    currentDeletedGasto = data.gasto_data;
-                    
-                    // Eliminar la fila de la tabla
-                    const row = button.closest('tr');
-                    row.style.opacity = '0.5';
-                    row.style.textDecoration = 'line-through';
-                    
-                    // Mostrar el toast
-                    toastMessage.textContent = `"${concepto}" eliminado`;
-                    undoToast.style.display = 'flex';
-                    
-                    // Reiniciar la barra de progreso
-                    timerProgress.style.width = '100%';
-                    
-                    // Limpiar timeout e intervalo anterior si existe
-                    if (undoTimeout) {
-                        clearTimeout(undoTimeout);
-                    }
-                    if (timerInterval) {
-                        clearInterval(timerInterval);
-                    }
-                    
-                    // Iniciar el contador regresivo de la barra
-                    let timeRemaining = UNDO_DELAY;
-                    timerInterval = setInterval(() => {
-                        timeRemaining -= 100;
-                        const percentage = (timeRemaining / UNDO_DELAY) * 100;
-                        timerProgress.style.width = percentage + '%';
-                        
-                        if (timeRemaining <= 0) {
-                            clearInterval(timerInterval);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Guardar los datos para posible restauración
+                        currentDeletedGasto = data.gasto_data;
+
+                        // Eliminar la fila de la tabla
+                        const row = button.closest('tr');
+                        row.style.opacity = '0.5';
+                        row.style.textDecoration = 'line-through';
+
+                        // Mostrar el toast
+                        toastMessage.innerHTML = `<strong>"${concepto}"</strong> eliminado`;
+                        undoToast.style.display = 'flex';
+
+                        // Reiniciar la barra de progreso
+                        timerProgress.style.width = '100%';
+
+                        // Limpiar timeout e intervalo anterior si existe
+                        if (undoTimeout) {
+                            clearTimeout(undoTimeout);
                         }
-                    }, 100);
-                    
-                    // Auto-confirmar eliminación después de 5 segundos
-                    undoTimeout = setTimeout(() => {
                         if (timerInterval) {
                             clearInterval(timerInterval);
                         }
-                        confirmarEliminacionPermanente(row);
-                    }, UNDO_DELAY);
-                    
-                    // Configurar evento para deshacer
-                    undoBtn.onclick = () => deshacerEliminacion(row);
-                } else {
-                    // Error en la eliminación
-                    alert('Error al eliminar el gasto: ' + (data.error || 'Error desconocido'));
+
+                        // Iniciar el contador regresivo de la barra
+                        let timeRemaining = UNDO_DELAY;
+                        timerInterval = setInterval(() => {
+                            timeRemaining -= 100;
+                            const percentage = (timeRemaining / UNDO_DELAY) * 100;
+                            timerProgress.style.width = percentage + '%';
+
+                            if (timeRemaining <= 0) {
+                                clearInterval(timerInterval);
+                            }
+                        }, 100);
+
+                        // Auto-confirmar eliminación después de 5 segundos
+                        undoTimeout = setTimeout(() => {
+                            if (timerInterval) {
+                                clearInterval(timerInterval);
+                            }
+                            confirmarEliminacionPermanente(row);
+                        }, UNDO_DELAY);
+
+                        // Configurar evento para deshacer
+                        undoBtn.onclick = () => deshacerEliminacion(row);
+                    } else {
+                        // Error en la eliminación
+                        alert('Error al eliminar el gasto: ' + (data.error || 'Error desconocido'));
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al conectar con el servidor');
                     button.disabled = false;
                     button.textContent = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
-                button.disabled = false;
-                button.textContent = originalText;
-            });
+                });
         }
 
         function deshacerEliminacion(row) {
             if (!currentDeletedGasto || isUndoing) return;
-            
+
             isUndoing = true;
             undoBtn.disabled = true;
             undoBtn.textContent = 'Restaurando...';
-            
+
             // Limpiar timers
             if (undoTimeout) {
                 clearTimeout(undoTimeout);
@@ -482,48 +517,50 @@
                     gasto_data: currentDeletedGasto
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Restaurar la fila visualmente
-                    row.style.opacity = '1';
-                    row.style.textDecoration = 'none';
-                    
-                    // Ocultar el toast con animación
-                    undoToast.classList.add('toast-exit');
-                    
-                    setTimeout(() => {
-                        undoToast.style.display = 'none';
-                        undoToast.classList.remove('toast-exit');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Restaurar la fila visualmente
+                        row.style.opacity = '1';
+                        row.style.textDecoration = 'none';
+
+                        // Ocultar el toast con animación
+                        undoToast.classList.add('toast-exit');
+
+                        setTimeout(() => {
+                            undoToast.style.display = 'none';
+                            undoToast.classList.remove('toast-exit');
+                            isUndoing = false;
+                            // Refrescar la página después de ocultar el toast
+                            location.reload();
+                        }, 300);
+
+                        currentDeletedGasto = null;
+                    } else {
+                        alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
                         isUndoing = false;
-                    }, 300);
-                    
-                    currentDeletedGasto = null;
-                } else {
-                    alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
+                        undoBtn.disabled = false;
+                        undoBtn.textContent = 'Deshacer';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al conectar con el servidor');
                     isUndoing = false;
                     undoBtn.disabled = false;
                     undoBtn.textContent = 'Deshacer';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
-                isUndoing = false;
-                undoBtn.disabled = false;
-                undoBtn.textContent = 'Deshacer';
-            });
+                });
         }
 
         function confirmarEliminacionPermanente(row) {
             // Ocultar el toast
             undoToast.classList.add('toast-exit');
-            
+
             setTimeout(() => {
                 undoToast.style.display = 'none';
                 undoToast.classList.remove('toast-exit');
             }, 300);
-            
+
             // Recargar la página para sincronizar
             location.reload();
         }
@@ -543,6 +580,146 @@
             }
             return cookieValue;
         }
+
+        // Validación en tiempo real para inputs de gasto
+        document.addEventListener('DOMContentLoaded', function () {
+            const conceptoInput = document.getElementById('gasto-concepto');
+            const conceptoHelp = document.getElementById('concepto-help');
+
+            if (conceptoInput && conceptoHelp) {
+                conceptoInput.addEventListener('input', function () {
+                    const length = this.value.length;
+                    conceptoHelp.textContent = `${length}/100 caracteres`;
+
+                    if (length >= 100) {
+                        conceptoHelp.style.color = '#EF4444'; // Color rojo nativo
+                        conceptoHelp.style.fontWeight = 'bold';
+                        this.style.borderColor = '#EF4444';
+                        this.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+                    } else {
+                        conceptoHelp.style.color = '';
+                        conceptoHelp.style.fontWeight = 'normal';
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    }
+                });
+            }
+
+            const cantidadInput = document.getElementById('gasto-cantidad');
+            const cantidadContainer = document.getElementById('cantidad-container');
+            const cantidadHelp = document.getElementById('cantidad-help');
+            const cantidadSimbolo = document.getElementById('cantidad-simbolo');
+
+            if (cantidadInput && cantidadHelp && cantidadContainer) {
+                cantidadInput.addEventListener('input', function () {
+                    const value = parseFloat(this.value) || 0;
+
+                    if (value >= 100000000) {
+                        cantidadHelp.textContent = '¡Límite máximo alcanzado!';
+                        cantidadHelp.style.color = '#EF4444';
+                        cantidadHelp.style.fontWeight = 'bold';
+                        cantidadContainer.style.borderColor = '#EF4444';
+                        cantidadContainer.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+                        cantidadSimbolo.style.color = '#EF4444';
+                        cantidadSimbolo.style.backgroundColor = '#FEF2F2';
+                        cantidadSimbolo.style.borderColor = '#EF4444';
+                    } else {
+                        cantidadHelp.textContent = 'Máx. un numero de 8 digitos';
+                        cantidadHelp.style.color = '';
+                        cantidadHelp.style.fontWeight = 'normal';
+                        cantidadContainer.style.borderColor = '#E5E7EB';
+                        cantidadContainer.style.boxShadow = '';
+                        cantidadSimbolo.style.color = '#9CA3AF';
+                        cantidadSimbolo.style.backgroundColor = '#F9FAFB';
+                        cantidadSimbolo.style.borderColor = '#E5E7EB';
+                    }
+                });
+            }
+        });
+
+        // ══ LAYOUT DINÁMICO: Feature 1 + Feature 2 ══
+        (function () {
+            const TOLERANCE = 20; // px de margen para evitar oscilaciones
+            const MOBILE_BREAKPOINT = 768;
+
+            const cardDescripcion = document.getElementById('card-descripcion');
+            const cardResponsable = document.getElementById('card-responsable');
+            const colLeft = cardDescripcion ? cardDescripcion.closest('.col-left') : null;
+            const colRight = document.getElementById('col-right-container');
+            const cardFechas = document.getElementById('card-fechas');
+            const cardGastoRapido = document.getElementById('card-gasto-rapido');
+            const textoDescripcion = document.getElementById('texto-descripcion');
+
+            if (!cardDescripcion || !cardResponsable || !colLeft || !colRight || !cardFechas || !cardGastoRapido || !textoDescripcion) {
+                return;
+            }
+
+            let responsableEnDerecha = false;
+
+            function aplicarScrollDescripcion() {
+                // Feature 2: igualar altura de col-left con col-right usando max-height + scroll
+                // Se calcula DESPUÉS de haber movido el card de responsable a col-right
+                const alturaColRight = colRight.offsetHeight;
+                // La altura del card que NO es el texto: todo menos el párrafo de descripción
+                const alturaHeader = cardDescripcion.offsetHeight - textoDescripcion.offsetHeight;
+                const alturaDisponible = alturaColRight - alturaHeader;
+
+                textoDescripcion.style.maxHeight = Math.max(alturaDisponible, 60) + 'px';
+                textoDescripcion.style.overflowY = 'auto';
+                textoDescripcion.style.paddingRight = '4px';
+            }
+
+            function revertirScrollDescripcion() {
+                // Feature 2 reversion: devolver comportamiento natural
+                textoDescripcion.style.maxHeight = '';
+                textoDescripcion.style.overflowY = '';
+                textoDescripcion.style.paddingRight = '';
+            }
+
+            function evaluarLayout() {
+                // En móvil no aplica ninguna feature
+                if (window.innerWidth < MOBILE_BREAKPOINT) {
+                    if (responsableEnDerecha) {
+                        colLeft.appendChild(cardResponsable);
+                        responsableEnDerecha = false;
+                    }
+                    revertirScrollDescripcion();
+                    return;
+                }
+
+                const alturaDescripcion = cardDescripcion.offsetHeight;
+                const alturaFechas = cardFechas.offsetHeight;
+                const alturaGasto = cardGastoRapido.offsetHeight;
+                const alturaDerechaBase = alturaFechas + alturaGasto;
+
+                const debeEstarEnDerecha = alturaDescripcion >= (alturaDerechaBase - TOLERANCE);
+
+                if (debeEstarEnDerecha && !responsableEnDerecha) {
+                    // Feature 1: mover card responsable a col-right
+                    colRight.appendChild(cardResponsable);
+                    responsableEnDerecha = true;
+                    // Feature 2: ajustar scroll en descripción (esperar 1 frame para medir col-right ya actualizado)
+                    requestAnimationFrame(aplicarScrollDescripcion);
+                } else if (!debeEstarEnDerecha && responsableEnDerecha) {
+                    // Feature 1 reversion: devolver card a col-left
+                    colLeft.appendChild(cardResponsable);
+                    responsableEnDerecha = false;
+                    // Feature 2 reversion
+                    revertirScrollDescripcion();
+                } else if (debeEstarEnDerecha && responsableEnDerecha) {
+                    // Ya está en la derecha pero puede que la altura cambió (resize)
+                    requestAnimationFrame(aplicarScrollDescripcion);
+                }
+            }
+
+            window.addEventListener('load', evaluarLayout);
+            window.addEventListener('resize', evaluarLayout);
+
+            if (window.ResizeObserver) {
+                const observer = new ResizeObserver(evaluarLayout);
+                observer.observe(cardDescripcion);
+            }
+        })();
     </script>
 
 </div>
