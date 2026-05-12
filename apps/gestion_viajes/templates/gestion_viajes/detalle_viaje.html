@@ -14,7 +14,8 @@
 
 <!-- Hero full-width -->
 <div class="hero-wrapper">
-    <img src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=1400&q=80" alt="Destino">
+    <img src="{% if viaje.imagen_fondo %}{{ viaje.imagen_fondo.url }}{% else %}{{ foto_hero }}{% endif %}" alt="Destino">
+    
     <div class="status-pill">
         <span class="status-dot"></span>
         {% if viaje.estado == 'planeado' %}Planeado{% else %}{{ viaje.estado|capfirst }}{% endif %}
