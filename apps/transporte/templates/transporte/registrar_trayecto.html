@@ -4,15 +4,23 @@
 {% block head %}
 <link rel="stylesheet" href="{% static 'transporte/css/transporte_principal.css' %}">
 <link rel="stylesheet" href="{% static 'transporte/css/transporte_registro.css' %}">
-{% endblock %}
 
+<style>
+    /* 1. Oculta TODAS las alertas de la página por defecto */
+    .alert {
+        display: none !important;
+    }
+    
+    /* 2. Vuelve a encender SOLO las alertas de tu sección local */
+    #alertas-locales .alert {
+        display: block !important;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
-
-<!-- ========================================== -->
 <!-- 🔔 ALERTAS DE ÉXITO O ERROR (MENSAJES) 🔔  -->
-<!-- ========================================== -->
 {% if messages %}
 <div class="container mt-3" id="alertas-locales">
     {% for message in messages %}
