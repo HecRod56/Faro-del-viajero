@@ -1,4 +1,3 @@
-<!-- detalle_viaje.html -->
 {% extends "core/base.html" %}
 {% load static %}
 
@@ -11,7 +10,6 @@
 
 {% block content %}
 
-<!-- Sub-Navbar de secciones -->
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
 <!-- Hero full-width -->
@@ -30,7 +28,7 @@
     <div class="col-left">
 
         <!-- Info principal + acciones -->
-        <div class="section-card">
+        <div class="section-card" id="card-descripcion">
             <div class="card-body" style="padding-bottom: 0.75rem;">
                 <div class="d-flex justify-content-between align-items-start">
                     <h2 class="mb-0" style="font-size: 1.1rem;">{{ viaje.nombre }}</h2>
@@ -39,11 +37,10 @@
             </div>
 
             <hr class="card-divider">
-
             <div class="card-body">
                 <p class="section-label">Descripción y destino</p>
                 <h3 class="txt-bold txt-sm mb-2">📍 {{ viaje.destino }}</h3>
-                <p class="txt-sm mb-0" style="color: var(--color-text-secondary); line-height: 1.75;">
+                <p id="texto-descripcion" class="txt-sm mb-0" style="color: var(--color-text-secondary); line-height: 1.75;">
                     {% if viaje.descripcion %}
                         {{ viaje.descripcion }}
                     {% else %}
@@ -54,7 +51,7 @@
         </div>
 
         <!-- Responsable + Integrantes -->
-        <div class="section-card">
+        <div class="section-card" id="card-responsable">
             <div style="display: grid; grid-template-columns: 1fr 1fr;">
 
                 <!-- Responsable -->
@@ -81,25 +78,26 @@
                         <p class="section-label mb-0">Integrantes</p>
                         {% if not es_participante %}
                             {% if participantes|length < viaje.capacidad_max %}
-                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
-                                    + Unirme
-                                </a>
+                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal"
+                                    style="font-size: var(--font-size-small); padding: 0.25rem 0.8rem;">+ Unirme</a>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: 0.65rem;">⚠️ Viaje Lleno</span>
+                                <span class="badge bg-danger-subtle text-danger rounded-pill"
+                                    style="font-size: var(--font-size-small);">⚠️ Viaje Lleno</span>
                             {% endif %}
                         {% else %}
-                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: 0.65rem;">Ya eres parte</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill"
+                                style="font-size: var(--font-size-small);">Ya eres parte</span>
                         {% endif %}
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
                         <div class="d-flex align-items-center">
                             {% for p in participantes %}
-                                <div class="organizer-avatar" title="{{ p.usuario.username }}">
-                                    {{ p.usuario.username|first|upper }}
-                                </div>
+                            <div class="organizer-avatar" title="{{ p.usuario.username }}">
+                                {{ p.usuario.username|first|upper }}
+                            </div>
                             {% empty %}
-                                <span class="txt-muted">Sin integrantes</span>
+                            <span class="txt-muted">Sin integrantes</span>
                             {% endfor %}
                         </div>
                     </div>
@@ -118,10 +116,10 @@
     </div>
 
     <!-- ══ COLUMNA DERECHA ══ -->
-    <div class="col-right">
+    <div class="col-right" id="col-right-container">
 
         <!-- Fechas del viaje -->
-        <div class="section-card">
+        <div class="section-card" id="card-fechas">
             <div class="card-body">
                 <p class="section-label">Fechas del viaje</p>
                 <div class="dates-grid">
@@ -148,30 +146,41 @@
         </div>
 
         <!-- Añadir gasto rápido -->
-        <div class="section-card">
+        <div class="section-card" id="card-gasto-rapido">
             <div class="card-body">
                 <p class="section-label">Añadir gasto rápido</p>
                 {% if puede_registrar_gasto %}
                 <form action="{% url 'gestion_viajes:p_registrar_gasto' viaje.id %}" method="POST">
                     {% csrf_token %}
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
-                        <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
-                        <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
-                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: 0.78rem; border-right: 1px solid #E5E7EB;">$</span>
-                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: 0.78rem; width: 100%;" placeholder="0.00" required>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: start;">
+                        <div>
+                            <input type="text" id="gasto-concepto" name="concepto" class="input-field"
+                                placeholder="¿En qué gastaste?" maxlength="100" required>
+                            <small id="concepto-help" class="txt-muted" style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 4px;">0/100 caracteres</small>
                         </div>
-                        <select name="categoria" class="input-field">
-                            <option value="comida">🍕 Comida</option>
-                            <option value="transporte">🚗 Transporte</option>
-                            <option value="hospedaje">🏨 Hospedaje</option>
-                            <option value="entretenimiento">🎟️ Entretenimiento</option>
-                            <option value="otros">📦 Otros</option>
-                        </select>
-                        <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
+                        <div>
+                            <div id="cantidad-container" style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
+                                <span id="cantidad-simbolo" style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: var(--font-size-small); border-right: 1px solid #E5E7EB;">$</span>
+                                <input type="number" id="gasto-cantidad" name="cantidad" step="0.01" max="100000000"
+                                    style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: var(--font-size-small); width: 100%; background: transparent;"
+                                    placeholder="0.00" required>
+                            </div>
+                            <small id="cantidad-help" class="txt-muted" style="font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 4px;">Máx. un numero de 8 digitos</small>
+                        </div>
+                        <div>
+                            <select name="categoria" class="input-field">
+                                <option value="comida">🍕 Comida</option>
+                                <option value="transporte">🚗 Transporte</option>
+                                <option value="hospedaje">🏨 Hospedaje</option>
+                                <option value="entretenimiento">🎟️ Entretenimiento</option>
+                                <option value="otros">📦 Otros</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary" style="padding: 0.45rem 1rem;">+</button>
                     </div>
                 </form>
                 {% else %}
-                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: var(--color-danger); font-size: 0.78rem; text-align: center;">
+                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: var(--color-danger); font-size: var(--font-size-small); text-align: center;">
                     <strong>⚠️ {{ razon_no_puede_registrar }}</strong>
                 </div>
                 {% endif %}
@@ -196,7 +205,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for gasto in viaje.gastos.all %}
+                {% for gasto in gastos %}
                 <tr>
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
@@ -205,14 +214,13 @@
                         -${{ gasto.cantidad }}
                     </td>
                     <td style="text-align: center;">
-                        {% if request.user.is_authenticated and request.user == gasto.pagado_por.usuario or rol_usuario == 'organizador' %}
-                            <button type="button"
-                                    class="delete-link delete-gasto-btn"
-                                    data-gasto-id="{{ gasto.id }}"
-                                    data-concepto="{{ gasto.concepto }}"
-                                    style="background: none; border: none; cursor: pointer; padding: 0;">
-                                🗑️ Eliminar
-                            </button>
+                        {% if gasto.puede_eliminar %}
+                        <button type="button" class="delete-link delete-gasto-btn"
+                            data-gasto-id="{{ gasto.id }}"
+                            data-concepto="{{ gasto.concepto }}"
+                            style="background: none; border: none; cursor: pointer; padding: 0;">
+                            🗑️ Eliminar
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
@@ -273,26 +281,37 @@
         <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">
             ← Regresar a mis viajes
         </a>
-        <a href="{% url 'gestion_viajes:p_eliminar_viaje' viaje.id %}"
-           class="delete-link"
-           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">
+        <button type="button" class="delete-link"
+            onclick="document.getElementById('modalEliminarViaje').classList.remove('d-none')"
+            style="border: none; background: none; padding: 0; cursor: pointer;">
             Eliminar viaje
-        </a>
+        </button>
     </div>
 
+    {% include "gestion_viajes/modals/modal_abandonar_viaje.html" %}
+
     <!-- ══ TOAST DE DESHACER (estilo Gmail) ══ -->
-    <div id="undo-toast" class="undo-toast" style="display: none;">
+    <div id="undo-toast" style="
+        position: fixed; bottom: 20px; left: 20px;
+        background: var(--color-white);
+        font-family: var(--font-family-base);
+        color: var(--color-text);
+        padding: 16px 24px;
+        border-radius: 4px;
+        font-size: var(--font-size-body);
+        box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
+        display: none; z-index: 1000;
+        align-items: center; gap: 16px;
+        max-width: 400px;
+        animation: slideInLeft 0.3s ease-out;
+    ">
         <div style="flex: 1;">
             <div id="toast-message">Gasto eliminado</div>
-            <div id="timer-bar" class="timer-bar">
-                <div id="timer-progress" class="timer-progress"></div>
+            <div id="timer-bar" style="height: 2px; background: rgba(0,0,0,0.1); border-radius: 1px; margin-top: 8px; overflow: hidden;">
+                <div id="timer-progress" style="height: 100%; background: var(--color-primary); border-radius: 1px; width: 100%; transition: width 0.1s linear;"></div>
             </div>
         </div>
-        <button id="undo-btn" class="undo-btn"
-                onmouseover="this.style.background='#29B6F6'"
-                onmouseout="this.style.background='#4FC3F7'">
-            Deshacer
-        </button>
+        <button id="undo-btn" class="btn-primary" style="white-space: nowrap;">Deshacer</button>
     </div>
 
 </div>
@@ -390,6 +409,7 @@
                 row.style.textDecoration = 'none';
                 ocultarToast();
                 currentDeletedGasto = null;
+                location.reload();
             } else {
                 alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
             }
@@ -423,6 +443,114 @@
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
+
+    // Validación en tiempo real para inputs de gasto
+    document.addEventListener('DOMContentLoaded', function () {
+        const conceptoInput = document.getElementById('gasto-concepto');
+        const conceptoHelp = document.getElementById('concepto-help');
+        if (conceptoInput && conceptoHelp) {
+            conceptoInput.addEventListener('input', function () {
+                const length = this.value.length;
+                conceptoHelp.textContent = `${length}/100 caracteres`;
+                if (length >= 100) {
+                    conceptoHelp.style.color = 'var(--color-danger)';
+                    this.style.borderColor = 'var(--color-danger)';
+                } else {
+                    conceptoHelp.style.color = '';
+                    this.style.borderColor = '';
+                }
+            });
+        }
+
+        const cantidadInput = document.getElementById('gasto-cantidad');
+        const cantidadContainer = document.getElementById('cantidad-container');
+        const cantidadHelp = document.getElementById('cantidad-help');
+        const cantidadSimbolo = document.getElementById('cantidad-simbolo');
+        if (cantidadInput && cantidadHelp) {
+            cantidadInput.addEventListener('input', function () {
+                const value = parseFloat(this.value) || 0;
+                if (value >= 100000000) {
+                    cantidadHelp.textContent = '¡Límite máximo alcanzado!';
+                    cantidadHelp.style.color = 'var(--color-danger)';
+                    cantidadContainer.style.borderColor = 'var(--color-danger)';
+                    cantidadSimbolo.style.color = 'var(--color-danger)';
+                    cantidadSimbolo.style.backgroundColor = '#FEF2F2';
+                } else {
+                    cantidadHelp.textContent = 'Máx. un numero de 8 digitos';
+                    cantidadHelp.style.color = '';
+                    cantidadContainer.style.borderColor = '#E5E7EB';
+                    cantidadSimbolo.style.color = '#9CA3AF';
+                    cantidadSimbolo.style.backgroundColor = '#F9FAFB';
+                }
+            });
+        }
+    });
+
+    // ══ LAYOUT DINÁMICO ══
+    (function () {
+        const TOLERANCE = 20;
+        const MOBILE_BREAKPOINT = 768;
+
+        const cardDescripcion = document.getElementById('card-descripcion');
+        const cardResponsable = document.getElementById('card-responsable');
+        const colLeft = cardDescripcion ? cardDescripcion.closest('.col-left') : null;
+        const colRight = document.getElementById('col-right-container');
+        const cardFechas = document.getElementById('card-fechas');
+        const cardGastoRapido = document.getElementById('card-gasto-rapido');
+        const textoDescripcion = document.getElementById('texto-descripcion');
+
+        if (!cardDescripcion || !cardResponsable || !colLeft || !colRight || !cardFechas || !cardGastoRapido || !textoDescripcion) return;
+
+        let responsableEnDerecha = false;
+
+        function aplicarScrollDescripcion() {
+            const alturaColRight = colRight.offsetHeight;
+            const alturaHeader = cardDescripcion.offsetHeight - textoDescripcion.offsetHeight;
+            const alturaDisponible = alturaColRight - alturaHeader;
+            textoDescripcion.style.maxHeight = Math.max(alturaDisponible, 60) + 'px';
+            textoDescripcion.style.overflowY = 'auto';
+            textoDescripcion.style.paddingRight = '4px';
+        }
+
+        function revertirScrollDescripcion() {
+            textoDescripcion.style.maxHeight = '';
+            textoDescripcion.style.overflowY = '';
+            textoDescripcion.style.paddingRight = '';
+        }
+
+        function evaluarLayout() {
+            if (window.innerWidth < MOBILE_BREAKPOINT) {
+                if (responsableEnDerecha) {
+                    colLeft.appendChild(cardResponsable);
+                    responsableEnDerecha = false;
+                }
+                revertirScrollDescripcion();
+                return;
+            }
+
+            const alturaDescripcion = cardDescripcion.offsetHeight;
+            const alturaDerechaBase = cardFechas.offsetHeight + cardGastoRapido.offsetHeight;
+            const debeEstarEnDerecha = alturaDescripcion >= (alturaDerechaBase - TOLERANCE);
+
+            if (debeEstarEnDerecha && !responsableEnDerecha) {
+                colRight.appendChild(cardResponsable);
+                responsableEnDerecha = true;
+                requestAnimationFrame(aplicarScrollDescripcion);
+            } else if (!debeEstarEnDerecha && responsableEnDerecha) {
+                colLeft.appendChild(cardResponsable);
+                responsableEnDerecha = false;
+                revertirScrollDescripcion();
+            } else if (debeEstarEnDerecha && responsableEnDerecha) {
+                requestAnimationFrame(aplicarScrollDescripcion);
+            }
+        }
+
+        window.addEventListener('load', evaluarLayout);
+        window.addEventListener('resize', evaluarLayout);
+        if (window.ResizeObserver) {
+            new ResizeObserver(evaluarLayout).observe(cardDescripcion);
+        }
+    })();
 </script>
 
 {% endblock %}
