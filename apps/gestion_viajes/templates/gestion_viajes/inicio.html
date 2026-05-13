@@ -1,18 +1,17 @@
-{%extends "gestion_viajes/base.html"%}
-{% block viajes_content %} 
+{% extends "gestion_viajes/base.html" %}
+{% block viajes_content %}
+
   <!-- Hero Banner -->
   <div class="welcome-banner">
     <div class="welcome-banner__bg"></div>
-    <div class="welcome-banner__overlay"></div>
     <div class="welcome-banner__content">
       <h1>Explora México</h1>
       <p>"Organiza tu viaje grupal con la precisión de una joya."</p>
       <div class="welcome-banner__actions">
-        <button class="btn btn-primary">
+        <button class="btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Crear nuevo viaje
         </button>
-
       </div>
     </div>
   </div>
@@ -73,10 +72,11 @@
       hero.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => {
         btn.classList.remove('highlight');
-        void btn.offsetWidth; // reflow to restart animation
+        void btn.offsetWidth; // reflow para reiniciar la animación
         btn.classList.add('highlight');
         btn.addEventListener('animationend', () => btn.classList.remove('highlight'), { once: true });
       }, 500);
     }
   </script>
+
 {% endblock %}
