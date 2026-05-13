@@ -1,30 +1,57 @@
-/* --- Estilos específicos de Tarjetas de Viaje --- */
+/* ==========================================
+   ver_mis_viajes.css
+   Estilos específicos de la pantalla "Mis viajes".
+   Depende de: core/styles.css + common_viajes.css
+   ========================================== */
+
+/* --- Tarjeta de viaje --- */
 .trip-card {
-    background: white;
+    background: var(--color-white);
     border-radius: 2rem;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-    transition: transform 0.2s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    transition: var(--transition);
     height: 100%;
 }
-.trip-card:hover { transform: scale(1.02); }
+.trip-card:hover {
+    transform: scale(1.02);
+}
 
+/* --- Cabecera con gradiente --- */
 .card-header-band {
-    height: 192px; padding: 1.5rem; position: relative;
+    height: 192px;
+    padding: 1.5rem;
+    position: relative;
 }
 .card-header-band h2 {
-    position: absolute; bottom: 1.5rem; left: 1.5rem;
-    color: white; font-size: 1.25rem; font-weight: 700; margin: 0;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    color: var(--color-white);
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
 }
 
-/* --- Gradientes específicos --- */
-.card-gradient-1 { background: linear-gradient(180deg, #149B7E 0%, #D9DF5B 100%); }
-.card-gradient-2 { background: linear-gradient(180deg, #5EEAD4 0%, #134E4A 100%); }
-.card-gradient-3 { background: linear-gradient(180deg, #A855F7 0%, #FB923C 100%); }
+/* --- Gradientes por estado --- */
+.card-gradient-1 { background: linear-gradient(180deg, #149B7E 0%, #D9DF5B 100%); } /* Planeado  */
+.card-gradient-2 { background: linear-gradient(180deg, #5EEAD4 0%, #134E4A 100%); } /* En curso  */
+.card-gradient-3 { background: linear-gradient(180deg, #A855F7 0%, #FB923C 100%); } /* Finalizado */
 
+/* --- Badge de estado --- */
 .badge-status {
-    position: absolute; top: 1rem; right: 1rem;
-    background: white; padding: 0.2rem 1rem;
-    border-radius: 999px; font-size: 0.75rem;
-    font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-white);
+    padding: 0.2rem 1rem;
+    border-radius: 999px;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-bold);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
+
+/* --- Colores de texto por estado --- */
+.text-yellow-600 { color: var(--color-warning); }
+.text-green-600  { color: var(--color-success); }
+.text-blue-900   { color: var(--color-heading); }

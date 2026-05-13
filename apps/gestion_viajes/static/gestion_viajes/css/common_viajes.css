@@ -1,51 +1,65 @@
-/* --- Variables Globales --- */
-:root {
-    --teal: #149B7E;
-    --teal-dark: #0f7d65;
-    --white: #ffffff;
-    --gray-900: #111827;
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
-}
+/* ==========================================
+   common_viajes.css
+   Estilos compartidos entre pantallas de la app gestion_viajes.
+   Depende de: core/styles.css (variables globales)
+   ========================================== */
 
-/* --- Botones Compartidos --- */
+/* --- Botón principal de la app (alias del global) --- */
 .btn-teal {
-    background-color: var(--teal);
-    color: white;
-    border-radius: 999px;
-    font-weight: 700;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-radius: var(--btn-radius);
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family-base);
     border: none;
     padding: 0.5rem 1.5rem;
-    box-shadow: var(--shadow-md);
-    transition: background-color 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
     text-decoration: none;
     display: inline-block;
+    cursor: pointer;
 }
-.btn-teal:hover { background-color: var(--teal-dark); color: white; }
+.btn-teal:hover {
+    background-color: var(--color-primary-hover);
+    color: var(--color-white);
+}
 
-/* --- Filtros (Usados en varias listas) --- */
+/* --- Filtros de lista --- */
 .filter-btn {
-    border-radius: 999px;
+    border-radius: var(--btn-radius);
     padding: 0.4rem 2rem;
-    font-weight: 500;
-    border: 1px solid #d1d5db;
-    background: white;
-    color: #374151;
-    transition: background-color 0.2s;
+    font-weight: var(--font-weight-regular);
+    font-family: var(--font-family-base);
+    border: 1px solid #D1D5DB;
+    background: var(--color-white);
+    color: var(--color-text);
+    transition: var(--transition);
     white-space: nowrap;
+    cursor: pointer;
 }
 .filter-btn.active {
-    background-color: var(--teal);
-    color: white;
-    border-color: var(--teal);
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
 }
 
-/* --- Avatares (Se usan en detalle y lista) --- */
-.avatar-stack { display: flex; }
+/* --- Avatares --- */
+.avatar-stack {
+    display: flex;
+}
 .avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 2px solid white; display: flex;
-    align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-white);
     margin-left: -8px;
 }
-.avatar:first-child { margin-left: 0; }
+.avatar:first-child {
+    margin-left: 0;
+}

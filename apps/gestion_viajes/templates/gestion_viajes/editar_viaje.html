@@ -2,7 +2,7 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'gestion_viajes/css/editar_viaje.css' %}">
-    
+
     <div class="breadcrumb-sticky-container">
         <nav class="breadcrumb-nav">
             <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
@@ -15,17 +15,17 @@
 
     <div class="container-fluid py-4 px-3">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Editar: {{ viaje.nombre }}</h1>
+            <h1 class="mb-0">Editar: {{ viaje.nombre }}</h1>
         </div>
 
         <div class="row justify-content-center">
             <div class="col-12">
                 <div class="section-card">
                     <p class="section-label">Información General</p>
-                    
+
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
+
                         <div class="row g-4">
                             <div class="col-12 col-md-8">
                                 <label class="fw-bold mb-2">Nombre del Viaje</label>
@@ -62,11 +62,11 @@
                                 </div>
                                 {% if viaje.imagen_fondo %}
                                     <div class="mt-2 d-flex align-items-center gap-2">
-                                        <small class="text-muted">Actual:</small>
+                                        <small class="text-secondary-custom">Actual:</small>
                                         <img src="{{ viaje.imagen_fondo.url }}" class="rounded shadow-sm" style="width: 80px; height: 50px; object-fit: cover;">
                                     </div>
                                 {% endif %}
-                                <small class="text-muted d-block mt-1">Sube una foto personalizada para el encabezado de este viaje.</small>
+                                <small class="text-secondary-custom d-block mt-1">Sube una foto personalizada para el encabezado de este viaje.</small>
                             </div>
 
                             <p class="section-label mt-5">Logística y Presupuesto</p>
@@ -94,9 +94,11 @@
                                 <input type="number" name="capacidad_max" class="form-control input-field" value="{{ viaje.capacidad_max }}">
                             </div>
 
+                            <div id="errores-fechas" class="col-12 d-none" style="color: var(--color-danger); font-size: var(--font-size-small);"></div>
+
                             <div class="col-12 d-flex justify-content-end gap-3 mt-4">
-                                <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-cancel">Cancelar</a>
-                                <button type="submit" class="btn-save">Guardar Cambios</button>
+                                <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-secondary">Cancelar</a>
+                                <button type="submit" class="btn-primary">Guardar Cambios</button>
                             </div>
                         </div>
                     </form>
