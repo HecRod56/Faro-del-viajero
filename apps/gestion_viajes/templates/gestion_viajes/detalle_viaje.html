@@ -43,16 +43,16 @@
         <div class="section-card" id="card-descripcion">
             <div class="card-body" style="padding-bottom: 0.75rem;">
                 <div class="d-flex justify-content-between align-items-start">
-                    <h2 class="mb-0" style="font-size: 1.1rem;">{{ viaje.nombre }}</h2>
+                    <h2 class="mb-0" style="font-size: var(--font-size-h2);">{{ viaje.nombre }}</h2>
                     <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
                 </div>
             </div>
 
             <hr class="card-divider">
             <div class="card-body">
-                <p class="section-label">Descripción y destino</p>
-                <h3 class="txt-bold txt-sm mb-2">📍 {{ viaje.destino }}</h3>
-                <p id="texto-descripcion" class="txt-sm mb-0" style="color: var(--color-text-secondary); line-height: 1.75;">
+                <p class="section-label" style="font-size: var(--font-size-body)" >Descripción y destino</p>
+                <h3 class="txt-bold txt-sm mb-2" style="font-size: var(--font-size-body);">📍 {{ viaje.destino }}</h3>
+                <p id="texto-descripcion" class="txt-sm mb-0" style="color: var(--color-text-secondary); line-height: 1.75; font-size: var(--font-size-body);">
                     {% if viaje.descripcion %}
                         {{ viaje.descripcion }}
                     {% else %}
@@ -68,7 +68,7 @@
 
                 <!-- Responsable -->
                 <div class="card-body" style="border-right: 1px solid #F3F4F6;">
-                    <p class="section-label">Responsable</p>
+                    <p class="section-label" style="font-size: var(--font-size-body)">Responsable</p>
                     <div class="d-flex align-items-center gap-2">
                         <div class="resp-avatar">
                             {% if organizador %}
@@ -87,7 +87,7 @@
                 <!-- Integrantes -->
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <p class="section-label mb-0">Integrantes</p>
+                        <p class="section-label mb-0" style="font-size: var(--font-size-body)">Integrantes</p>
                         {% if not es_participante %}
                             {% if participantes|length < viaje.capacidad_max %}
                                 <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal"
@@ -133,16 +133,16 @@
         <!-- Fechas del viaje -->
         <div class="section-card" id="card-fechas">
             <div class="card-body">
-                <p class="section-label">Fechas del viaje</p>
+                <p class="section-label" style="font-size: var(--font-size-body)">Fechas del viaje</p>
                 <div class="dates-grid">
                     <div class="date-box">
-                        <div class="date-box-label">Salida</div>
+                        <div class="date-box-label" style="font-size: var(--font-size-small)">Salida</div>
                         <div class="date-box-value">{{ viaje.fecha_inicio|date:"d M" }}</div>
                         <div class="date-box-year">{{ viaje.fecha_inicio|date:"Y" }}</div>
                     </div>
                     <div class="date-arrow">→</div>
                     <div class="date-box">
-                        <div class="date-box-label">Regreso</div>
+                        <div class="date-box-label" style="font-size: var(--font-size-small)">Regreso</div>
                         <div class="date-box-value">{{ viaje.fecha_fin|date:"d M" }}</div>
                         <div class="date-box-year">{{ viaje.fecha_fin|date:"Y" }}</div>
                     </div>
@@ -152,7 +152,7 @@
                 <span class="meta-icon">⏱</span>
                 <div>
                     <div class="meta-label">Duración</div>
-                    <div class="meta-value">{{ duracion_viaje_dias }}</div>
+                    <div class="meta-value" style="font-size: var(--font-size-body);">{{ duracion_viaje_dias }}</div>
                 </div>
             </div>
         </div>
@@ -160,7 +160,7 @@
         <!-- Añadir gasto rápido -->
         <div class="section-card" id="card-gasto-rapido">
             <div class="card-body">
-                <p class="section-label">Añadir gasto rápido</p>
+                <p class="section-label" style="font-size: var(--font-size-body)">Añadir gasto rápido</p>
                 {% if puede_registrar_gasto %}
                 <form action="{% url 'gestion_viajes:p_registrar_gasto' viaje.id %}" method="POST">
                     {% csrf_token %}
@@ -204,16 +204,16 @@
     <!-- ══ GASTOS REGISTRADOS — ANCHO COMPLETO ══ -->
     <div class="section-card full-width">
         <div class="card-body" style="padding-bottom: 0.75rem;">
-            <p class="section-label mb-0">Gastos registrados</p>
+            <p class="section-label mb-0" style="font-size: var(--font-size-body)">Gastos registrados</p>
         </div>
         <table class="gastos-table">
             <thead>
                 <tr>
-                    <th>Concepto</th>
-                    <th>Categoría</th>
-                    <th>Integrante</th>
-                    <th style="text-align: right;">Cantidad</th>
-                    <th style="text-align: center;">Acción</th>
+                    <th style="font-size: 12px; text-align: left;">Concepto</th>
+                    <th style="font-size: 12px">Categoría</th>
+                    <th style="font-size: 12px">Integrante</th>
+                    <th style="text-align: right; font-size: 12px">Cantidad</th>
+                    <th style="text-align: center; font-size: 12px">Acción</th>
                 </tr>
             </thead>
             <tbody>
@@ -251,17 +251,17 @@
     <div class="section-card full-width">
         <div class="budget-summary-grid">
             <div class="budget-summary-item">
-                <p class="section-label mb-1">Presupuesto</p>
+                <p class="section-label mb-1" style="font-size: var(--font-size-body)">Presupuesto</p>
                 <div class="txt-bold" style="font-size: 1rem;">${{ viaje.presupuesto_estimado }}</div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label text-danger-custom mb-1">Gastado</p>
+                <p class="section-label text-danger-custom mb-1" style="font-size: var(--font-size-body)">Gastado</p>
                 <div class="presupuesto-negativo" style="font-size: 1rem; font-weight: var(--font-weight-bold);">
                     -${{ total_gastado }}
                 </div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label mb-1 {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}">
+                <p class="section-label mb-1 {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="font-size: var(--font-size-body)">
                     Disponible
                 </p>
                 <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}"
@@ -276,14 +276,14 @@
         <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
             <div class="d-flex justify-content-between align-items-baseline gap-2">
                 <span class="txt-bold" style="font-size: 0.85rem;">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
-                <span class="txt-muted">presupuesto total</span>
+                <span class="txt-muted" style="font-size: var(--font-size-small)">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
                 <div id="progreso-viaje" class="budget-bar-fill" data-porcentaje="{{ porcentaje_gastado }}"></div>
             </div>
             <div class="d-flex justify-content-between">
-                <span class="txt-muted">$0</span>
-                <span class="txt-muted">${{ viaje.presupuesto_estimado }}</span>
+                <span class="txt-muted" style="font-size: var(--font-size-small)">$0</span>
+                <span class="txt-muted" style="font-size: var(--font-size-small)">${{ viaje.presupuesto_estimado }}</span>
             </div>
         </div>
     </div>
