@@ -109,17 +109,17 @@ WSGI_APPLICATION = 'faro_del_viajero.wsgi.application'
 
 #CRENDECIALES DE CLOUDINARY
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY':    config('CLOUDINARY_API_KEY'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY':    config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
 }
 
 
 import cloudinary
 cloudinary.config(
-    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
-    api_key=config('CLOUDINARY_API_KEY'),
-    api_secret=config('CLOUDINARY_API_SECRET'),
+    cloud_name=config('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=config('CLOUDINARY_API_KEY', default=''),
+    api_secret=config('CLOUDINARY_API_SECRET', default=''),
 )
 
 
@@ -149,6 +149,9 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
@@ -224,9 +227,9 @@ Luego, puedes usarlo en tus vistas o servicios:
 # CONFIGURACIÓN DE CORREO (con API BREVO)
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {
-    "BREVO_API_KEY": config("BREVO_API_KEY", default="None"),
+    "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
 }
 DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
 
-GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY")
-PEXELS_API_KEY = config("PEXELS_API_KEY")
+GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY", default="")
+PEXELS_API_KEY = config("PEXELS_API_KEY", default="")
