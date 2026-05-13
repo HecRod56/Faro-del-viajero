@@ -13,35 +13,78 @@ def p_destinos(request, viaje_id):
     busqueda  = request.GET.get("q", "")
     termino   = busqueda if busqueda else viaje.destino
 
+    # ── Leer filtros del GET ───────────────────────────────────────────────────
+    subcategorias = request.GET.getlist("subcategoria")   # lista de strings
+    popularidades = request.GET.getlist("popularidad")    # lista de strings
+    precio_min    = int(request.GET.get("precio_min", 0) or 0)
+    precio_max    = int(request.GET.get("precio_max", 10000) or 10000)
+    estrellas_raw = request.GET.getlist("estrellas")
+    estrellas     = [int(e) for e in estrellas_raw if e.isdigit()]
+    servicios     = request.GET.getlist("servicios")
+    cupos         = int(request.GET.get("cupos", 1) or 1)
+
+    # Número de integrantes del viaje para el stepper de cupos
+    num_integrantes = viaje.participantes.count() or 1
+
+    # Hay filtros activos si algo difiere del estado "vacío / por defecto"
+    hay_filtros = bool(
+        subcategorias or popularidades or estrellas or servicios
+        or precio_min > 0 or precio_max < 10000
+    )
+
     desde_cache = False
     lugares     = None
 
-    try:
-        cache_obj   = DestinoCache.objects.get(destino__iexact=termino, categoria=categoria)
-        lugares     = cache_obj.datos
-        desde_cache = True
-    except DestinoCache.DoesNotExist:
-        lugares = buscar_lugares(termino, categoria=categoria, limite=18)
-        DestinoCache.objects.update_or_create(
-            destino=termino,
+    # Usar caché solo cuando NO hay filtros activos
+    if not hay_filtros:
+        try:
+            cache_obj   = DestinoCache.objects.get(destino__iexact=termino, categoria=categoria)
+            lugares     = cache_obj.datos
+            desde_cache = True
+        except DestinoCache.DoesNotExist:
+            pass
+
+    if lugares is None:
+        lugares = buscar_lugares(
+            termino,
             categoria=categoria,
-            defaults={"datos": lugares}
+            limite=18,
+            precio_min=precio_min,
+            precio_max=precio_max,
+            subcategorias=subcategorias or None,
+            popularidades=popularidades or None,
+            estrellas=estrellas or None,
+            servicios=servicios or None,
         )
+        # Guardar en caché solo cuando no hay filtros activos
+        if not hay_filtros:
+            DestinoCache.objects.update_or_create(
+                destino=termino,
+                categoria=categoria,
+                defaults={"datos": lugares}
+            )
 
     foto_hero = obtener_foto_destino(viaje.destino)
     coords    = obtener_coordenadas(viaje.destino)
 
     context = {
-        "viaje":        viaje,
-        "viaje_actual": viaje,
-        "lugares":      lugares,
-        "categoria":    categoria,
-        "busqueda":     busqueda,
-        "foto_hero":    foto_hero,
-        "coords":       coords,
-        "desde_cache":  desde_cache,
-        "precio_min":   0,
-        "precio_max":   8800,
+        "viaje":           viaje,
+        "viaje_actual":    viaje,
+        "lugares":         lugares,
+        "categoria":       categoria,
+        "busqueda":        busqueda,
+        "foto_hero":       foto_hero,
+        "coords":          coords,
+        "desde_cache":     desde_cache,
+        # Filtros: estado actual para que los parciales los muestren seleccionados
+        "precio_min":      precio_min,
+        "precio_max":      precio_max,
+        "subcategorias":   subcategorias,
+        "popularidades":   popularidades,
+        "estrellas":       [str(e) for e in estrellas],   # strings para comparar con template
+        "servicios":       servicios,
+        "cupos":           cupos,
+        "num_integrantes": num_integrantes,
     }
     return render(request, "busqueda/destinos.html", context)
 
