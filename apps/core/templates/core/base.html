@@ -23,6 +23,15 @@
                         url("{% static 'core/img/fondo.jpeg' %}") center/cover no-repeat;
         }
     </style>
+    <style>
+        /* Forzar que los contenedores principales ocupen el 95% del ancho en main */
+        main .container, main .container-fluid, .container-app, .container-xxl, .detalle-container {
+            width: 95% !important;
+            max-width: 95% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+    </style>
 </head>
 <body>
 

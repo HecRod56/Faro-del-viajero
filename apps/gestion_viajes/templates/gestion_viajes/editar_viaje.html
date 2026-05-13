@@ -49,9 +49,38 @@
                                 <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
                                 <select id="destino" name="destino" class="form-select input-field" required>
                                     <option value="" disabled>Selecciona el estado de destino</option>
-                                    {% for estado in "Aguascalientes,Baja California,Baja California Sur,Campeche,Coahuila,Colima,Chiapas,Chihuahua,Ciudad de México,Durango,Guanajuato,Guerrero,Hidalgo,Jalisco,México,Michoacán,Morelos,Nayarit,Nuevo León,Oaxaca,Puebla,Querétaro,Quintana Roo,San Luis Potosí,Sinaloa,Sonora,Tabasco,Tamaulipas,Tlaxcala,Veracruz,Yucatán,Zacatecas".split(",") %}
-                                    <option value="{{ estado }}" {% if viaje.destino == estado %}selected{% endif %}>{{ estado }}</option>
-                                    {% endfor %}
+                                    <option value="Aguascalientes" {% if viaje.destino == "Aguascalientes" %}selected{% endif %}>Aguascalientes</option>
+                                    <option value="Baja California" {% if viaje.destino == "Baja California" %}selected{% endif %}>Baja California</option>
+                                    <option value="Baja California Sur" {% if viaje.destino == "Baja California Sur" %}selected{% endif %}>Baja California Sur</option>
+                                    <option value="Campeche" {% if viaje.destino == "Campeche" %}selected{% endif %}>Campeche</option>
+                                    <option value="Coahuila" {% if viaje.destino == "Coahuila" %}selected{% endif %}>Coahuila</option>
+                                    <option value="Colima" {% if viaje.destino == "Colima" %}selected{% endif %}>Colima</option>
+                                    <option value="Chiapas" {% if viaje.destino == "Chiapas" %}selected{% endif %}>Chiapas</option>
+                                    <option value="Chihuahua" {% if viaje.destino == "Chihuahua" %}selected{% endif %}>Chihuahua</option>
+                                    <option value="Ciudad de México" {% if viaje.destino == "Ciudad de México" %}selected{% endif %}>Ciudad de México</option>
+                                    <option value="Durango" {% if viaje.destino == "Durango" %}selected{% endif %}>Durango</option>
+                                    <option value="Guanajuato" {% if viaje.destino == "Guanajuato" %}selected{% endif %}>Guanajuato</option>
+                                    <option value="Guerrero" {% if viaje.destino == "Guerrero" %}selected{% endif %}>Guerrero</option>
+                                    <option value="Hidalgo" {% if viaje.destino == "Hidalgo" %}selected{% endif %}>Hidalgo</option>
+                                    <option value="Jalisco" {% if viaje.destino == "Jalisco" %}selected{% endif %}>Jalisco</option>
+                                    <option value="México" {% if viaje.destino == "México" %}selected{% endif %}>México</option>
+                                    <option value="Michoacán" {% if viaje.destino == "Michoacán" %}selected{% endif %}>Michoacán</option>
+                                    <option value="Morelos" {% if viaje.destino == "Morelos" %}selected{% endif %}>Morelos</option>
+                                    <option value="Nayarit" {% if viaje.destino == "Nayarit" %}selected{% endif %}>Nayarit</option>
+                                    <option value="Nuevo León" {% if viaje.destino == "Nuevo León" %}selected{% endif %}>Nuevo León</option>
+                                    <option value="Oaxaca" {% if viaje.destino == "Oaxaca" %}selected{% endif %}>Oaxaca</option>
+                                    <option value="Puebla" {% if viaje.destino == "Puebla" %}selected{% endif %}>Puebla</option>
+                                    <option value="Querétaro" {% if viaje.destino == "Querétaro" %}selected{% endif %}>Querétaro</option>
+                                    <option value="Quintana Roo" {% if viaje.destino == "Quintana Roo" %}selected{% endif %}>Quintana Roo</option>
+                                    <option value="San Luis Potosí" {% if viaje.destino == "San Luis Potosí" %}selected{% endif %}>San Luis Potosí</option>
+                                    <option value="Sinaloa" {% if viaje.destino == "Sinaloa" %}selected{% endif %}>Sinaloa</option>
+                                    <option value="Sonora" {% if viaje.destino == "Sonora" %}selected{% endif %}>Sonora</option>
+                                    <option value="Tabasco" {% if viaje.destino == "Tabasco" %}selected{% endif %}>Tabasco</option>
+                                    <option value="Tamaulipas" {% if viaje.destino == "Tamaulipas" %}selected{% endif %}>Tamaulipas</option>
+                                    <option value="Tlaxcala" {% if viaje.destino == "Tlaxcala" %}selected{% endif %}>Tlaxcala</option>
+                                    <option value="Veracruz" {% if viaje.destino == "Veracruz" %}selected{% endif %}>Veracruz</option>
+                                    <option value="Yucatán" {% if viaje.destino == "Yucatán" %}selected{% endif %}>Yucatán</option>
+                                    <option value="Zacatecas" {% if viaje.destino == "Zacatecas" %}selected{% endif %}>Zacatecas</option>
                                 </select>
                             </div>
                         </div>

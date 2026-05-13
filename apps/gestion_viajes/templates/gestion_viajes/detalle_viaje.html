@@ -5,35 +5,36 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'gestion_viajes/css/common_viajes.css' %}">
-    <link rel="stylesheet" href="{% static 'gestion_viajes/css/detalle_viaje.css' %}">
+    <link rel="stylesheet" href="{% static 'gestion_viajes/css/detalle_viaje.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
 
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
-<!-- Hero full-width -->
-<div class="hero-wrapper">
-    <img 
-        src="{% if viaje.imagen_destino %}{{ viaje.imagen_destino.url }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80{% endif %}" 
-        alt="{{ viaje.destino }}"
-        class="img-fluid rounded-4 w-100"
-        style="height: 180px; object-fit: cover;"
-    >
+<!-- Main wrapper para alineación -->
+<div class="detalle-container" style="width: 90%;">
 
-    <div class="status-pill">
-        <span class="status-dot"></span>
+    <!-- Contenido en dos columnas -->
+    <div class="page-content">
 
-        {% if viaje.estado == 'planeado' %}
-            Planeado
-        {% else %}
-            {{ viaje.estado|capfirst }}
-        {% endif %}
+    <!-- Hero full-width -->
+    <div class="hero-wrapper full-width">
+        <img 
+            src="{% if viaje.imagen_fondo %}{{ viaje.imagen_fondo.url }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80{% endif %}" 
+            alt="{{ viaje.destino }}"
+        >
+
+        <div class="status-pill">
+            <span class="status-dot"></span>
+
+            {% if viaje.estado == 'planeado' %}
+                Planeado
+            {% else %}
+                {{ viaje.estado|capfirst }}
+            {% endif %}
+        </div>
     </div>
-</div>
-
-<!-- Contenido en dos columnas -->
-<div class="page-content">
 
     <!-- ══ COLUMNA IZQUIERDA ══ -->
     <div class="col-left">
@@ -324,6 +325,8 @@
         </div>
         <button id="undo-btn" class="btn-primary" style="white-space: nowrap;">Deshacer</button>
     </div>
+
+</div>
 
 </div>
 
