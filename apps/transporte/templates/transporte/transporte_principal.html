@@ -3,23 +3,42 @@
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'transporte/css/transporte_principal.css' %}">
+
+<style>
+    /* 1. Oculta TODAS las alertas de la página por defecto */
+    .alert {
+        display: none !important;
+    }
+    
+    /* 2. Vuelve a encender SOLO las alertas de tu sección local */
+    #alertas-locales .alert {
+        display: block !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
-<div class="container-app">
+<!-- 🔔 ALERTAS DE ÉXITO O ERROR (MENSAJES) 🔔  -->
+{% if messages %}
+<div class="container mt-3" id="alertas-locales">
+    {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show shadow-sm" role="alert" style="border-left: 5px solid {% if message.tags == 'error' %}#dc3545{% else %}#198754{% endif %};">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container-app mt-4">
     
-    <!-- HEADER PRINCIPAL -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="fw-bold text-oscuro mb-1" style="font-size: 28px;">Transporte</h2>
             <p class="text-muted mb-0" style="font-size: 14px;">Trayectos registrados</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'transporte:buscar_ruta_interna' viaje.id %}" class="btn-action-secondary shadow-sm" aria-label="Buscar ruta de transporte interno">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Buscar Ruta Interna
-            </a>
             <a href="{% url 'transporte:registrar_trayecto' viaje.id %}" class="btn-action-primary shadow-sm" aria-label="Registrar trayecto de ida o regreso">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
                 Registrar Ida / Regreso
@@ -27,7 +46,6 @@
         </div>
     </div>
 
-    <!-- BANNER DE ERROR DE API -->
     <div class="api-error-banner" id="apiErrorBanner">
         <span style="font-size: 18px;" aria-hidden="true">⚠️</span>
         <div class="flex-grow-1">
@@ -36,35 +54,36 @@
         <button class="btn btn-sm btn-link text-warning fw-bold p-0" onclick="document.getElementById('apiErrorBanner').classList.remove('show')" aria-label="Cerrar aviso">Reintentar ↻</button>
     </div>
 
-    <!-- ALERTA DE CONFLICTOS -->
+    {% if hay_conflicto %}
     <div class="conflict-alert" onclick="this.classList.toggle('expanded'); document.getElementById('conflictDetails').style.display = this.classList.contains('expanded') ? 'block' : 'none';" role="button" tabindex="0" aria-expanded="false">
         <div class="conflict-alert-header">
             <div class="conflict-icon-box">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <div class="flex-grow-1">
-                <div class="fw-bold text-oscuro" style="font-size: 15px;">1 conflicto de horario detectado</div>
+                <div class="fw-bold text-oscuro" style="font-size: 15px;">{{ conflictos|length }} conflicto{{ conflictos|length|pluralize }} de horario detectado{{ conflictos|length|pluralize }}</div>
                 <div class="text-muted" style="font-size: 13px;">Hay actividades programadas que se cruzan con un trayecto principal</div>
             </div>
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--color-danger);" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
         
         <div class="conflict-detail" id="conflictDetails" style="display: none;">
-            <div class="d-flex align-items-start gap-3">
+            {% for conflicto in conflictos %}
+            <div class="d-flex align-items-start gap-3 mb-3">
                 <span style="font-size: 20px;" aria-hidden="true">🕐</span>
                 <div class="flex-grow-1">
-                    <div class="fw-bold text-oscuro" style="font-size: 14px;">Tour por Tulum (22 Oct, 14:00 - 18:00)</div>
-                    <div class="text-muted" style="font-size: 13px;">Se cruza con el vuelo de regreso <strong>CUN → MEX</strong> programado a las 16:30.</div>
+                    <div class="fw-bold text-oscuro" style="font-size: 14px;">{{ conflicto.actividad }}</div>
+                    <div class="text-muted" style="font-size: 13px;">{{ conflicto.descripcion }}</div>
                     <div class="d-flex gap-2 mt-2 flex-wrap">
                         <a href="#" class="btn-action-secondary" style="font-size: 12px; padding: 4px 12px;">Reagendar actividad</a>
-                        <a href="#" class="btn-action-secondary" style="font-size: 12px; padding: 4px 12px;">Cambiar vuelo</a>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
+    {% endif %}
 
-    <!-- PANEL DE RESUMEN DE COSTOS -->
     {% if tiene_trayectos %}
     <div class="summary-panel shadow-sm">
         <div class="summary-top">
@@ -93,7 +112,6 @@
             <div class="cost-row">
                 <span class="label">
                     <span aria-hidden="true">{% if trayecto.es_autobus %}🚌{% else %}✈️{% endif %}</span> 
-                    
                     {% if trayecto.es_autobus %}Autobús{% else %}Vuelo{% endif %} de {{ trayecto.get_tipo_display|lower }} ({{ trayecto.origen_codigo }} → {{ trayecto.destino_codigo }})
                 </span>
                 <span class="value">{{ trayecto.precio_display }}</span>
@@ -116,21 +134,16 @@
     </div>
     {% endif %}
 
-    <!-- CONTENIDO PRINCIPAL -->
     <div class="row g-4">
-
-        <!-- COLUMNA IZQUIERDA: Trayectos principales -->
-        <div class="col-lg-8">
+        <div class="col-12">
             <h4 class="section-title-transport"><span aria-hidden="true">✈️</span> Trayectos Principales</h4>
             
             {% if tiene_trayectos %}
 
-                <!-- Trayectos de IDA (y Redondos) -->
                 {% for trayecto in trayectos_ida %}
                 <article class="transport-card shadow-sm">
                     <div class="route-header">
                         <div class="route-badges">
-                            <!-- AQUÍ ESTÁ LA MAGIA DEL GET_TIPO_DISPLAY EN MAYÚSCULAS -->
                             <span class="route-badge" {% if trayecto.tipo == 'IDA_VUELTA' %}style="background: #E8721C;"{% endif %}>
                                 {{ trayecto.get_tipo_display|upper }}
                             </span>
@@ -206,7 +219,6 @@
                 </article>
                 {% endfor %}
 
-                <!-- Trayectos de REGRESO Puros -->
                 {% for trayecto in trayectos_regreso %}
                 <article class="transport-card shadow-sm">
                     <div class="route-header">
@@ -284,7 +296,6 @@
                 {% endfor %}
 
             {% else %}
-                <!-- Estado vacío -->
                 <div class="empty-state">
                     <div class="mb-2 fs-4">✈️ / 🚌</div>
                     Aún no hay trayectos registrados.<br>
@@ -292,62 +303,19 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- COLUMNA DERECHA: Movilidad interna -->
-        <div class="col-lg-4">
-            <h4 class="section-title-transport"><span aria-hidden="true">🗺️</span> Movilidad Interna</h4>
-            
-            <div class="bg-white p-3 rounded-4 shadow-sm border internal-sidebar">
-                
-                <a href="#" class="internal-card metro" aria-label="Ruta en metro: Aeropuerto a Hotel">
-                    <div class="internal-icon" aria-hidden="true">🚇</div>
-                    <div class="internal-info">
-                        <div class="internal-route">Aeropuerto → Hotel</div>
-                        <div class="internal-meta">Metro L1 · 45 mins · $50 MXN</div>
-                    </div>
-                </a>
-
-                <a href="#" class="internal-card uber" aria-label="Ruta en Uber: Hotel a Museo Maya">
-                    <div class="internal-icon" aria-hidden="true">🚕</div>
-                    <div class="internal-info">
-                        <div class="internal-route">Hotel → Museo Maya</div>
-                        <div class="internal-meta">Uber · 15 mins · $120 MXN</div>
-                    </div>
-                </a>
-
-                <a href="#" class="internal-card walk" aria-label="Ruta a pie: Museo a Restaurante">
-                    <div class="internal-icon" aria-hidden="true">🚶</div>
-                    <div class="internal-info">
-                        <div class="internal-route">Museo → Restaurante</div>
-                        <div class="internal-meta">A pie · 8 mins · Gratis</div>
-                    </div>
-                </a>
-
-                <button class="show-more-btn mt-2" type="button">
-                    Ver todos los traslados (8) ↓
-                </button>
-
-                <div class="mt-3 d-grid gap-2">
-                    <a href="{% url 'transporte:buscar_ruta_interna' viaje.id %}" class="btn-action-dark justify-content-center" aria-label="Abrir mapa interactivo de rutas">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                        Ver Mapa de Rutas
-                    </a>
-                    
-                    <a href="#" class="text-naranja fw-bold text-center mt-1" style="font-size: 13px; text-decoration: none;">
-                        + Proponer traslado compartido (Votación)
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
-    document.querySelector('.conflict-alert').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            this.click();
-        }
-    });
+    // Script para la alerta de conflictos
+    const conflictAlert = document.querySelector('.conflict-alert');
+    if (conflictAlert) {
+        conflictAlert.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    }
 </script>
 {% endblock %}

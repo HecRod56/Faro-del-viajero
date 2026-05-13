@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
 
     <!-- Bloque para CSS específico de cada módulo -->
     {% block extra_css %}{% endblock %}
@@ -56,7 +55,7 @@
                             <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
                         </svg>
                     </div>
-                    <a href="{% url 'profile' %}" class="icon-btn-nav text-decoration-none">
+                    <a href="{% url 'profile' %}" class="icon-btn-nav">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
                         </svg>
@@ -64,18 +63,23 @@
                 </div>
 
             {% else %}
+
                 <div class="d-flex align-items-center gap-2">
                     {% block nav_auth %}
                     <a href="{% url 'login' %}"
-                       class="nav-link-custom {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                       class="btn btn-accent rounded-pill px-4 py-2 {% if request.resolver_match.url_name != 'login' %}btn-secondary{% endif %}"
+                       style="font-size: 1.05rem;">
                         Iniciar sesión
                     </a>
+
                     <a href="{% url 'register' %}"
-                       class="nav-link-custom {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                       class="btn btn-accent rounded-pill px-4 py-2 {% if request.resolver_match.url_name != 'register' %}btn-secondary{% endif %}"
+                       style="font-size: 1.05rem;">
                         Registrarte
                     </a>
                     {% endblock %}
                 </div>
+
             {% endif %}
 
         </div>
