@@ -181,7 +181,7 @@ def eliminar_integrante(request, id_integrante):
     )
 
     participante_a_eliminar = get_object_or_404(
-        Participante, viaje=viaje, usuario_id=id_integrante
+        Participante, viaje=viaje, pk=id_integrante
     )
 
     # No puede eliminarse a sí mismo con esta acción

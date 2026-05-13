@@ -678,7 +678,11 @@ def expulsar_participante(participante_a_expulsar, organizador, viaje):
                 otro_gp.save(update_fields=['monto_deuda'])
 
         # Soft-delete de la participación del expulsado
-        gp.delete(usuario=organizador)
+        gp.delete(usuario=organizador.usuario)
+
+    # Eliminar físicamente cualquier participación residual del expulsado para
+    # no bloquear la eliminación del Participante por la FK RESTRICT.
+    GastoParticipante.todos.filter(participante=participante_a_expulsar).delete()
 
     # Recalcular liquidaciones con la nueva distribución
     _recalcular_liquidaciones(viaje)
@@ -687,7 +691,7 @@ def expulsar_participante(participante_a_expulsar, organizador, viaje):
     _registrar_auditoria(
         gasto_id=0,  # 0 indica operación a nivel viaje, no gasto específico
         accion='eliminado',
-        usuario=organizador,
+        usuario=organizador.usuario,
         antes={'participante_expulsado': str(participante_a_expulsar.usuario)},
         despues={'redistribuido_entre': [str(p.usuario) for p in participantes_restantes]},
     )
