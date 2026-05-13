@@ -6,8 +6,23 @@
 <link rel="stylesheet" href="{% static 'transporte/css/transporte_registro.css' %}">
 {% endblock %}
 
+
 {% block content %}
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+<!-- ========================================== -->
+<!-- 🔔 ALERTAS DE ÉXITO O ERROR (MENSAJES) 🔔  -->
+<!-- ========================================== -->
+{% if messages %}
+<div class="container mt-3" id="alertas-locales">
+    {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show shadow-sm" role="alert" style="border-left: 5px solid {% if message.tags == 'error' %}#dc3545{% else %}#198754{% endif %};">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 
 <div class="container mt-4"> 
     <!-- Header -->
