@@ -56,3 +56,27 @@
     border-color: var(--color-primary);
     box-shadow: 0 2px 8px rgba(14, 158, 142, 0.1);
 }
+
+.viajes-scroll {
+  max-height: 420px; /* Ajusta la altura a tu gusto */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Scroll bonito */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) transparent;
+}
+
+/* Chrome / Edge / Safari */
+.viajes-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.viajes-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.viajes-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border-radius: 20px;
+}

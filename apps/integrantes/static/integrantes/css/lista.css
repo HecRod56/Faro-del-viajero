@@ -1,0 +1,15 @@
+.trip-subnav{
+    position: sticky;
+    top: 70px;
+
+    z-index: 1030;
+
+    background: #fff;
+
+    border-bottom: 1px solid #E4E4E2;
+
+    padding-top: .5rem;
+    padding-bottom: 0;
+
+    margin-bottom: 0;
+}
