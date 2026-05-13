@@ -3,8 +3,8 @@
    ========================================== */
 :root {
     /* 🎯 Colores principales */
-    --color-primary: #0E9E8E;        /* Teal */
-    --color-primary-hover: #0c8779;
+    --color-primary: #0E9E8E;        /* Teal / Turquesa */
+    --color-primary-hover: #0b8a7c;
 
     --color-heading: #1A2E35;        /* Dark navy */
     --color-text: #2D2D2D;
@@ -14,8 +14,11 @@
     --color-success: #27AE60;
     --color-danger: #C0392B;
     --color-warning: #D4A017;
+    --color-accent: #E8721C;         /* Naranja */
+    --color-accent-hover: #d66415;
+    --color-highlight: #F5C518;      /* Dorado */
 
-    --color-bg: #F2F2F2;
+    --color-bg: #F2F2F0;
     --color-white: #FFFFFF;
 
     --color-disabled-bg: #CCCCCC;
@@ -30,16 +33,20 @@
     --font-size-small: 14px;
 
     --font-weight-regular: 400;
+    --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
 
     /* Botones */
     --btn-radius: 24px;
     --transition: all 0.3s ease;
+    --transition-fast: all 0.2s ease;
 
     /* Navbar */
     --navbar-bg: var(--color-primary);
 }
+
 
 /* ==========================================
    Body
@@ -50,8 +57,11 @@ body {
     font-weight: var(--font-weight-regular);
     color: var(--color-text);
     background-color: var(--color-bg);
+    /* padding-top compensa la navbar fixed-top (altura ~100px) */
+    padding-top: 100px;
     margin: 0;
 }
+
 
 /* ==========================================
    Encabezados
@@ -74,6 +84,7 @@ h3 {
     color: var(--color-heading);
 }
 
+
 /* ==========================================
    Texto secundario
    ========================================== */
@@ -87,9 +98,25 @@ p, span, small {
     color: var(--color-text-secondary);
 }
 
+
+/* ==========================================
+   Utilidades de color (helpers)
+   ========================================== */
+.bg-primary-faro   { background-color: var(--color-primary) !important; }
+.text-primary-faro { color: var(--color-primary) !important; }
+.text-heading      { color: var(--color-heading) !important; }
+
+
 /* ==========================================
    Navbar
    ========================================== */
+
+/*
+ * NOTA: El background-image de #mainNav usa {% static %} de Django,
+ * por lo que el gradiente sobre la imagen permanece en base.html.
+ * Aquí se define todo lo demás de la barra de navegación.
+ */
+
 .navbar-faro {
     background-color: var(--navbar-bg);
     padding: 0.8rem 1rem;
@@ -103,6 +130,28 @@ p, span, small {
     gap: 10px;
 }
 
+/* Links de navegación principales */
+.nav-link-custom {
+    color: var(--color-white);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-small);
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: var(--transition-fast);
+    text-decoration: none;
+}
+
+.nav-link-custom:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-white);
+}
+
+.nav-link-custom.active {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: var(--color-white);
+}
+
+/* Links legacy (mantener compatibilidad con módulos existentes) */
 .nav-link-faro {
     color: var(--color-white) !important;
     font-weight: var(--font-weight-semibold);
@@ -112,6 +161,49 @@ p, span, small {
 .nav-link-faro:hover {
     opacity: 0.8;
 }
+
+/* Barra de búsqueda en la navbar */
+.search-bar-nav {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 8px 18px 8px 40px; /* padding-left deja espacio al ícono SVG */
+    color: var(--color-white);
+    width: 240px;
+    font-size: var(--font-size-small);
+    font-family: var(--font-family-base);
+    transition: var(--transition-fast);
+}
+
+.search-bar-nav::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.search-bar-nav:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: var(--color-white);
+}
+
+/* Botones circulares de íconos en la navbar */
+.icon-btn-nav {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-white);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-decoration: none;
+}
+
+.icon-btn-nav:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
 
 /* ==========================================
    Footer
@@ -123,9 +215,11 @@ footer {
     margin-top: auto;
 }
 
+
 /* ==========================================
    Botones
    ========================================== */
+
 /* Primario: Guardar, Crear, Confirmar */
 .btn-primary {
     background-color: var(--color-primary);
@@ -141,6 +235,7 @@ footer {
 
 .btn-primary:hover:not(:disabled) {
     background-color: var(--color-primary-hover);
+    color: var(--color-white);
 }
 
 .btn-primary:disabled {
@@ -168,6 +263,32 @@ footer {
 }
 
 .btn-secondary:disabled {
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+}
+
+/* Acento / CTA: Registrarte, acciones destacadas */
+.btn-accent {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--btn-radius);
+    padding: 8px 25px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family-base);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-accent:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+    color: var(--color-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(232, 114, 28, 0.2);
+}
+
+.btn-accent:disabled {
     background-color: var(--color-disabled-bg);
     color: var(--color-disabled-text);
     cursor: not-allowed;
