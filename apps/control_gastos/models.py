@@ -160,7 +160,7 @@ class GastoParticipante(SoftDeleteModel):
     )
     participante = models.ForeignKey(
         'gestion_viajes.Participante',
-        on_delete=models.CASCADE,
+        on_delete=models.RESTRICT,
         related_name='participaciones_gastos',
     )
 

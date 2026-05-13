@@ -2,107 +2,126 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'gestion_viajes/css/editar_viaje.css' %}">
-    
-    <div class="breadcrumb-sticky-container">
-        <nav class="breadcrumb-nav">
-            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
-            <span class="mx-2">&gt;</span>
-            <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">Detalle</a>
-            <span class="mx-2">&gt;</span>
-            <span class="current">Editar viaje</span>
-        </nav>
+
+<div class="breadcrumb-sticky-container">
+    <nav class="breadcrumb-nav">
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
+        <span class="mx-2">&gt;</span>
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">Detalle</a>
+        <span class="mx-2">&gt;</span>
+        <span class="current">Editar viaje</span>
+    </nav>
+</div>
+
+<div class="container-fluid py-4 px-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Editar: {{ viaje.nombre }}</h1>
     </div>
 
-    <div class="container-fluid py-4 px-3">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Editar: {{ viaje.nombre }}</h1>
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="section-card">
+                <p class="section-label">Información General</p>
 
-        <div class="row justify-content-center">
-            <div class="col-12">
-                <div class="section-card">
-                    <p class="section-label">Información General</p>
-                    
-                    <form method="POST">
-                        {% csrf_token %}
-                        
-                        <div class="row g-4">
-                            <div class="col-12 col-md-8">
-                                <label class="fw-bold mb-2">Nombre del Viaje</label>
-                                <input type="text" name="nombre" class="form-control input-field" 
-                                       value="{{ viaje.nombre }}" required>
-                            </div>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-                            <div class="col-12 col-md-4">
-                                <label class="fw-bold mb-2">Estado</label>
-                                <select name="estado" class="form-select input-field">
-                                    <option value="planeado" {% if viaje.estado == 'planeado' %}selected{% endif %}>Planeado</option>
-                                    <option value="en curso" {% if viaje.estado == 'en curso' %}selected{% endif %}>En curso</option>
-                                    <option value="finalizado" {% if viaje.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                    <div class="row g-4">
+                        <div class="col-12 col-md-8">
+                            <label class="fw-bold mb-2">Nombre del Viaje</label>
+                            <input id="editar-nombre" type="text" name="nombre" class="form-control input-field"
+                                maxlength="100" value="{{ viaje.nombre }}" required>
+                            <small id="nombre-help" class="text-secondary-custom d-block mt-1">0/100 caracteres</small>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="fw-bold mb-2">Estado</label>
+                            <select name="estado" class="form-select input-field">
+                                <option value="planeado" {% if viaje.estado == 'planeado' %}selected{% endif %}>Planeado</option>
+                                <option value="en curso" {% if viaje.estado == 'en curso' %}selected{% endif %}>En curso</option>
+                                <option value="finalizado" {% if viaje.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="fw-bold mb-2">Destino</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
+                                <select id="destino" name="destino" class="form-select input-field" required>
+                                    <option value="" disabled>Selecciona el estado de destino</option>
+                                    {% for estado in "Aguascalientes,Baja California,Baja California Sur,Campeche,Coahuila,Colima,Chiapas,Chihuahua,Ciudad de México,Durango,Guanajuato,Guerrero,Hidalgo,Jalisco,México,Michoacán,Morelos,Nayarit,Nuevo León,Oaxaca,Puebla,Querétaro,Quintana Roo,San Luis Potosí,Sinaloa,Sonora,Tabasco,Tamaulipas,Tlaxcala,Veracruz,Yucatán,Zacatecas".split(",") %}
+                                    <option value="{{ estado }}" {% if viaje.destino == estado %}selected{% endif %}>{{ estado }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
+                        </div>
 
-                            <div class="col-12">
-                                <label class="fw-bold mb-2">Destino</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
-                                    <input type="text" name="destino" class="form-control input-field" 
-                                           style="border-radius: 0 0.75rem 0.75rem 0;"
-                                           value="{{ viaje.destino }}" required>
+                        <div class="col-12">
+                            <label class="fw-bold mb-2">Descripción</label>
+                            <textarea id="editar-descripcion" name="descripcion" class="form-control input-field"
+                                rows="4" maxlength="5000">{{ viaje.descripcion }}</textarea>
+                            <small id="descripcion-help" class="text-secondary-custom d-block mt-1">0/5000 caracteres</small>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label class="fw-bold mb-2">Imagen de Portada (Fondo)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">🖼️</span>
+                                <input type="file" name="imagen_fondo" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" accept="image/*">
+                            </div>
+                            {% if viaje.imagen_fondo %}
+                                <div class="mt-2 d-flex align-items-center gap-2">
+                                    <small class="text-secondary-custom">Actual:</small>
+                                    <img src="{{ viaje.imagen_fondo.url }}" class="rounded shadow-sm" style="width: 80px; height: 50px; object-fit: cover;">
                                 </div>
-                            </div>
+                            {% endif %}
+                            <small class="text-secondary-custom d-block mt-1">Sube una foto personalizada para el encabezado de este viaje.</small>
+                        </div>
 
-                            <div class="col-12">
-                                <label class="fw-bold mb-2">Descripción</label>
-                                <textarea name="descripcion" class="form-control input-field" rows="4">{{ viaje.descripcion }}</textarea>
-                            </div>
+                        <p class="section-label mt-5">Logística y Presupuesto</p>
 
-                            <p class="section-label mt-5">Logística y Presupuesto</p>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Fecha de Inicio</label>
+                            <input type="date" name="fecha_inicio" class="form-control input-field" value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
+                        </div>
 
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Fecha de Inicio</label>
-                                <input type="date" name="fecha_inicio" class="form-control input-field" 
-                                       value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
-                            </div>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Fecha de Fin</label>
+                            <input type="date" name="fecha_fin" class="form-control input-field" value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
+                        </div>
 
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Fecha de Fin</label>
-                                <input type="date" name="fecha_fin" class="form-control input-field" 
-                                       value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
-                            </div>
-
-                            <div class="col-12">
-                                <div id="errores-fechas" class="d-none p-2 rounded-3"
-                                    style="background-color:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:0.75rem;">
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
-                                    <input type="number" name="presupuesto_estimado" step="0.01" class="form-control input-field" 
-                                           style="border-radius: 0 0.75rem 0.75rem 0;"
-                                           value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
-                                <input type="number" name="capacidad_max" class="form-control input-field" 
-                                       value="{{ viaje.capacidad_max }}">
-                            </div>
-
-                            <div class="col-12 d-flex justify-content-end gap-3 mt-4">
-                                <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-cancel">Cancelar</a>
-                                <button type="submit" class="btn-save">Guardar Cambios</button>
+                        <div class="col-12">
+                            <div id="errores-fechas" class="d-none p-2 rounded-3"
+                                style="background-color:#FEF2F2; border:1px solid #FECACA; color: var(--color-danger); font-size: var(--font-size-small);">
                             </div>
                         </div>
-                    </form>
-                </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
+                            <div id="presupuesto-container" class="input-group">
+                                <span id="presupuesto-simbolo" class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
+                                <input id="editar-presupuesto" type="number" name="presupuesto_estimado" step="0.01"
+                                    max="100000000" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;"
+                                    value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
+                            </div>
+                            <small id="presupuesto-help" class="text-secondary-custom d-block mt-1">Máx. un número de 8 dígitos</small>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
+                            <input type="number" name="capacidad_max" class="form-control input-field" value="{{ viaje.capacidad_max }}">
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                            <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
 <script>
     const hoy = new Date();
@@ -151,6 +170,64 @@
 
     fechaInicio.addEventListener("change", validarFechas);
     fechaFin.addEventListener("change", validarFechas);
+
+    // Nombre del viaje
+    const nombreInput = document.getElementById('editar-nombre');
+    const nombreHelp = document.getElementById('nombre-help');
+    if (nombreInput && nombreHelp) {
+        nombreHelp.textContent = `${nombreInput.value.length}/100 caracteres`;
+        nombreInput.addEventListener('input', function () {
+            const length = this.value.length;
+            nombreHelp.textContent = `${length}/100 caracteres`;
+            if (length >= 100) {
+                nombreHelp.style.color = 'var(--color-danger)';
+                this.style.borderColor = 'var(--color-danger)';
+            } else {
+                nombreHelp.style.color = '';
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // Descripción
+    const descripcionInput = document.getElementById('editar-descripcion');
+    const descripcionHelp = document.getElementById('descripcion-help');
+    if (descripcionInput && descripcionHelp) {
+        descripcionHelp.textContent = `${descripcionInput.value.length}/5000 caracteres`;
+        descripcionInput.addEventListener('input', function () {
+            const length = this.value.length;
+            descripcionHelp.textContent = `${length}/5000 caracteres`;
+            if (length >= 5000) {
+                descripcionHelp.style.color = 'var(--color-danger)';
+                this.style.borderColor = 'var(--color-danger)';
+            } else {
+                descripcionHelp.style.color = '';
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // Presupuesto
+    const presupuestoInput = document.getElementById('editar-presupuesto');
+    const presupuestoHelp = document.getElementById('presupuesto-help');
+    const presupuestoSimbolo = document.getElementById('presupuesto-simbolo');
+    const presupuestoContainer = document.getElementById('presupuesto-container');
+    if (presupuestoInput && presupuestoHelp) {
+        presupuestoInput.addEventListener('input', function () {
+            const value = parseFloat(this.value) || 0;
+            if (value >= 100000000) {
+                presupuestoHelp.textContent = '¡Límite máximo alcanzado!';
+                presupuestoHelp.style.color = 'var(--color-danger)';
+                presupuestoSimbolo.style.color = 'var(--color-danger)';
+                presupuestoSimbolo.style.backgroundColor = '#FEF2F2';
+            } else {
+                presupuestoHelp.textContent = 'Máx. un número de 8 dígitos';
+                presupuestoHelp.style.color = '';
+                presupuestoSimbolo.style.color = '';
+                presupuestoSimbolo.style.backgroundColor = '';
+            }
+        });
+    }
 </script>
 
 {% endblock %}
