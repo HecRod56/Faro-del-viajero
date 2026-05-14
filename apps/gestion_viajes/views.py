@@ -223,6 +223,123 @@ def eliminar_viaje(request, viaje_id):
     viaje.delete() # ¡Adiós registro!
     return redirect('gestion_viajes:p_ver_mis_viajes')
 
+# 7.1 Vista AJAX para eliminar un viaje y devolver sus datos para restaurarlo
+@require_http_methods(["POST"])
+def eliminar_viaje_ajax(request, viaje_id):
+    """Elimina un viaje y guarda sus datos en sesión para poder restaurarlo"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'No autenticado'}, status=401)
+
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+
+    # Solo el organizador puede eliminar el viaje
+    participante = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
+    if not participante or participante.rol != 'organizador':
+        return JsonResponse({'error': 'No tienes permiso para eliminar este viaje'}, status=403)
+
+    # Serializar todos los datos antes de borrar
+    participantes_data = [
+        {
+            'usuario_id': p.usuario_id,
+            'rol': p.rol,
+        }
+        for p in viaje.participantes.all()
+    ]
+
+    gastos_data = [
+        {
+            'concepto': g.concepto,
+            'cantidad': str(g.cantidad),
+            'categoria': g.categoria,
+            'pagado_por_usuario_id': g.pagado_por.usuario_id if g.pagado_por else None,
+            'fecha': str(g.fecha),
+        }
+        for g in viaje.gastos.all()
+    ]
+
+    viaje_data = {
+        'nombre': viaje.nombre,
+        'destino': viaje.destino,
+        'descripcion': viaje.descripcion,
+        'fecha_inicio': str(viaje.fecha_inicio),
+        'fecha_fin': str(viaje.fecha_fin),
+        'capacidad_max': viaje.capacidad_max,
+        'presupuesto_estimado': str(viaje.presupuesto_estimado) if viaje.presupuesto_estimado else '0',
+        'estado': viaje.estado,
+        'participantes': participantes_data,
+        'gastos': gastos_data,
+    }
+
+    # Guardar en sesión para restauración
+    request.session['viaje_eliminado_data'] = viaje_data
+
+    viaje.delete()
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Viaje eliminado',
+        'viaje_nombre': viaje_data['nombre'],
+    })
+
+# 7.2 Vista AJAX para restaurar un viaje eliminado
+@require_http_methods(["POST"])
+def restaurar_viaje_ajax(request):
+    """Restaura un viaje eliminado usando los datos guardados en sesión"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'No autenticado'}, status=401)
+
+    viaje_data = request.session.pop('viaje_eliminado_data', None)
+    if not viaje_data:
+        return JsonResponse({'error': 'No hay datos de viaje para restaurar'}, status=400)
+
+    try:
+        # Recrear el viaje
+        nuevo_viaje = Viaje.objects.create(
+            nombre=viaje_data['nombre'],
+            destino=viaje_data['destino'],
+            descripcion=viaje_data['descripcion'],
+            fecha_inicio=viaje_data['fecha_inicio'],
+            fecha_fin=viaje_data['fecha_fin'],
+            capacidad_max=viaje_data['capacidad_max'],
+            presupuesto_estimado=viaje_data['presupuesto_estimado'],
+            estado=viaje_data['estado'],
+        )
+
+        # Recrear participantes
+        User = get_user_model()
+        participante_map = {}  # usuario_id -> nuevo Participante
+        for p_data in viaje_data.get('participantes', []):
+            try:
+                usuario = User.objects.get(pk=p_data['usuario_id'])
+                p = Participante.objects.create(
+                    viaje=nuevo_viaje,
+                    usuario=usuario,
+                    rol=p_data['rol'],
+                )
+                participante_map[p_data['usuario_id']] = p
+            except User.DoesNotExist:
+                pass
+
+        # Recrear gastos
+        for g_data in viaje_data.get('gastos', []):
+            pagado_por = participante_map.get(g_data['pagado_por_usuario_id'])
+            Gasto.objects.create(
+                viaje=nuevo_viaje,
+                pagado_por=pagado_por,
+                concepto=g_data['concepto'],
+                cantidad=g_data['cantidad'],
+                categoria=g_data['categoria'],
+            )
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Viaje restaurado correctamente',
+            'viaje_id': nuevo_viaje.id,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 # 8. Vista para registrar un nuevo gasto
 def registrar_gasto(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)

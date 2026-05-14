@@ -110,5 +110,124 @@
         {% endfor %}
     </div>
 
+    <!-- ══ TOAST DESHACER ELIMINACIÓN DE VIAJE ══ -->
+    <div id="undo-viaje-toast" style="
+        position: fixed; bottom: 20px; left: 20px;
+        background: var(--color-white);
+        font-family: var(--font-family-base);
+        color: var(--color-text);
+        padding: 16px 24px;
+        border-radius: 4px;
+        font-size: var(--font-size-body);
+        box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
+        display: none; z-index: 1000;
+        align-items: center; gap: 16px;
+        max-width: 400px;
+        animation: slideInLeft 0.3s ease-out;
+    ">
+        <div style="flex: 1;">
+            <div id="viaje-toast-message">Viaje eliminado</div>
+            <div style="height: 2px; background: rgba(0,0,0,0.1); border-radius: 1px; margin-top: 8px; overflow: hidden;">
+                <div id="viaje-timer-progress" style="height: 100%; background: var(--color-primary); border-radius: 1px; width: 100%; transition: width 0.1s linear;"></div>
+            </div>
+        </div>
+        <button id="undo-viaje-btn" class="btn-primary" style="white-space: nowrap;">
+            Deshacer
+        </button>
+    </div>
+
 </div>
+
+<style>
+    @keyframes slideInLeft {
+        from { transform: translateX(-110%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+    }
+    .toast-exit {
+        animation: slideOutLeft 0.3s ease-in forwards;
+    }
+    @keyframes slideOutLeft {
+        from { transform: translateX(0);    opacity: 1; }
+        to   { transform: translateX(-110%); opacity: 0; }
+    }
+</style>
+
+<script>
+    (function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('deleted') !== '1') return;
+
+        const nombre           = decodeURIComponent(params.get('nombre') || 'El viaje');
+        const toast            = document.getElementById('undo-viaje-toast');
+        const toastMsg         = document.getElementById('viaje-toast-message');
+        const timerBar         = document.getElementById('viaje-timer-progress');
+        const undoBtn          = document.getElementById('undo-viaje-btn');
+        const UNDO_DELAY       = 5000;
+
+        // Limpiar la URL para que no reaparezca al recargar
+        history.replaceState({}, '', window.location.pathname);
+
+        toastMsg.textContent = `"${nombre}" eliminado`;
+        toast.style.display = 'flex';
+        timerBar.style.width = '100%';
+
+        let timeRemaining = UNDO_DELAY;
+        const interval = setInterval(() => {
+            timeRemaining -= 100;
+            timerBar.style.width = ((timeRemaining / UNDO_DELAY) * 100) + '%';
+            if (timeRemaining <= 0) clearInterval(interval);
+        }, 100);
+
+        const timeout = setTimeout(() => {
+            clearInterval(interval);
+            ocultarToast();
+        }, UNDO_DELAY);
+
+        undoBtn.addEventListener('click', () => {
+            clearTimeout(timeout);
+            clearInterval(interval);
+            undoBtn.disabled = true;
+            undoBtn.textContent = 'Restaurando...';
+
+            fetch('{% url "gestion_viajes:p_restaurar_viaje_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    ocultarToast();
+                    window.location.href = '{% url "gestion_viajes:p_detalle_viaje" 0 %}'.replace('/0/', '/' + data.viaje_id + '/');
+                } else {
+                    alert('Error al restaurar el viaje: ' + (data.error || 'Error desconocido'));
+                    undoBtn.disabled = false;
+                    undoBtn.textContent = 'Deshacer';
+                }
+            })
+            .catch(() => {
+                alert('Error al conectar con el servidor');
+                undoBtn.disabled = false;
+                undoBtn.textContent = 'Deshacer';
+            });
+        });
+
+        function ocultarToast() {
+            toast.classList.add('toast-exit');
+            setTimeout(() => {
+                toast.style.display = 'none';
+                toast.classList.remove('toast-exit');
+            }, 300);
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    })();
+</script>
+
 {% endblock %}

@@ -302,7 +302,7 @@
 
     {% include "gestion_viajes/modals/modal_abandonar_viaje.html" %}
 
-    <!-- ══ TOAST DE DESHACER (estilo Gmail) ══ -->
+    <!-- ══ TOAST DE DESHACER GASTO (estilo Gmail) ══ -->
     <div id="undo-toast" style="
         position: fixed; bottom: 20px; left: 20px;
         background: var(--color-white);
@@ -325,6 +325,8 @@
         </div>
         <button id="undo-btn" class="btn-primary" style="white-space: nowrap;">Deshacer</button>
     </div>
+
+
 
 </div>
 
@@ -457,6 +459,41 @@
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
+
+    // ── Sistema de deshacer eliminación de VIAJE (estilo Gmail) ──
+    const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar-viaje');
+
+    if (btnConfirmarEliminar) {
+        btnConfirmarEliminar.addEventListener('click', function () {
+            document.getElementById('modalEliminarViaje').classList.add('d-none');
+            btnConfirmarEliminar.disabled = true;
+            btnConfirmarEliminar.textContent = 'Eliminando...';
+
+            fetch('{% url "gestion_viajes:p_eliminar_viaje_ajax" viaje.id %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const nombre = encodeURIComponent(data.viaje_nombre);
+                    window.location.href = '{% url "gestion_viajes:p_ver_mis_viajes" %}?deleted=1&nombre=' + nombre;
+                } else {
+                    alert('Error al eliminar el viaje: ' + (data.error || 'Error desconocido'));
+                    btnConfirmarEliminar.disabled = false;
+                    btnConfirmarEliminar.textContent = 'Sí, eliminar';
+                }
+            })
+            .catch(() => {
+                alert('Error al conectar con el servidor');
+                btnConfirmarEliminar.disabled = false;
+                btnConfirmarEliminar.textContent = 'Sí, eliminar';
+            });
+        });
+    }
+
+    function deshacerEliminacionViaje() {}
+    function ocultarViajeToast() {}
 
     // Validación en tiempo real para inputs de gasto
     document.addEventListener('DOMContentLoaded', function () {
