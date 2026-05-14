@@ -80,5 +80,5 @@ def abandonar_viaje(request, viaje_id):
     if request.method == 'POST':
         viaje = get_object_or_404(Viaje, id=viaje_id)
         ChatAbandonado.objects.get_or_create(viaje=viaje, usuario=request.user)
-        return redirect('chat:lista_chats')
+        return redirect('chat:chat_viaje', viaje_id=viaje_id)
     return redirect('chat:chat_viaje', viaje_id=viaje_id)
