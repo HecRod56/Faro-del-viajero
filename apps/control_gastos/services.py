@@ -593,3 +593,108 @@ def _validar_division(gasto, participantes: list, datos_division: dict):
             raise ValueError(
                 f"La suma de montos fijos (${suma}) no coincide con el total del gasto (${gasto.monto})."
             )
+        
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECCIÓN 6 — VALIDACIONES PARA EXPULSIÓN DE PARTICIPANTE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def puede_abandonar_viaje(participante) -> tuple[bool, str]:
+    """
+    Verifica si un participante puede abandonar el viaje.
+    Retorna (puede: bool, razon: str)
+    """
+    from decimal import Decimal
+    balances = _calcular_balances(participante.viaje)
+    data = balances.get(participante.id)
+
+    if data is None:
+        return True, ""  # nunca tuvo gastos, puede salir
+
+    balance = data['balance']
+
+    if balance > Decimal('0.01'):
+        return False, (
+            f"Tienes un saldo a favor de ${balance:.2f}. "
+            "Debes cobrar lo que te deben antes de salir."
+        )
+    if balance < Decimal('-0.01'):
+        return False, (
+            f"Tienes una deuda pendiente de ${abs(balance):.2f}. "
+            "Debes liquidarla antes de salir."
+        )
+
+    return True, ""
+
+@transaction.atomic
+def expulsar_participante(participante_a_expulsar, organizador, viaje):
+    """
+    El organizador elimina a un integrante del viaje.
+    Sus gastos como pagador quedan registrados (pagado_por → NULL via SET_NULL).
+    Sus participaciones se redistribuyen equitativamente entre los restantes.
+    """
+    from apps.gestion_viajes.models import Participante
+
+    # Verificar que quien ejecuta es organizador
+    if organizador.rol != 'organizador':
+        raise PermissionError("Solo el organizador puede expulsar integrantes.")
+
+    participantes_restantes = list(
+        Participante.objects.filter(viaje=viaje)
+        .exclude(id=participante_a_expulsar.id)
+    )
+
+    if not participantes_restantes:
+        raise ValueError("No puedes expulsar al último integrante del viaje.")
+
+    # Reasignar cada GastoParticipante donde aparece el expulsado
+    gastos_afectados = GastoParticipante.objects.filter(
+        participante=participante_a_expulsar,
+        gasto__eliminado=False,
+    ).select_related('gasto')
+
+    for gp in gastos_afectados:
+        gasto = gp.gasto
+        monto_a_repartir = gp.monto_deuda
+
+        # Si además era el pagador, ese crédito pasa al organizador
+        if gasto.pagado_por == participante_a_expulsar:
+            gasto.pagado_por = organizador
+            gasto.save(update_fields=['pagado_por'])
+
+        # Distribuir su deuda entre los restantes que ya están en el gasto
+        otros_gps = GastoParticipante.objects.filter(
+            gasto=gasto,
+            eliminado=False,
+        ).exclude(participante=participante_a_expulsar)
+
+        if otros_gps.exists():
+            # Repartir equitativamente entre los que ya participan
+            n = otros_gps.count()
+            parte = _redondear(monto_a_repartir / n)
+            residuo = monto_a_repartir - (parte * n)
+
+            for i, otro_gp in enumerate(otros_gps):
+                otro_gp.monto_deuda += parte + (residuo if i == 0 else Decimal('0'))
+                otro_gp.save(update_fields=['monto_deuda'])
+
+        # Soft-delete de la participación del expulsado
+        gp.delete(usuario=organizador.usuario)
+
+    # Eliminar físicamente cualquier participación residual del expulsado para
+    # no bloquear la eliminación del Participante por la FK RESTRICT.
+    GastoParticipante.todos.filter(participante=participante_a_expulsar).delete()
+
+    # Recalcular liquidaciones con la nueva distribución
+    _recalcular_liquidaciones(viaje)
+
+    # Registrar en auditoría
+    _registrar_auditoria(
+        gasto_id=0,  # 0 indica operación a nivel viaje, no gasto específico
+        accion='eliminado',
+        usuario=organizador.usuario,
+        antes={'participante_expulsado': str(participante_a_expulsar.usuario)},
+        despues={'redistribuido_entre': [str(p.usuario) for p in participantes_restantes]},
+    )
+
+    # Finalmente eliminar el Participante
+    participante_a_expulsar.delete()

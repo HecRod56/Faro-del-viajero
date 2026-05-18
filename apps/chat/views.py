@@ -80,5 +80,16 @@ def abandonar_viaje(request, viaje_id):
     if request.method == 'POST':
         viaje = get_object_or_404(Viaje, id=viaje_id)
         ChatAbandonado.objects.get_or_create(viaje=viaje, usuario=request.user)
-        return redirect('chat:lista_chats')
+        return redirect('chat:chat_viaje', viaje_id=viaje_id)
+    return redirect('chat:chat_viaje', viaje_id=viaje_id)
+
+
+@login_required
+def fijar_mensaje(request, viaje_id, mensaje_id):
+    if request.method == 'POST':
+        viaje = get_object_or_404(Viaje, id=viaje_id)
+        mensaje = get_object_or_404(MensajeChat, id=mensaje_id, viaje=viaje)
+        # Toggle: si está fijado lo desfija, si no lo fija
+        mensaje.fijado = not mensaje.fijado
+        mensaje.save()
     return redirect('chat:chat_viaje', viaje_id=viaje_id)

@@ -1,7 +1,18 @@
-<!-- Modal: Eliminar integrante -->
-<div class="modal fade" id="modalEliminarIntegrante" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+<!-- Modal: Eliminar integrante (solo organizador) -->
+<!--
+  El botón que abre este modal debe tener estos atributos:
+    data-participante-id="{{ p.participante_id }}"
+    data-nombre="{{ p.nombre }}"
+    onclick="abrirModalEliminar(this)"
+
+  Los datos financieros se cargan desde:
+    GET /integrantes/<id_viaje>/gastos-info/<id_participante>/
+-->
+<div class="modal fade" id="modalEliminarIntegrante" tabindex="-1"
+     aria-labelledby="modalEliminarLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow">
+
       <div class="modal-header border-0 pb-0">
         <h5 class="modal-title fw-bold" id="modalEliminarLabel">
           <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
@@ -9,26 +20,162 @@
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body pt-2">
-        <p class="mb-0">
-          ¿Estás seguro de que deseas eliminar a
-          <strong id="modalNombreIntegrante"></strong>
-          del viaje? Esta acción no se puede deshacer.
-        </p>
+
+        <!-- Cargando -->
+        <div id="eliminar-loading" class="text-center py-3">
+          <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>
+          <span class="text-muted" style="font-size:13.5px;">Verificando gastos...</span>
+        </div>
+
+        <!-- Contenido cargado -->
+        <div id="eliminar-contenido" style="display:none;">
+          <p class="mb-3" style="font-size:14px;">
+            ¿Estás seguro de que deseas eliminar a
+            <strong id="modalNombreIntegrante"></strong>
+            de <strong>{{ viaje.nombre }}</strong>?
+          </p>
+
+          <!-- Con gastos activos -->
+          <div id="bloque-con-gastos" style="display:none;">
+            <div class="alert alert-warning rounded-3 d-flex gap-2 align-items-start mb-3"
+                 style="font-size:13.5px; background:#fff4e0; border-color:#f5c518; color:#5a4000;">
+              <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-1" style="color:#E8721C;"></i>
+              <div>
+                <strong>Este integrante tiene gastos activos en el viaje.</strong><br>
+                Al eliminarlo, su parte se redistribuirá equitativamente entre los
+                <span id="modal-restantes-count"></span> integrante(s) restante(s).
+              </div>
+            </div>
+
+            <div class="rounded-3 p-3 mb-3" style="background:#f8f9fa; border:1px solid #e4e8ee;">
+              <p class="fw-bold mb-2"
+                 style="font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:#5a6476;">
+                Resumen de redistribución
+              </p>
+              <div class="d-flex justify-content-between py-1"
+                   style="font-size:13.5px; border-bottom:1px solid #e4e8ee;">
+                <span style="color:#5a6476;">Gastos afectados</span>
+                <span class="fw-bold" id="modal-gastos-count"></span>
+              </div>
+              <div class="d-flex justify-content-between py-1"
+                   style="font-size:13.5px; border-bottom:1px solid #e4e8ee;">
+                <span style="color:#5a6476;">Monto a redistribuir</span>
+                <span class="fw-bold" id="modal-monto-afectado"></span>
+              </div>
+              <div class="d-flex justify-content-between py-1" style="font-size:13.5px;">
+                <span style="color:#5a6476;">Se divide entre</span>
+                <span class="fw-bold" id="modal-divide-entre"></span>
+              </div>
+            </div>
+
+            <p class="mb-0 text-muted" style="font-size:12.5px;">
+              <i class="bi bi-info-circle me-1"></i>
+              Los gastos donde este integrante <strong>pagó</strong> quedarán registrados
+              y el crédito pasará al organizador del viaje.
+            </p>
+          </div>
+
+          <!-- Sin gastos -->
+          <div id="bloque-sin-gastos" style="display:none;">
+            <div class="d-flex align-items-center gap-2 p-3 rounded-3"
+                 style="background:#e6f7f5; font-size:13.5px;">
+              <i class="bi bi-check-circle-fill" style="color:#0E9E8E;"></i>
+              <span style="color:#0b8a7c; font-weight:600;">
+                Este integrante no tiene gastos activos. Puedes eliminarlo sin afectar los balances.
+              </span>
+            </div>
+          </div>
+
+          <p class="mt-3 mb-0 text-muted" style="font-size:12.5px;">
+            <i class="bi bi-shield-x me-1 text-danger"></i>
+            Esta acción <strong>no se puede deshacer</strong>.
+          </p>
+        </div>
+
+        <!-- Error al cargar -->
+        <div id="eliminar-error" style="display:none;">
+          <div class="alert alert-danger rounded-3 mb-0" style="font-size:13.5px;">
+            <i class="bi bi-x-circle me-1"></i>
+            No se pudo cargar la información. Intenta de nuevo.
+          </div>
+        </div>
+
       </div>
+
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
           Cancelar
         </button>
         <form id="formEliminarIntegrante" method="POST" action="">
           {% csrf_token %}
-          <input type="hidden" name="id_viaje" value="{{ viaje.id }}" />
-          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}" />
-          <button type="submit" class="btn btn-danger rounded-pill px-4">
-            <i class="bi bi-trash-fill me-1"></i> Eliminar
+          <input type="hidden" name="id_viaje" value="{{ viaje.id }}">
+          <input type="hidden" name="usuario_actual_id" value="{{ usuario_actual_id }}">
+          <button type="submit" id="btn-confirmar-eliminar"
+                  class="btn btn-danger rounded-pill px-4" disabled>
+            <i class="bi bi-trash-fill me-1"></i>
+            <span id="btn-eliminar-texto" class="text-white">Eliminar</span>
           </button>
         </form>
       </div>
+
     </div>
   </div>
 </div>
+
+<script>
+// URL base del endpoint AJAX — el 0 se reemplaza con el id del participante
+const _GASTOS_INFO_BASE = "{% url 'integrantes:gastos_info' viaje.id 0 %}";
+const _ELIMINAR_BASE    = "{% url 'integrantes:eliminar' 0 %}";
+
+function abrirModalEliminar(btn) {
+  const pid    = btn.dataset.participanteId;
+  const nombre = btn.dataset.nombre;
+
+  // Reset de estados
+  document.getElementById('eliminar-loading').style.display   = 'block';
+  document.getElementById('eliminar-contenido').style.display = 'none';
+  document.getElementById('eliminar-error').style.display     = 'none';
+  document.getElementById('btn-confirmar-eliminar').disabled  = true;
+
+  new bootstrap.Modal(document.getElementById('modalEliminarIntegrante')).show();
+
+  fetch(_GASTOS_INFO_BASE.replace('/0/', '/' + pid + '/'))
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => {
+      document.getElementById('modalNombreIntegrante').textContent = data.nombre;
+
+      if (data.tiene_gastos_pendientes) {
+        document.getElementById('bloque-con-gastos').style.display = 'block';
+        document.getElementById('bloque-sin-gastos').style.display = 'none';
+        document.getElementById('modal-gastos-count').textContent  =
+          data.gastos_afectados_count + (data.gastos_afectados_count !== 1 ? ' gastos' : ' gasto');
+        document.getElementById('modal-monto-afectado').textContent =
+          '$' + parseFloat(data.monto_total_afectado).toFixed(2);
+        document.getElementById('modal-restantes-count').textContent =
+          data.participantes_restantes_count;
+        document.getElementById('modal-divide-entre').textContent =
+          data.participantes_restantes_count +
+          (data.participantes_restantes_count !== 1 ? ' integrantes' : ' integrante');
+        document.getElementById('btn-eliminar-texto').textContent = 'Eliminar y redistribuir';
+      } else {
+        document.getElementById('bloque-con-gastos').style.display = 'none';
+        document.getElementById('bloque-sin-gastos').style.display = 'block';
+        document.getElementById('btn-eliminar-texto').textContent = 'Eliminar';
+      }
+
+      // Apuntar el form al participante correcto
+      document.getElementById('formEliminarIntegrante').action =
+        _ELIMINAR_BASE.replace('/0/', '/' + pid + '/');
+
+      document.getElementById('eliminar-loading').style.display   = 'none';
+      document.getElementById('eliminar-contenido').style.display = 'block';
+      document.getElementById('btn-confirmar-eliminar').disabled  = false;
+    })
+    .catch(() => {
+      document.getElementById('eliminar-loading').style.display = 'none';
+      document.getElementById('eliminar-error').style.display   = 'block';
+    });
+}
+</script>

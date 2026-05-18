@@ -1,9 +1,41 @@
+
 <!--destinos.html-->
 {% extends "core/base.html" %}
 {% load static %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'busqueda/css/destinos.css' %}">
+<style>
+    /* Spinner */
+    .spinner-overlay {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        gap: 1rem;
+    }
+    .spinner-ring {
+        width: 52px; height: 52px;
+        border: 4px solid #E2E8F0;
+        border-top-color: #0E9E8E;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-texto {
+        font-size: 13px;
+        font-family: 'Montserrat', sans-serif;
+        color: #94A3B8;
+        font-weight: 600;
+    }
+    .spinner-subtexto {
+        font-size: 11px;
+        font-family: 'Montserrat', sans-serif;
+        color: #CBD5E1;
+        text-align: center;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -68,7 +100,6 @@
                         {% include "busqueda/partials/filtros_hoteles.html" %}
                     {% endif %}
 
-                    <!-- BOTONES -->
                     <button type="submit" class="btn btn-sm w-100 mb-2"
                         style="background:#0E9E8E;color:white;font-size:13px;border-radius:8px;padding:7px 0;">
                         Aplicar filtros
@@ -78,49 +109,41 @@
                               border:1px solid #D1D5DB;border-radius:8px;color:#374151;background:white;text-decoration:none;">
                         Limpiar Filtro(s)
                     </a>
-
                 </form>
 
                 <style>
                     .filtro-label {
-                        font-size: 11px;
-                        font-weight: 600;
-                        color: #64748B;
-                        text-transform: uppercase;
-                        letter-spacing: 0.05em;
-                        margin-bottom: 6px;
+                        font-size: 11px; font-weight: 600; color: #64748B;
+                        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
                     }
                 </style>
 
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
-                        var MAX_CUPOS = parseInt(document.getElementById('btn_cupos_mas').getAttribute('data-max')) || 1;
-                        var inp = document.getElementById('cupos_input');
-                        var dsp = document.getElementById('cupos_display');
-                        var btnMas = document.getElementById('btn_cupos_mas');
+                        var btnMas   = document.getElementById('btn_cupos_mas');
                         var btnMenos = document.getElementById('btn_cupos_menos');
+                        var inp      = document.getElementById('cupos_input');
+                        var dsp      = document.getElementById('cupos_display');
 
-                        function actualizarBotones(v) {
-                            btnMas.disabled = (v >= MAX_CUPOS);
-                            btnMas.style.background = (v >= MAX_CUPOS) ? '#CBD5E1' : '#0E9E8E';
-                            btnMas.style.cursor = (v >= MAX_CUPOS) ? 'not-allowed' : 'pointer';
-                            btnMenos.disabled = (v <= 1);
-                            btnMenos.style.color = (v <= 1) ? '#CBD5E1' : '#374151';
+                        if (btnMas && btnMenos && inp && dsp) {
+                            var MAX_CUPOS = parseInt(btnMas.getAttribute('data-max')) || 1;
+                            function actualizarBotones(v) {
+                                btnMas.disabled = (v >= MAX_CUPOS);
+                                btnMas.style.background = (v >= MAX_CUPOS) ? '#CBD5E1' : '#0E9E8E';
+                                btnMas.style.cursor = (v >= MAX_CUPOS) ? 'not-allowed' : 'pointer';
+                                btnMenos.disabled = (v <= 1);
+                                btnMenos.style.color = (v <= 1) ? '#CBD5E1' : '#374151';
+                            }
+                            window.stepCupos = function (delta) {
+                                var v = parseInt(inp.value) + delta;
+                                if (v < 1) v = 1;
+                                if (v > MAX_CUPOS) v = MAX_CUPOS;
+                                inp.value = v; dsp.textContent = v;
+                                actualizarBotones(v);
+                            };
+                            actualizarBotones(parseInt(inp.value));
                         }
 
-                        window.stepCupos = function (delta) {
-                            var v = parseInt(inp.value) + delta;
-                            if (v < 1) { v = 1; }
-                            if (v > MAX_CUPOS) { v = MAX_CUPOS; }
-                            inp.value = v;
-                            dsp.textContent = v;
-                            actualizarBotones(v);
-                        };
-
-                        // Estado visual inicial
-                        actualizarBotones(parseInt(inp.value));
-
-                        // Pills de popularidad
                         document.querySelectorAll('.pop-chk').forEach(function (chk) {
                             chk.addEventListener('change', function () {
                                 var pill = this.nextElementSibling;
@@ -134,128 +157,158 @@
         </div>
 
         <!-- Grid de lugares -->
-        <div class="col-lg-10 col-md-9">
-            {% if lugares %}
-            <p style="font-size:13px;color:#94A3B8;margin-bottom:1rem;">
-                {{ lugares|length }} resultado(s) en <strong>{{ viaje.destino }}</strong>
-            </p>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
-                {% for lugar in lugares %}
-                <div class="col">
-                    <div class="lugar-card">
-                        <!-- Imagen -->
-                        <a href="{% url 'busqueda:detalle_lugar' viaje.id %}?nombre={{ lugar.nombre }}&ciudad={{ lugar.ciudad }}&categoria={{ categoria }}"
-                            style="text-decoration:none;">
-                            <div class="img-wrapper">
-                                {% if lugar.foto %}
-                                <img src="{{ lugar.foto }}" alt="{{ lugar.nombre }}" class="lugar-card-img"
-                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="lugar-card-img-placeholder" style="display:none;">
-                                    {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
-                                </div>
-                                {% else %}
-                                <div class="lugar-card-img-placeholder">
-                                    {% if categoria == "gastronomia" %}🍽️{% elif categoria == "hoteles" %}🏨{% else %}🏖️{% endif %}
-                                </div>
-                                {% endif %}
-                                <span class="badge-ciudad">{{ lugar.ciudad }}</span>
-                                <span class="badge-pop" style="background:{{ lugar.pop_color }};">{{ lugar.popularidad }}</span>
-                            </div>
-                        </a>
+        <div class="col-lg-10 col-md-9" id="grid-container">
 
-                        <div class="lugar-card-body">
-                            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-                                {% if lugar.categoria_filtro == "naturaleza" %}
-                                <span
-                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8F5E9;color:#2E7D32;">
-                                    🌿 Naturaleza
-                                </span>
-                                {% elif lugar.categoria_filtro == "cultura" %}
-                                <span
-                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8EAF6;color:#283593;">
-                                    🏛️ Cultura
-                                </span>
-                                {% elif lugar.categoria_filtro == "aventura" %}
-                                <span
-                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#FFF3E0;color:#E65100;">
-                                    🏃 Aventura
-                                </span>
-                                {% elif lugar.categoria_filtro == "entretenimiento" %}
-                                <span
-                                    style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#F3E5F5;color:#6A1B9A;">
-                                    🎭 Entretenimiento
-                                </span>
-                                {% endif %}
-                            </div>
-                            <p class="lugar-nombre">{{ lugar.nombre }}</p>
-                            {% if lugar.categorias %}
-                            <p class="lugar-cat">{{ lugar.categorias|join:", " }}</p>
-                            {% endif %}
-
-                            {% if lugar.descripcion %}
-                            <p style="font-size:12px;color:#64748B;margin-bottom:8px;line-height:1.4;">
-                                {{ lugar.descripcion|truncatechars:80 }}
-                            </p>
-                            {% endif %}
-
-                            <div class="d-flex align-items-center justify-content-between mt-auto pt-1">
-                                {% if lugar.precio == "Gratis" %}
-                                <span
-                                    style="font-size:12px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:8px;">🎟️
-                                    Gratis</span>
-                                {% elif lugar.precio %}
-                                <span class="lugar-precio">{{ lugar.precio }}</span>
-                                {% else %}
-                                <span style="font-size:12px;color:#94A3B8;">Precio variable</span>
-                                {% endif %}
-                                {% if lugar.rating %}
-                                <span class="rating-stars">
-                                    ★ <span style="font-weight:700;color:#1A2E35;">{{ lugar.rating }}</span>
-                                </span>
-                                {% endif %}
-                            </div>
-
-                            <!-- Botones -->
-                            <div class="mt-2">
-                                <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}"
-                                    onsubmit="showToast()">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="nombre" value="{{ lugar.nombre }}">
-                                    <input type="hidden" name="direccion" value="{{ lugar.direccion }}">
-                                    <input type="hidden" name="precio" value="{{ lugar.precio }}">
-                                    <input type="hidden" name="website" value="{{ lugar.website }}">
-                                    <button type="submit" class="btn-agregar">
-                                        + Agregar a Actividades
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+            <!-- Spinner (se muestra mientras carga) -->
+            <div id="spinner-box" class="spinner-overlay">
+                <div class="spinner-ring"></div>
+                <p class="spinner-texto">Buscando lugares en {{ viaje.destino }}...</p>
+                {% if not tiene_cache %}
+                <p class="spinner-subtexto">Primera búsqueda — consultando APIs externas.<br>Las siguientes cargas serán instantáneas ⚡</p>
+                {% endif %}
             </div>
 
-            {% else %}
-            <div class="empty-state">
-                <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                </svg>
-                <h5 style="color:#1A2E35;font-weight:700;">Sin resultados</h5>
-                <p style="font-size:14px;">No encontramos lugares para <strong>{{ busqueda|default:viaje.destino }}</strong>.<br>Intenta con otro término.</p>
-                <a href="?categoria={{ categoria }}" class="categoria-btn active mt-2">Ver todos</a>
-            </div>
-            {% endif %}
+            <!-- Contenido (se llena con AJAX) -->
+            <div id="lugares-box" style="display:none;"></div>
+
         </div>
-
     </div>
 </main>
 
+<!-- Template de card para JS -->
+<script id="card-template" type="text/template">
+    CARD_TEMPLATE_PLACEHOLDER
+</script>
+
 <script>
-    function showToast() {
-        const t = document.getElementById('toastFaro');
-        t.style.display = 'block';
-        setTimeout(() => { t.style.display = 'none'; }, 3000);
-    }
+function showToast() {
+    const t = document.getElementById('toastFaro');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+function getBadgeCategoria(cat) {
+    const map = {
+        naturaleza:      '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8F5E9;color:#2E7D32;">🌿 Naturaleza</span>',
+        cultura:         '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8EAF6;color:#283593;">🏛️ Cultura</span>',
+        aventura:        '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#FFF3E0;color:#E65100;">🏃 Aventura</span>',
+        entretenimiento: '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#F3E5F5;color:#6A1B9A;">🎭 Entretenimiento</span>',
+    };
+    return map[cat] || '';
+}
+
+function getPrecioHtml(precio) {
+    if (!precio) return '<span style="font-size:12px;color:#94A3B8;">Precio variable</span>';
+    if (precio === 'Gratis') return '<span style="font-size:12px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:8px;">🎟️ Gratis</span>';
+    return `<span class="lugar-precio">${precio}</span>`;
+}
+
+function getPlaceholder(categoria) {
+    if (categoria === 'gastronomia') return '🍽️';
+    if (categoria === 'hoteles') return '🏨';
+    return '🏖️';
+}
+
+function renderCard(lugar, viaje_id, categoria, csrf) {
+    const detUrl = `/busqueda/viaje/${viaje_id}/destino/detalle/?nombre=${encodeURIComponent(lugar.nombre)}&ciudad=${encodeURIComponent(lugar.ciudad)}&categoria=${categoria}`;
+    const imgHtml = lugar.foto
+        ? `<img src="${lugar.foto}" alt="${lugar.nombre}" class="lugar-card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+           <div class="lugar-card-img-placeholder" style="display:none;">${getPlaceholder(categoria)}</div>`
+        : `<div class="lugar-card-img-placeholder">${getPlaceholder(categoria)}</div>`;
+
+    const descHtml = lugar.descripcion
+        ? `<p style="font-size:12px;color:#64748B;margin-bottom:8px;line-height:1.4;">${lugar.descripcion.substring(0,80)}${lugar.descripcion.length>80?'...':''}</p>`
+        : '';
+
+    const ratingHtml = lugar.rating
+        ? `<span class="rating-stars">★ <span style="font-weight:700;color:#1A2E35;">${lugar.rating}</span></span>`
+        : '';
+
+    return `
+    <div class="col">
+        <div class="lugar-card">
+            <a href="${detUrl}" style="text-decoration:none;">
+                <div class="img-wrapper">
+                    ${imgHtml}
+                    <span class="badge-ciudad">${lugar.ciudad}</span>
+                    <span class="badge-pop" style="background:${lugar.pop_color};">${lugar.popularidad}</span>
+                </div>
+            </a>
+            <div class="lugar-card-body">
+                <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+                    ${getBadgeCategoria(lugar.categoria_filtro)}
+                </div>
+                <p class="lugar-nombre">${lugar.nombre}</p>
+                ${lugar.categorias && lugar.categorias.length ? `<p class="lugar-cat">${lugar.categorias.join(', ')}</p>` : ''}
+                ${descHtml}
+                <div class="d-flex align-items-center justify-content-between mt-auto pt-1">
+                    ${getPrecioHtml(lugar.precio)}
+                    ${ratingHtml}
+                </div>
+                <div class="mt-2">
+                    <form method="POST" action="/busqueda/viaje/${viaje_id}/agregar-actividad/" onsubmit="showToast()">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+                        <input type="hidden" name="nombre" value="${lugar.nombre}">
+                        <input type="hidden" name="direccion" value="${lugar.direccion || ''}">
+                        <input type="hidden" name="precio" value="${lugar.precio || ''}">
+                        <input type="hidden" name="website" value="${lugar.website || ''}">
+                        <button type="submit" class="btn-agregar">+ Agregar a Actividades</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+// ── Cargar lugares por AJAX ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const viajeId  = "{{ viaje.id }}";
+    const categoria = "{{ categoria }}";
+    const csrf     = "{{ csrf_token }}";
+    const destino  = "{{ viaje.destino }}";
+
+    // Construir URL con todos los parámetros del GET actual
+    const params   = new URLSearchParams(window.location.search);
+    params.set('categoria', categoria);
+    const url = `/busqueda/viaje/${viajeId}/destinos/lugares/?${params.toString()}`;
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            const spinner = document.getElementById('spinner-box');
+            const box     = document.getElementById('lugares-box');
+
+            spinner.style.display = 'none';
+            box.style.display = 'block';
+
+            if (!data.lugares || data.lugares.length === 0) {
+                box.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <h5 style="color:#1A2E35;font-weight:700;">Sin resultados</h5>
+                        <p style="font-size:14px;">No encontramos lugares para <strong>${destino}</strong>.</p>
+                        <a href="?categoria=${categoria}" class="categoria-btn active mt-2">Ver todos</a>
+                    </div>`;
+                return;
+            }
+
+            let html = `<p style="font-size:13px;color:#94A3B8;margin-bottom:1rem;">${data.total} resultado(s) en <strong>${destino}</strong></p>`;
+            html += '<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">';
+            data.lugares.forEach(lugar => {
+                html += renderCard(lugar, viajeId, categoria, csrf);
+            });
+            html += '</div>';
+            box.innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById('spinner-box').innerHTML = `
+                <div class="empty-state">
+                    <p style="color:#EF4444;font-size:14px;">❌ Error al cargar los lugares. Recarga la página.</p>
+                </div>`;
+            console.error(err);
+        });
+});
 </script>
 {% endblock %}

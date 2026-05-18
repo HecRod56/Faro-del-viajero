@@ -20,7 +20,6 @@ urlpatterns = [
     path('', include('apps.autenticado.urls')),
     path('viajes/', include('apps.gestion_viajes.urls')),
     path('actividades/', include('apps.actividades.urls')),
-    path('', include('chat.urls')),
     path('chat/', include('chat.urls')),
     path('', include('galeria.urls')),
     path('viajes/gastos/', include('apps.control_gastos.urls')),

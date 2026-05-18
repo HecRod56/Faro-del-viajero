@@ -82,6 +82,23 @@
             {% include 'chat/modals/modal_abandonar.html' %}
 
             <div id="menuOpciones" class="d-none position-absolute bg-white rounded-4 shadow border" style="top:56px;right:12px;width:210px;z-index:20;">
+               
+                {% with fijado=mensajes|dictsort:"fecha_envio"|last %}
+                {% for msg in mensajes %}
+                {% if msg.fijado %}
+                <div class="px-3 py-2 d-flex align-items-center gap-2" 
+                    style="background:#FEF9C3;border-bottom:1px solid #FDE68A;z-index:2;position:relative;cursor:pointer;"
+                    onclick="document.getElementById('msg-{{ msg.id }}').scrollIntoView({behavior:'smooth', block:'center'})">
+                    <span style="font-size:13px;">📌</span>
+                    <span style="font-size:12px;font-weight:600;color:#854D0E;flex-grow:1;">{{ msg.contenido|truncatechars:60 }}</span>
+                    <span style="font-size:10px;color:#B45309;">Ver mensaje →</span>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endwith %}  
+               
+               
+               
                 <button onclick="document.getElementById('panelIntegrantes').classList.toggle('d-none'); document.getElementById('menuOpciones').classList.add('d-none')"
                         class="btn w-100 d-flex align-items-center gap-2 px-3 py-2 text-dark border-bottom" style="font-size:13px;">
                     <svg width="15" height="15" fill="none" stroke="#149B7E" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
@@ -114,11 +131,18 @@
                         </span>
                     </div>
                     {% elif mensaje.usuario == request.user %}
-                    <div class="d-flex justify-content-end align-items-end gap-2 mb-2">
-                        <div class="d-flex flex-column align-items-end" style="max-width:75%;">
+                    <div class="d-flex justify-content-end align-items-end gap-2 mb-2" id="msg-{{ mensaje.id }}">
+                            <div class="d-flex flex-column align-items-end" style="max-width:75%;">
                             <div class="px-3 py-2 shadow-sm msg-bubble-right" style="border-radius:18px;font-size:14px;">
-                                {{ mensaje.contenido }}
+                                {{ mensaje.contenido }}  
                             </div>
+                    <!-- Botón fijar -->
+                    <form method="POST" action="{% url 'chat:fijar_mensaje' viaje_actual.id mensaje.id %}">
+                        {% csrf_token %}
+                        <button type="submit" style="background:none;border:none;font-size:11px;color:#94A3B8;cursor:pointer;padding:2px 8px;">
+                            {% if mensaje.fijado %}📌 Fijado{% else %}📌 Fijar{% endif %}
+                        </button>
+                    </form>
                             <span class="mt-1 px-2" style="font-size:10px; color:#6B7280;">
                                 {{ mensaje.fecha_envio|timezone:"America/Mexico_City"|date:"h:i A" }}
                             </span>
@@ -127,8 +151,8 @@
                             class="rounded-circle flex-shrink-0 mb-3" style="width:32px;height:32px;">
                     </div>
                     {% else %}
-                    <div class="d-flex justify-content-start align-items-end gap-2 mb-2">
-                        <img src="https://api.dicebear.com/7.x/personas/svg?seed={{ mensaje.usuario.username }}"
+                    <div class="d-flex justify-content-start align-items-end gap-2 mb-2" id="msg-{{ mensaje.id }}">
+                            <img src="https://api.dicebear.com/7.x/personas/svg?seed={{ mensaje.usuario.username }}"
                             class="rounded-circle flex-shrink-0 mb-3" style="width:32px;height:32px;">
                         <div class="d-flex flex-column align-items-start" style="max-width:75%;">
                             <span class="text-dark fw-bold mb-1 px-2" style="font-size:11px;">
@@ -153,10 +177,36 @@
             </div>
 
             <div class="px-3 py-3 border-top chat-input-bar">
+
+
+            <div class="px-3 pt-2 pb-1 d-flex gap-2 flex-wrap" style="margin-top:4px;">
+                    <button type="button" onclick="setEvento('✅ Ya llegué')" 
+                        style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #D1DBD9;background:white;cursor:pointer;font-family:'Montserrat',sans-serif;color:#1A2E35;">
+                    ✅ Ya llegué
+                </button>
+                <button type="button" onclick="setEvento('🎟️ Ya reservé')"
+                        style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #D1DBD9;background:white;cursor:pointer;font-family:'Montserrat',sans-serif;color:#1A2E35;">
+                    🎟️ Ya reservé
+                </button>
+                <button type="button" onclick="setEvento('🚗 Estoy en camino')"
+                        style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #D1DBD9;background:white;cursor:pointer;font-family:'Montserrat',sans-serif;color:#1A2E35;">
+                    🚗 Estoy en camino
+                </button>
+                <button type="button" onclick="setEvento('🏨 Ya estoy en el hotel')"
+                        style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #D1DBD9;background:white;cursor:pointer;font-family:'Montserrat',sans-serif;color:#1A2E35;">
+                    🏨 Ya estoy en el hotel
+                </button>
+                <button type="button" onclick="setEvento('⏰ ¿A qué hora salimos?')"
+                        style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #D1DBD9;background:white;cursor:pointer;font-family:'Montserrat',sans-serif;color:#1A2E35;">
+                    ⏰ ¿A qué hora salimos?
+                </button>
+            </div>
+
+
                 <form method="POST" action="{% url 'chat:enviar_mensaje' viaje_actual.id %}" class="mb-0">
                     {% csrf_token %}
                     <div class="d-flex align-items-center gap-3 bg-white rounded-pill px-4 py-2 shadow-sm border">
-                        <input type="text" name="contenido" placeholder="Escribe un mensaje..."
+                        <input type="text" name="contenido" id="inputMensaje" placeholder="Escribe un mensaje..."
                             autocomplete="off" class="flex-grow-1 border-0 bg-transparent" 
                             style="font-size:14px; outline:none;" required>
                         <button type="submit" class="btn p-0" style="color:#149B7E;">
@@ -189,5 +239,16 @@
                 }
             });
     }, 3000);
+
+
+function setEvento(texto) {
+    const input = document.getElementById('inputMensaje');
+    if (input) {
+        input.value = texto;
+        input.focus();
+    }
+}
+
 </script>
+
 {% endblock %}

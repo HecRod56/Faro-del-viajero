@@ -9,6 +9,7 @@ class MensajeChat(models.Model):
     contenido = models.TextField()
     fecha_envio = models.DateTimeField(auto_now_add=True)
     es_sistema = models.BooleanField(default=False)
+    fijado      = models.BooleanField(default=False)  # ← NUEVO
 
     class Meta:
         ordering = ['fecha_envio']
