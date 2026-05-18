@@ -12,6 +12,11 @@ from apps.gestion_viajes.models import Viaje
 from .servicios_cbus import buscar_autobuses_cbus
 from .services import buscar_vuelos
 from .models import Trayecto, TrayectoAutobus
+import io
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
 
 
 @login_required
@@ -256,3 +261,91 @@ def eliminar_trayecto(request, viaje_id, trayecto_id): # <-- Corregido el orden:
                 messages.error(request, "⚠️ No se encontró el trayecto a eliminar.")
                 
     return redirect('transporte:principal', viaje_id=viaje.id)
+
+
+@login_required
+def descargar_ticket(request, viaje_id, trayecto_id):
+    if request.method == 'POST':
+        
+        # 1. BUSCADOR INTELIGENTE (¿Es vuelo o autobús?)
+        es_autobus = False
+        # Primero buscamos en la tabla de Vuelos
+        trayecto = Trayecto.objects.filter(id=trayecto_id, viaje_id=viaje_id).first()
+        
+        if not trayecto:
+            # Si no existe como vuelo, obligatoriamente lo buscamos como Autobús
+            trayecto = get_object_or_404(TrayectoAutobus, id=trayecto_id, viaje_id=viaje_id)
+            es_autobus = True
+
+        # 2. EXTRAER LOS DATOS CORRECTOS SEGÚN EL MODELO
+        if es_autobus:
+            tipo_txt = "Autobús"
+            operador = trayecto.linea_autobus
+            numero = trayecto.servicio
+            origen = trayecto.origen_nombre
+            destino = trayecto.destino_nombre
+        else:
+            tipo_txt = "Vuelo"
+            operador = trayecto.aerolinea
+            numero = trayecto.numero_vuelo
+            origen = trayecto.origen_codigo
+            destino = trayecto.destino_codigo
+
+        # 3. ACTUALIZAR EL ESTADO EN LA BD
+        if trayecto.estado != 'CONFIRMADO':
+            trayecto.estado = 'CONFIRMADO'
+            trayecto.save()
+            messages.success(request, f"✅ ¡Ticket descargado! El trayecto a {destino} ahora está Confirmado.")
+
+        # 4. GENERAR EL PDF EN MEMORIA
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        
+        # --- Diseño del Ticket ---
+        p.setFont("Helvetica-Bold", 24)
+        p.setFillColor(colors.HexColor("#0D47A1")) 
+        p.drawString(50, 750, "Faro del Viajero - E-Ticket")
+        
+        p.setFont("Helvetica", 14)
+        p.setFillColor(colors.gray)
+        p.drawString(50, 725, f"Reserva de {tipo_txt} - Confirmada")
+
+        p.line(50, 710, 550, 710)
+
+        # Ruta
+        p.setFillColor(colors.black)
+        p.setFont("Helvetica-Bold", 18)
+        p.drawString(50, 670, f"{origen}  ---->  {destino}")
+
+        # Info del Pasajero y Transporte
+        p.setFont("Helvetica", 12)
+        nombre_pasajero = trayecto.registrado_por.get_full_name() or trayecto.registrado_por.username
+        p.drawString(50, 630, f"Pasajero Titular: {nombre_pasajero}")
+        p.drawString(50, 605, f"Operador: {operador}")
+        p.drawString(50, 580, f"Identificador: {numero}")
+        
+        fecha_str = trayecto.fecha_salida.strftime("%d de %b %Y, %I:%M %p")
+        p.drawString(50, 555, f"Fecha de Salida: {fecha_str}")
+        
+        # Costo (Usando los campos exactos de tu modelo)
+        p.setFont("Helvetica-Bold", 14)
+        p.setFillColor(colors.HexColor("#198754"))
+        p.drawString(50, 515, f"Total Abonado: {trayecto.precio_total} {trayecto.moneda}")
+
+        # Pie de página
+        p.setFont("Helvetica-Oblique", 10)
+        p.setFillColor(colors.gray)
+        p.drawString(50, 100, "Este es un documento generado automáticamente por Faro del Viajero.")
+
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+
+        # 5. ENVIAR EL ARCHIVO AL NAVEGADOR
+        response = HttpResponse(buffer, content_type='application/pdf')
+        nombre_archivo = f"Ticket_{operador}_{numero}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+        
+        return response
+
+    return redirect('transporte:principal', viaje_id=viaje_id)
