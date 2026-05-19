@@ -201,7 +201,7 @@ function renderCard(lugar, viaje_id, categoria, csrf) {
                 <div class="img-wrapper">
                     ${imgHtml}
                     <span class="badge-ciudad">${lugar.ciudad}</span>
-                    <span class="badge-pop" style="background:${lugar.pop_color};">${lugar.popularidad}</span>
+                    ${categoria !== 'hoteles' ? `<span class="badge-pop" style="background:${lugar.pop_color};">${lugar.popularidad}</span>` : ''}
                 </div>
             </a>
             <div class="lugar-card-body">
@@ -215,6 +215,16 @@ function renderCard(lugar, viaje_id, categoria, csrf) {
                     ${getPrecioHtml(lugar.precio)}
                     ${ratingHtml}
                 </div>
+                ${categoria === 'hoteles' && lugar.servicios_disponibles && lugar.servicios_disponibles.length ? `
+                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                    ${lugar.servicios_disponibles.map(s => {
+                        const iconos = {'Wi-Fi':'🛜','Alberca':'🏊','Estacionamiento':'🚗','Mascotas':'🐕','Accesibilidad':'♿'};
+                        return `<span style="font-size:10px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;
+                                             border-radius:20px;padding:2px 7px;font-weight:600;">
+                                    ${iconos[s] || ''} ${s}
+                                </span>`;
+                    }).join('')}
+                </div>` : ''}
                 <div class="mt-2">
                     <form method="POST" action="/busqueda/viaje/${viaje_id}/agregar-actividad/" onsubmit="showToast()">
                         <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">

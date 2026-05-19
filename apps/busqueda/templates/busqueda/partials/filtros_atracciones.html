@@ -27,161 +27,50 @@
                         </div>
                     </div>
 
-                    <!-- PRECIO ESTIMADO (Rango) -->
-                    <p class="filtro-label">Precio estimado</p>
-                    
-                    <!-- Contenedor del slider con más altura para espacio visual -->
-                    <div style="position: relative; width: 100%; margin-bottom: 20px; height: 40px; padding-top: 5px;">
-                        <!-- Slider para precio mínimo -->
-                        <input type="range" id="slider_precio_min" name="precio_min" min="0" max="10000" step="100"
-                            value="{{ precio_min }}" 
-                            style="position: absolute; width: 100%; height: 5px; accent-color: #0E9E8E;
-                                   pointer-events: none; z-index: {% if precio_min > 5000 %}5{% else %}3{% endif %};
-                                   -webkit-appearance: none; appearance: none; background: transparent; top: 5px;">
-                        
-                        <!-- Slider para precio máximo -->
-                        <input type="range" id="slider_precio_max" name="precio_max" min="0" max="10000" step="100"
-                            value="{{ precio_max }}" 
-                            style="position: absolute; width: 100%; height: 5px; accent-color: #0E9E8E;
-                                   pointer-events: none; z-index: 4; 
-                                   -webkit-appearance: none; appearance: none; background: transparent; top: 5px;">
-                        
-                        <style>
-                            #slider_precio_min::-webkit-slider-thumb {
-                                -webkit-appearance: none;
-                                appearance: none;
-                                width: 18px;
-                                height: 18px;
-                                border-radius: 50%;
-                                background: #0E9E8E;
-                                cursor: pointer;
-                                pointer-events: all;
-                                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                            }
-                            #slider_precio_min::-moz-range-thumb {
-                                width: 18px;
-                                height: 18px;
-                                border-radius: 50%;
-                                background: #0E9E8E;
-                                cursor: pointer;
-                                pointer-events: all;
-                                border: none;
-                                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                            }
-                            #slider_precio_max::-webkit-slider-thumb {
-                                -webkit-appearance: none;
-                                appearance: none;
-                                width: 18px;
-                                height: 18px;
-                                border-radius: 50%;
-                                background: #0E9E8E;
-                                cursor: pointer;
-                                pointer-events: all;
-                                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                            }
-                            #slider_precio_max::-moz-range-thumb {
-                                width: 18px;
-                                height: 18px;
-                                border-radius: 50%;
-                                background: #0E9E8E;
-                                cursor: pointer;
-                                pointer-events: all;
-                                border: none;
-                                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                            }
-                            #slider_precio_min::-webkit-slider-runnable-track,
-                            #slider_precio_max::-webkit-slider-runnable-track {
-                                background: #E5E7EB;
-                                height: 5px;
-                                border-radius: 5px;
-                            }
-                            #slider_precio_min::-moz-range-track,
-                            #slider_precio_max::-moz-range-track {
-                                background: #E5E7EB;
-                                height: 5px;
-                                border-radius: 5px;
-                            }
-                            .input-precio {
-                                width: 100%;
-                                padding: 6px 8px;
-                                border: 1px solid #D1D5DB;
-                                border-radius: 6px;
-                                font-size: 12px;
-                                color: #374151;
-                                transition: border-color 0.2s;
-                            }
-                            .input-precio:focus {
-                                outline: none;
-                                border-color: #0E9E8E;
-                                box-shadow: 0 0 0 2px rgba(14, 158, 142, 0.1);
-                            }
-                        </style>
-                    </div>
-                    
-                    <!-- Labels con valores del slider -->
-                    <div class="d-flex justify-content-between"
-                        style="font-size:11px;color:#94A3B8;margin-bottom:0.5rem;">
-                        <span id="lbl_precio_min">${{ precio_min }} MXN</span>
-                        <span id="lbl_precio_max">${{ precio_max }} MXN</span>
-                    </div>
-                    
-                    <!-- Inputs para ingresar montos manualmente -->
-                    <div class="d-flex gap-2" style="margin-bottom:1rem;">
-                        <div style="flex: 1;">
-                            <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:3px;">Mínimo</label>
-                            <input type="number" id="input_precio_min" class="input-precio" 
-                                   min="0" max="10000" step="100" value="{{ precio_min }}">
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:3px;">Máximo</label>
-                            <input type="number" id="input_precio_max" class="input-precio" 
-                                   min="0" max="10000" step="100" value="{{ precio_max }}">
-                        </div>
-                    </div>
-                    
-                    <script>
-                        (function() {
-                            const sliderMin = document.getElementById('slider_precio_min');
-                            const sliderMax = document.getElementById('slider_precio_max');
-                            const inputMin  = document.getElementById('input_precio_min');
-                            const inputMax  = document.getElementById('input_precio_max');
-                            const lblMin    = document.getElementById('lbl_precio_min');
-                            const lblMax    = document.getElementById('lbl_precio_max');
+<!-- PRECIO ESTIMADO — bandas fijas de destinos_service.py -->
+<p class="filtro-label">Precio estimado</p>
 
-                            function updateFromSliders() {
-                                let minVal = parseInt(sliderMin.value);
-                                let maxVal = parseInt(sliderMax.value);
-                                if (minVal > maxVal) { sliderMin.value = maxVal; minVal = maxVal; }
-                                sliderMin.style.zIndex = minVal > 5000 ? '5' : '3';
-                                sliderMax.style.zIndex = '4';
-                                lblMin.textContent = '$' + Number(minVal).toLocaleString() + ' MXN';
-                                lblMax.textContent = '$' + Number(maxVal).toLocaleString() + ' MXN';
-                                inputMin.value = minVal;
-                                inputMax.value = maxVal;
-                            }
+<input type="hidden" name="precio_min" id="at_precio_min" value="{{ precio_min }}">
+<input type="hidden" name="precio_max" id="at_precio_max" value="{{ precio_max }}">
 
-                            function updateFromInputs() {
-                                let minVal = Math.max(0, Math.min(parseInt(inputMin.value) || 0, 10000));
-                                let maxVal = Math.max(0, Math.min(parseInt(inputMax.value) || 10000, 10000));
-                                if (minVal > maxVal) { [minVal, maxVal] = [maxVal, minVal]; }
-                                sliderMin.value = minVal;
-                                sliderMax.value = maxVal;
-                                lblMin.textContent = '$' + Number(minVal).toLocaleString() + ' MXN';
-                                lblMax.textContent = '$' + Number(maxVal).toLocaleString() + ' MXN';
-                                inputMin.value = minVal;
-                                inputMax.value = maxVal;
-                                sliderMin.style.zIndex = minVal > 5000 ? '5' : '3';
-                                sliderMax.style.zIndex = '4';
-                            }
+<div class="d-flex flex-column gap-1 mb-3">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p_todos" value="0,10000" {% if precio_min == 0 and precio_max == 10000 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p_todos" style="font-size:13px;color:#374151;">Todos los precios</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p0" value="0,0" {% if precio_min == 0 and precio_max == 0 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p0" style="font-size:13px;color:#374151;">🎟️ Gratis</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p1" value="0,150" {% if precio_min == 0 and precio_max == 150 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p1" style="font-size:13px;color:#374151;">💚 Económico <span style="color:#94A3B8;font-size:11px;">($50–$150)</span></label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p2" value="150,500" {% if precio_min == 150 and precio_max == 500 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p2" style="font-size:13px;color:#374151;">💛 Moderado <span style="color:#94A3B8;font-size:11px;">($150–$500)</span></label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p3" value="400,1500" {% if precio_min == 400 and precio_max == 1500 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p3" style="font-size:13px;color:#374151;">🔴 Premium <span style="color:#94A3B8;font-size:11px;">($400–$1,500)</span></label>
+    </div>
+</div>
 
-                            sliderMin.addEventListener('input', updateFromSliders);
-                            sliderMax.addEventListener('input', updateFromSliders);
-                            inputMin.addEventListener('change', updateFromInputs);
-                            inputMax.addEventListener('change', updateFromInputs);
-                            inputMin.addEventListener('keyup', updateFromInputs);
-                            inputMax.addEventListener('keyup', updateFromInputs);
-                        })();
-                    </script>
+<script>
+(function() {
+    document.querySelectorAll('input[name="_rango_precio_at"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const parts = this.value.split(',');
+            document.getElementById('at_precio_min').value = parts[0];
+            document.getElementById('at_precio_max').value = parts[1];
+        });
+    });
+})();
+</script>
+
+
+
+
 
 <!-- POPULARIDAD (badges toggle multi-select) -->
 <p class="filtro-label">Popularidad</p>

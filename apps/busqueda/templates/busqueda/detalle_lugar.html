@@ -119,9 +119,19 @@
         <div class="col-lg-4">
             <div class="panel-precio">
 
-                <p class="precio-label">Precio por persona</p>
+                {% if categoria == 'hoteles' %}
+                <p class="precio-label">Precio estimado por noche</p>
                 <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
-                <p class="precio-usd">~ precio estimado</p>
+                <p class="precio-usd">~ rango estimado MXN/noche</p>
+                {% elif categoria == 'gastronomia' %}
+                <p class="precio-label">Precio estimado por persona</p>
+                <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
+                <p class="precio-usd">~ precio promedio por visita</p>
+                {% else %}
+                <p class="precio-label">Precio de entrada</p>
+                <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
+                <p class="precio-usd">~ precio estimado por persona</p>
+                {% endif %}
 
                 <!-- Agregar como actividad -->
                 <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}" onsubmit="showToast()">
