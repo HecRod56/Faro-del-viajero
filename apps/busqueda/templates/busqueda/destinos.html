@@ -126,6 +126,29 @@
                                 pill.style.color = this.checked ? pill.getAttribute('data-text-on') : pill.getAttribute('data-text-off');
                             });
                         });
+
+                        // ── Navegación con teclado ← → entre categorías ──────────────
+                        const CATS = ['atracciones', 'gastronomia', 'hoteles'];
+                        const categoriaActual = "{{ categoria }}";
+                        const idxActual = CATS.indexOf(categoriaActual);
+
+                        document.addEventListener('keydown', function(e) {
+                            // No interferir con inputs, textareas ni selects
+                            const tag = document.activeElement.tagName;
+                            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+                            let siguienteIdx = -1;
+                            if (e.key === 'ArrowRight') {
+                                siguienteIdx = (idxActual + 1) % CATS.length;
+                            } else if (e.key === 'ArrowLeft') {
+                                siguienteIdx = (idxActual - 1 + CATS.length) % CATS.length;
+                            }
+
+                            if (siguienteIdx !== -1) {
+                                e.preventDefault();
+                                window.location.href = '?categoria=' + CATS[siguienteIdx];
+                            }
+                        });
                     });
                 </script>
             </div>
