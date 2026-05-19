@@ -5,12 +5,13 @@
   <link rel="stylesheet" href="{% static 'integrantes/css/lista.css' %}" />
 {% endblock %}
 
+{% block subnav %}
+  {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+{% endblock %}
+
 {% block content %}
 
 <div class="trip-layout">
-
-  <!-- Sub-Navbar de secciones -->
-  {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
   <div class="container-xxl px-4 mt-4">
 
