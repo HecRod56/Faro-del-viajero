@@ -152,6 +152,64 @@ HOTEL_LUJO = [  # $6,000+ MXN/noche
 ]
 
 
+def obtener_rango_precio_atraccion(precio):
+    """
+    Retorna la categoría de precio basada en el valor numérico para atracciones.
+    Función de compatibilidad que reutiliza los umbrales de extraer_precio_real().
+    """
+    if precio is None:
+        return "No disponible"
+    if precio == 0:
+        return "Gratuito"
+    if precio <= 150:
+        return "Económico"
+    if precio <= 500:
+        return "Moderado"
+    return "Premium"
+
+
+def obtener_rango_precio_gastronomia(precio_promedio):
+    """
+    Retorna la categoría de precio para establecimientos gastronómicos.
+    Función de compatibilidad que reutiliza los umbrales de extraer_precio_real().
+    """
+    if precio_promedio is None:
+        return "No disponible"
+    if precio_promedio <= 150:
+        return "Económico"
+    if precio_promedio <= 700:
+        return "Moderado"
+    return "Premium"
+
+
+def inferir_nivel_hotel(nombre: str, precio_max_num: int) -> str:
+    """
+    Infiere el nivel del hotel usando las palabras clave de los diccionarios HOTEL_*
+    y como fallback el precio numérico estimado.
+    Devuelve: 'hotel_muy_bajo', 'hotel_bajo', 'hotel_medio', 'hotel_alto' o 'hotel_lujo'.
+    Esto reemplaza el filtro por estrellas OSM, que rara vez está disponible en Geoapify.
+    """
+    nombre_lower = nombre.lower()
+    if any(k in nombre_lower for k in HOTEL_LUJO):
+        return "hotel_lujo"
+    if any(k in nombre_lower for k in HOTEL_ALTO):
+        return "hotel_alto"
+    if any(k in nombre_lower for k in HOTEL_MUY_BAJO):
+        return "hotel_muy_bajo"
+    if any(k in nombre_lower for k in HOTEL_BAJO):
+        return "hotel_bajo"
+    # Fallback por rango de precio numérico estimado
+    if precio_max_num >= 6000:
+        return "hotel_lujo"
+    if precio_max_num >= 3000:
+        return "hotel_alto"
+    if precio_max_num >= 1500:
+        return "hotel_medio"
+    if precio_max_num >= 700:
+        return "hotel_bajo"
+    return "hotel_muy_bajo"
+
+
 GEOAPIFY_BASE     = "https://api.geoapify.com/v1"
 GEOAPIFY_PLACES   = "https://api.geoapify.com/v2/places"
 FOURSQUARE_PLACES = "https://api.foursquare.com/v3/places/search"
@@ -269,10 +327,6 @@ def obtener_coordenadas(destino: str):
         print(f"Error Geoapify geocode: {e}")
     return {"lat": None, "lon": None, "nombre": destino}
 
-def _validar_resolucion_minima(ancho: int, alto: int, ancho_min: int = 1920, alto_min: int = 1080) -> bool:
-    """Valida que la imagen tenga resolución mínima."""
-    return ancho >= ancho_min and alto >= alto_min
-
 def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
     # Intentar con Wikimedia Commons primero
     queries = [nombre, f"{nombre} {ciudad}", f"{ciudad} Mexico"]
@@ -285,7 +339,7 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
             "gsrlimit": 10,
             "prop": "imageinfo",
             "iiprop": "url|size|mime",
-            "iiurlwidth": 1920,  # Solicitar Full HD (1920px de ancho)
+            "iiurlwidth": 800,
             "format": "json",
         }
         try:
@@ -297,11 +351,8 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
                 ii = p.get("imageinfo", [{}])[0]
                 mime = ii.get("mime", "")
                 url = ii.get("thumburl", "")
-                ancho = ii.get("thumbwidth", 0)
-                alto = ii.get("thumbheight", 0)
-                # Solo fotos, no logos ni SVGs, con resolución mínima 1920x1080
-                if (url and ("image/jpeg" in mime or "image/png" in mime) and 
-                    _validar_resolucion_minima(ancho, alto)):
+                # Solo fotos, no logos ni SVGs
+                if url and "image/jpeg" in mime or "image/png" in mime:
                     fotos.append(url)
             if fotos:
                 return fotos[indice % len(fotos)]
@@ -320,13 +371,7 @@ def obtener_foto_lugar(nombre: str, ciudad: str, indice: int = 0):
         resp.raise_for_status()
         fotos = resp.json().get("photos", [])
         if fotos:
-            # Filtrar por resolución mínima 1920x1080
-            fotos_filtradas = [
-                foto for foto in fotos 
-                if _validar_resolucion_minima(foto.get("width", 0), foto.get("height", 0))
-            ]
-            if fotos_filtradas:
-                return fotos_filtradas[indice % len(fotos_filtradas)]["src"]["original"]
+            return fotos[indice % len(fotos)]["src"]["medium"]
     except Exception:
         pass
 
@@ -605,9 +650,16 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         categoria_filtro = obtener_categoria_filtro(p.get("categories", []))
 
         # ── Filtros post-fetch ─────────────────────────────
-        # Subcategoría: descartar si el lugar no pertenece a ninguna de las seleccionadas
-        if subcategorias and categoria_filtro not in subcategorias:
-            continue
+        # Subcategoría: para hoteles se filtra por nivel (hotel_lujo/alto/medio/bajo/muy_bajo)
+        # inferido por palabras clave del nombre, ya que OSM raramente provee `stars`.
+        # Para atracciones y gastronomía se usa categoria_filtro derivada de Geoapify.
+        if categoria == "hoteles":
+            nivel_hotel = inferir_nivel_hotel(nombre, precio_max_num)
+            if subcategorias and nivel_hotel not in subcategorias:
+                continue
+        else:
+            if subcategorias and categoria_filtro not in subcategorias:
+                continue
 
         # Precio: aplicar filtro de rango (precio_min y precio_max)
         if precio_max_num < precio_min or precio_max_num > precio_max:
@@ -616,12 +668,9 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         # Popularidad: filtrar si se seleccionó al menos una opción
         if popularidades and label not in popularidades:
             continue
-            
+
         # Filtros exclusivos de Hoteles
         if categoria == "hoteles":
-            # Filtrar por estrellas
-            if estrellas and int(rating or 3) not in estrellas:
-                continue
             
             # Filtrar por servicios
             if servicios:
@@ -683,32 +732,27 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
             "lon":         p.get("lon"),
             "precio_max_num": precio_max_num,
             "categoria_filtro": categoria_filtro,
+            "nivel_hotel":     inferir_nivel_hotel(nombre, precio_max_num) if categoria == "hoteles" else None,
         })
 
     return lugares
 
 def obtener_foto_destino(destino: str):
-    """Obtiene una foto de portada para un destino con resolución mínima 1920x1080."""
     headers = {"Authorization": settings.PEXELS_API_KEY}
-    params = {"query": f"{destino} Mexico travel", "per_page": 20, "orientation": "landscape"}
+    params = {"query": f"{destino} Mexico travel", "per_page": 1, "orientation": "landscape"}
     try:
         resp = requests.get(f"{PEXELS_BASE}/search", headers=headers, params=params, timeout=6)
         resp.raise_for_status()
         fotos = resp.json().get("photos", [])
-        # Filtrar por resolución mínima 1920x1080
-        fotos_filtradas = [
-            foto for foto in fotos 
-            if _validar_resolucion_minima(foto.get("width", 0), foto.get("height", 0))
-        ]
-        if fotos_filtradas:
-            return fotos_filtradas[0]["src"]["original"]
+        if fotos:
+            return fotos[0]["src"]["large"]
     except Exception as e:
         print(f"Error Pexels: {e}")
     return None
 
 def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
     """
-    Obtiene múltiples fotos en calidad Full HD para la galería (resolución mínima 1920x1080).
+    Obtiene múltiples fotos en calidad Full HD para la galería.
     Intenta primero Wikimedia Commons, luego completa con Pexels si es necesario.
     Omite la primera imagen de Wikimedia para evitar redundancia con la portada de grid.
     """
@@ -747,36 +791,27 @@ def obtener_fotos_lugar(nombre: str, ciudad: str, cantidad: int = 5):
                 ii = p.get("imageinfo", [{}])[0]
                 mime = ii.get("mime", "")
                 url = ii.get("thumburl", "")
-                ancho = ii.get("thumbwidth", 0)
-                alto = ii.get("thumbheight", 0)
-                # Solo fotos, no logos ni SVGs, con resolución mínima 1920x1080
-                if (url and ("image/jpeg" in mime or "image/png" in mime) and 
-                    _validar_resolucion_minima(ancho, alto)):
+                # Solo fotos, no logos ni SVGs
+                if url and ("image/jpeg" in mime or "image/png" in mime):
                     fotos.append(url)
         except Exception as e:
             print(f"Error Wikimedia: {e}")
         
         primera_consulta = False
     
-    # 2. Completar con Pexels si no hay suficientes fotos (resolución mínima 1920x1080)
+    # 2. Completar con Pexels si no hay suficientes fotos (original quality)
     if len(fotos) < cantidad:
         headers = {"Authorization": settings.PEXELS_API_KEY}
-        # Solicitar más fotos de lo necesario para filtrar por resolución
         params = {
             "query": f"{nombre} {ciudad} Mexico",
-            "per_page": max(10, (cantidad - len(fotos)) * 2),
+            "per_page": cantidad - len(fotos),
             "orientation": "landscape",
         }
         try:
             resp = requests.get(f"{PEXELS_BASE}/search", headers=headers, params=params, timeout=5)
             resp.raise_for_status()
             fotos_pexels = resp.json().get("photos", [])
-            # Filtrar por resolución mínima 1920x1080 y tomar solo las necesarias
-            fotos_filtradas = [
-                f["src"]["original"] for f in fotos_pexels 
-                if _validar_resolucion_minima(f.get("width", 0), f.get("height", 0))
-            ]
-            fotos.extend(fotos_filtradas[:cantidad - len(fotos)])
+            fotos.extend([f["src"]["original"] for f in fotos_pexels])
         except Exception as e:
             print(f"Error Pexels en obtener_fotos_lugar: {e}")
     

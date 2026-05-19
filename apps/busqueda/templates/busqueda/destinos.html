@@ -120,30 +120,7 @@
 
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
-                        var btnMas   = document.getElementById('btn_cupos_mas');
-                        var btnMenos = document.getElementById('btn_cupos_menos');
-                        var inp      = document.getElementById('cupos_input');
-                        var dsp      = document.getElementById('cupos_display');
-
-                        if (btnMas && btnMenos && inp && dsp) {
-                            var MAX_CUPOS = parseInt(btnMas.getAttribute('data-max')) || 1;
-                            function actualizarBotones(v) {
-                                btnMas.disabled = (v >= MAX_CUPOS);
-                                btnMas.style.background = (v >= MAX_CUPOS) ? '#CBD5E1' : '#0E9E8E';
-                                btnMas.style.cursor = (v >= MAX_CUPOS) ? 'not-allowed' : 'pointer';
-                                btnMenos.disabled = (v <= 1);
-                                btnMenos.style.color = (v <= 1) ? '#CBD5E1' : '#374151';
-                            }
-                            window.stepCupos = function (delta) {
-                                var v = parseInt(inp.value) + delta;
-                                if (v < 1) v = 1;
-                                if (v > MAX_CUPOS) v = MAX_CUPOS;
-                                inp.value = v; dsp.textContent = v;
-                                actualizarBotones(v);
-                            };
-                            actualizarBotones(parseInt(inp.value));
-                        }
-
+                        // Manejador de filtros de popularidad
                         document.querySelectorAll('.pop-chk').forEach(function (chk) {
                             chk.addEventListener('change', function () {
                                 var pill = this.nextElementSibling;
