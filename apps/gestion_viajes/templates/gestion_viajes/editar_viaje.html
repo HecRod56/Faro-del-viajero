@@ -36,11 +36,11 @@
 
                         <div class="col-12 col-md-4">
                             <label class="fw-bold mb-2">Estado</label>
-                            <select name="estado" class="form-select input-field">
-                                <option value="planeado" {% if viaje.estado == 'planeado' %}selected{% endif %}>Planeado</option>
-                                <option value="en curso" {% if viaje.estado == 'en curso' %}selected{% endif %}>En curso</option>
-                                <option value="finalizado" {% if viaje.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
-                            </select>
+                            <div class="input-field d-flex align-items-center px-3"
+                                style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.75rem; height: 42px;">
+                                <span>{{ viaje.get_estado_display }}</span>
+                            </div>
+                            <small class="text-secondary-custom d-block mt-1">Se actualiza automáticamente según las fechas.</small>
                         </div>
 
                         <div class="col-12">
@@ -162,26 +162,28 @@
     const fechaInicio = document.querySelector('[name="fecha_inicio"]');
     const fechaFin = document.querySelector('[name="fecha_fin"]');
 
-    fechaInicio.min = fechaHoy;
-    fechaFin.min = fechaHoy;
+    const fechaInicioOriginal = fechaInicio.value;
+    const fechaFinOriginal = fechaFin.value;
 
     function validarFechas() {
         let errores = [];
 
-        if (fechaInicio.value && fechaInicio.value < fechaHoy) {
+        // Solo valida contra hoy si el usuario cambió la fecha
+        if (fechaInicio.value && fechaInicio.value !== fechaInicioOriginal && fechaInicio.value < fechaHoy) {
             errores.push("• La fecha de inicio no puede ser menor a hoy.");
             fechaInicio.classList.add("is-invalid");
         } else {
             fechaInicio.classList.remove("is-invalid");
         }
 
-        if (fechaFin.value && fechaFin.value < fechaHoy) {
+        if (fechaFin.value && fechaFin.value !== fechaFinOriginal && fechaFin.value < fechaHoy) {
             errores.push("• La fecha de fin no puede ser menor a hoy.");
             fechaFin.classList.add("is-invalid");
         } else {
             fechaFin.classList.remove("is-invalid");
         }
 
+        // Esta sí aplica siempre, sin importar si cambió o no
         if (fechaInicio.value && fechaFin.value && fechaFin.value < fechaInicio.value) {
             errores.push("• La fecha de fin no puede ser menor a la fecha de inicio.");
             fechaFin.classList.add("is-invalid");

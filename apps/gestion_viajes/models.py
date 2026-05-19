@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings #Para referenciar al usuario del sistema
 from cloudinary.models import CloudinaryField
-
+from django.core.validators import MaxLengthValidator
 class Viaje(models.Model):
     ESTADOS_VIAJE = [
         ('planeado','Planeado'),
@@ -11,7 +11,7 @@ class Viaje(models.Model):
 
     nombre = models.CharField(max_length=100)
     destino = models.CharField(max_length=100) #Estado de la Rep. Mexicana
-    descripcion = models.TextField(blank=True, null=True) #Opcional
+    descripcion = models.TextField(blank=True, null=True, validators=[MaxLengthValidator(5000)])
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     capacidad_max = models.PositiveIntegerField()
