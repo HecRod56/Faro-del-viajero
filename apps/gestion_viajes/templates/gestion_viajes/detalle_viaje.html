@@ -465,11 +465,12 @@
 
     if (btnConfirmarEliminar) {
         btnConfirmarEliminar.addEventListener('click', function () {
+            const url = this.dataset.url;  // ← leer del atributo
             document.getElementById('modalEliminarViaje').classList.add('d-none');
-            btnConfirmarEliminar.disabled = true;
-            btnConfirmarEliminar.textContent = 'Eliminando...';
+            this.disabled = true;
+            this.textContent = 'Eliminando...';
 
-            fetch('{% url "gestion_viajes:p_eliminar_viaje_ajax" viaje.id %}', {
+            fetch(url, {  // ← usar la variable
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
             })
