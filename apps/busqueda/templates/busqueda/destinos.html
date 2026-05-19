@@ -1,4 +1,3 @@
-
 <!--destinos.html-->
 {% extends "core/base.html" %}
 {% load static %}
@@ -6,7 +5,6 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'busqueda/css/destinos.css' %}">
 <style>
-    /* Spinner */
     .spinner-overlay {
         display: flex;
         flex-direction: column;
@@ -175,11 +173,6 @@
     </div>
 </main>
 
-<!-- Template de card para JS -->
-<script id="card-template" type="text/template">
-    CARD_TEMPLATE_PLACEHOLDER
-</script>
-
 <script>
 function showToast() {
     const t = document.getElementById('toastFaro');
@@ -260,15 +253,13 @@ function renderCard(lugar, viaje_id, categoria, csrf) {
     </div>`;
 }
 
-// ── Cargar lugares por AJAX ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
-    const viajeId  = "{{ viaje.id }}";
+    const viajeId   = "{{ viaje.id }}";
     const categoria = "{{ categoria }}";
-    const csrf     = "{{ csrf_token }}";
-    const destino  = "{{ viaje.destino }}";
+    const csrf      = "{{ csrf_token }}";
+    const destino   = "{{ viaje.destino }}";
 
-    // Construir URL con todos los parámetros del GET actual
-    const params   = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
     params.set('categoria', categoria);
     const url = `/busqueda/viaje/${viajeId}/destinos/lugares/?${params.toString()}`;
 
