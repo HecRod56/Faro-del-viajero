@@ -151,6 +151,160 @@ HOTEL_LUJO = [  # $6,000+ MXN/noche
     "grand velas", "vidanta", "banyan tree",
 ]
 
+# ── Rangos de precio fijos por nivel de hotel (fuente única de verdad) ─────────────────
+# (precio_min, precio_max, texto_display, precio_max_num)
+HOTEL_LEVEL_PRICES = {
+    "hotel_muy_bajo": (300,   700,  "$300 - $700 MXN/noche",      700),
+    "hotel_bajo":     (700,  1500,  "$700 - $1,500 MXN/noche",   1500),
+    "hotel_medio":    (1500, 3000,  "$1,500 - $3,000 MXN/noche", 3000),
+    "hotel_alto":     (3000, 6000,  "$3,000 - $6,000 MXN/noche", 6000),
+    "hotel_lujo":     (6000, 15000, "$6,000+ MXN/noche",        15000),
+}
+
+def obtener_rango_precio_atraccion(precio):
+    """
+    Retorna la categoría de precio basada en el valor numérico para atracciones.
+    Función de compatibilidad que reutiliza los umbrales de extraer_precio_real().
+    """
+    if precio is None:
+        return "No disponible"
+    if precio == 0:
+        return "Gratuito"
+    if precio <= 150:
+        return "Económico"
+    if precio <= 500:
+        return "Moderado"
+    return "Premium"
+
+
+def obtener_rango_precio_gastronomia(precio_promedio):
+    """
+    Retorna la categoría de precio para establecimientos gastronómicos.
+    Función de compatibilidad que reutiliza los umbrales de extraer_precio_real().
+    """
+    if precio_promedio is None:
+        return "No disponible"
+    if precio_promedio <= 150:
+        return "Económico"
+    if precio_promedio <= 700:
+        return "Moderado"
+    return "Premium"
+
+
+def inferir_nivel_hotel(nombre: str, precio_max_num: int = 0) -> str:
+    """
+    Infiere el nivel del hotel usando las palabras clave de los diccionarios HOTEL_*
+    y como fallback el precio numérico estimado.
+    Devuelve: 'hotel_muy_bajo', 'hotel_bajo', 'hotel_medio', 'hotel_alto' o 'hotel_lujo'.
+    Esto reemplaza el filtro por estrellas OSM, que rara vez está disponible en Geoapify.
+    """
+    nombre_lower = nombre.lower()
+    # Orden de mayor a menor para evitar falsos positivos ("grand" antes que "hotel")
+    if any(k in nombre_lower for k in HOTEL_LUJO):
+        return "hotel_lujo"
+    if any(k in nombre_lower for k in HOTEL_ALTO):
+        return "hotel_alto"
+    if any(k in nombre_lower for k in HOTEL_MEDIO):
+        return "hotel_medio"
+    if any(k in nombre_lower for k in HOTEL_BAJO):
+        return "hotel_bajo"
+    if any(k in nombre_lower for k in HOTEL_MUY_BAJO):
+        return "hotel_muy_bajo"
+    # Fallback por rango de precio numérico (usando los umbrales de HOTEL_LEVEL_PRICES)
+    for nivel, (p_min, p_max, _, _) in HOTEL_LEVEL_PRICES.items():
+        if p_min <= precio_max_num <= p_max:
+            return nivel
+    # Sin datos de precio ni palabras clave → clasificar como hotel estándar por defecto
+    return "hotel_medio"
+
+
+# Palabras clave para inferir servicios por nombre del hotel
+_POOL_KEYWORDS    = ["resort", "playa", "beach", "aqua", "agua", "lagoon", "palms",
+                     "palmas", "marina", "spa", "grand velas", "vidanta"]
+_PARKING_KEYWORDS = ["resort", "grand", "gran", "real", "palace", "palacio",
+                     "inn", "express", "select", "fiesta", "camino real"]
+_PETS_KEYWORDS    = ["boutique", "hacienda", "villa", "casita", "b&b", "posada"]
+_WIFI_KEYWORDS    = ["business", "executive", "select", "express", "holiday", "suites"]
+
+
+def inferir_servicios_hotel(nombre: str, nivel: str, raw: dict, p: dict) -> dict:
+    """
+    Detecta los servicios disponibles de un hotel combinando:
+      1. Datos OSM reales (campos raw de Geoapify)
+      2. Campos nativos de Geoapify (facilities, accommodation)
+      3. Inferencia por nombre y nivel del hotel
+
+    Retorna un dict {servicio: bool} para los 5 servicios del filtro.
+    """
+    nombre_lower = nombre.lower()
+    cats         = " ".join(p.get("categories", []))
+    facilities   = p.get("facilities", {}) or {}
+    acc          = p.get("accommodation", {}) or {}
+
+    def _si(val):
+        """¿El valor OSM es afirmativo?"""
+        if val is None:
+            return False
+        if isinstance(val, bool):
+            return val
+        return str(val).lower() in {
+            "yes", "true", "1", "free", "wlan", "public", "private",
+            "heated", "indoor", "outdoor", "limited", "designated",
+        }
+
+    # ── 1. Datos OSM y Geoapify ───────────────────────────────────────────────
+    tiene_wifi = (
+        _si(raw.get("internet_access")) or _si(raw.get("wifi"))
+        or _si(facilities.get("internet_access"))
+        or "internet_access" in cats
+    )
+    tiene_alberca = (
+        _si(raw.get("swimming_pool")) or _si(raw.get("pool"))
+        or _si(facilities.get("swimming_pool"))
+        or "swimming_pool" in cats
+        or "leisure.swimming_pool" in cats
+    )
+    tiene_estacionamiento = (
+        _si(raw.get("parking")) or _si(raw.get("amenity_parking"))
+        or _si(facilities.get("parking"))
+        or "parking" in cats
+    )
+    tiene_mascotas = (
+        _si(raw.get("pets")) or _si(raw.get("pets_allowed"))
+        or _si(raw.get("dogs")) or _si(facilities.get("pets_allowed"))
+    )
+    tiene_accesibilidad = (
+        _si(raw.get("wheelchair")) or _si(facilities.get("wheelchair"))
+        or "wheelchair" in cats
+    )
+
+    # ── 2. Inferencia por nombre ──────────────────────────────────────────────
+    if any(k in nombre_lower for k in _POOL_KEYWORDS):
+        tiene_alberca = True
+    if any(k in nombre_lower for k in _PARKING_KEYWORDS):
+        tiene_estacionamiento = True
+    if any(k in nombre_lower for k in _PETS_KEYWORDS):
+        tiene_mascotas = True
+    if any(k in nombre_lower for k in _WIFI_KEYWORDS):
+        tiene_wifi = True
+
+    # ── 3. Inferencia por nivel ───────────────────────────────────────────────
+    # Hoteles de nivel alto/lujo en México casi siempre tienen estas comodidades
+    if nivel in ("hotel_alto", "hotel_lujo"):
+        tiene_wifi            = True
+        tiene_alberca         = True
+        tiene_estacionamiento = True
+    elif nivel == "hotel_medio":
+        tiene_wifi = True   # WiFi es estándar en hoteles de categoría media
+
+    return {
+        "tiene_wifi":            tiene_wifi,
+        "tiene_alberca":         tiene_alberca,
+        "tiene_estacionamiento": tiene_estacionamiento,
+        "tiene_mascotas":        tiene_mascotas,
+        "tiene_accesibilidad":   tiene_accesibilidad,
+    }
+
 
 GEOAPIFY_BASE     = "https://api.geoapify.com/v1"
 GEOAPIFY_PLACES   = "https://api.geoapify.com/v2/places"
@@ -367,11 +521,11 @@ def obtener_popularidad_lugar_foursquare(lat: float, lon: float, nombre: str) ->
         pop = min(checkins / 10_000, 1.0)
 
     if pop >= 0.70:
-        return "En Tendencia", "#0E9E8E"
+        return "Muy popular", "#0E9E8E"
     elif pop >= 0.35:
-        return "Ambiente Vivo", "#F59E0B"
+        return "Popular", "#F59E0B"
     else:
-        return "Sin filas", "#6B7280"
+        return "Poco concurrido", "#6B7280"
 
 
 def _popularidad_fallback(categorias: list) -> tuple:
@@ -379,15 +533,15 @@ def _popularidad_fallback(categorias: list) -> tuple:
     Estima el nivel de afluencia esperado basándose en las categorías de Geoapify.
     Usado cuando Foursquare no devuelve dato para ese lugar.
 
-    En Tendencia  → entretenimiento de pago, parques temáticos, estadios,
+    Muy popular  → entretenimiento de pago, parques temáticos, estadios,
                     zoológicos, cines, teatros, discotecas, casinos.
-    Ambiente Vivo → museos, sitios históricos, restaurantes, bares,
+    Popular → museos, sitios históricos, restaurantes, bares,
                     deportes, atracciones turísticas generales.
-    Sin filas     → parques, jardines, naturaleza, monumentos, miradores.
+    Poco concurrido     → parques, jardines, naturaleza, monumentos, miradores.
     """
     cats = " ".join(categorias).lower()
 
-    EN_TENDENCIA = (
+    MUY_POPULAR = (
         "entertainment",   # cubre entertainment.cinema, .theatre, .nightclub, etc.
         "theme_park",
         "water_park",
@@ -399,7 +553,7 @@ def _popularidad_fallback(categorias: list) -> tuple:
         "leisure.ski",
         "bar", "pub", "fast_food", "food_court",  # <--- Bares y comida rápida suelen estar llenos
     )
-    AMBIENTE_VIVO = (
+    POPULAR = (
         "museum", "historic", "castle", "archaeological",
         "sights", "attraction",
         "restaurant", "cafe",  # <--- Restaurantes formales y cafés
@@ -407,13 +561,13 @@ def _popularidad_fallback(categorias: list) -> tuple:
         "tourism",
     )
 
-    for kw in EN_TENDENCIA:
+    for kw in MUY_POPULAR:
         if kw in cats:
-            return "En Tendencia", "#0E9E8E"
-    for kw in AMBIENTE_VIVO:
+            return "Muy popular", "#0E9E8E"
+    for kw in POPULAR:
         if kw in cats:
-            return "Ambiente Vivo", "#F59E0B"
-    return "Sin filas", "#6B7280"
+            return "Popular", "#F59E0B"
+    return "Poco concurrido", "#6B7280"
 
 
 # ─── Rangos estimados por categoría (fallback) ───────────────────────────────
@@ -432,7 +586,7 @@ _PRECIO_FALLBACK = {
 }
 
 
-def extraer_precio_real(raw: dict, acc: dict, categoria: str, categorias_geo: list = None):
+def extraer_precio_real(raw: dict, acc: dict, categoria: str, categorias_geo: list = None, nombre: str = ""):
     """
     Intenta obtener un precio real del campo OSM `raw`.
     Devuelve (precio_str, precio_max_num).
@@ -471,38 +625,46 @@ def extraer_precio_real(raw: dict, acc: dict, categoria: str, categorias_geo: li
         else:
             return "$150 - $500 MXN por persona", 500
 
-    # 4. Hoteles
+    # 4. Hoteles ─ precios derivados de HOTEL_LEVEL_PRICES (fuente única de verdad)
     if categoria == "hoteles":
+        # Primero intentar por estrellas reales de OSM
         estrellas_val = acc.get("stars") or raw.get("stars")
         if estrellas_val:
             estrellas = max(1, min(int(estrellas_val), 5))
             txt, num = _PRECIO_FALLBACK["hoteles"].get(estrellas, ("$2,000 - $4,000", 4000))
             return txt + " MXN/noche", num
-        nombre_lower = str(raw.get("name","")).lower()
-        if any(k in nombre_lower for k in HOTEL_MUY_BAJO):
-            return "$300 - $700 MXN/noche", 700
-        elif any(k in nombre_lower for k in HOTEL_BAJO):
-            return "$700 - $1,500 MXN/noche", 1500
+        # Sin estrellas: inferir nivel por nombre y derivar precio de la tabla fija
+        nombre_lower = (nombre or str(raw.get("name", ""))).lower()
+        nivel = None
+        if any(k in nombre_lower for k in HOTEL_LUJO):
+            nivel = "hotel_lujo"
         elif any(k in nombre_lower for k in HOTEL_ALTO):
-            return "$3,000 - $6,000 MXN/noche", 6000
-        elif any(k in nombre_lower for k in HOTEL_LUJO):
-            return "$6,000+ MXN/noche", 15000
+            nivel = "hotel_alto"
+        elif any(k in nombre_lower for k in HOTEL_MEDIO):
+            nivel = "hotel_medio"
+        elif any(k in nombre_lower for k in HOTEL_BAJO):
+            nivel = "hotel_bajo"
+        elif any(k in nombre_lower for k in HOTEL_MUY_BAJO):
+            nivel = "hotel_muy_bajo"
         else:
-            return "$500 - $4,000 MXN/noche", 4000
+            nivel = "hotel_medio"  # default: hotel estándar
+        _, _, txt, num = HOTEL_LEVEL_PRICES[nivel]
+        return txt, num
 
     # 5. Atracciones
-    if categoria == "atracciones":
+    if categoria == 'atracciones':
         nombre_lower = str(raw.get("name", "")).lower()
-        if any(k in nombre_lower for k in ATRACCIONES_ALTO):
-            return "$400 - $1,500 MXN por persona", 1500
-        elif any(k in nombre_lower for k in ATRACCIONES_MEDIO):
-            return "$150 - $500 MXN por persona", 500
+        if any(k in nombre_lower for k in ATRACCIONES_GRATIS) or any(k in cats_str for k in ["monument","artwork","viewpoint","historic","memorial","park","garden","beach"]):
+            return "Gratis", 0
         elif any(k in nombre_lower for k in ATRACCIONES_BAJO):
             return "$50 - $150 MXN por persona", 150
-        elif any(k in nombre_lower for k in ATRACCIONES_GRATIS) or any(k in cats_str for k in ["monument","artwork","viewpoint","historic","memorial","park","garden","beach"]):
-            return "Gratis", 0
+        elif any(k in nombre_lower for k in ATRACCIONES_MEDIO):
+            return "$150 - $500 MXN por persona", 500
+        elif any(k in nombre_lower for k in ATRACCIONES_ALTO):
+            return "$400 - $1,500 MXN por persona", 1500
         else:
-         return "$300 - $1000 MXN por persona", 500  # ← fallback genérico, no gratis
+            return "$300 - $1,000 MXN por persona", 500
+    return "$0 - $500 MXN", 500
 
 def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
                    precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, 
@@ -572,8 +734,9 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         if acc.get("stars"):
             rating = float(acc["stars"])
 
-        # Precio real desde OSM / fallback por categoría
-        precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria, p.get("categories", []))
+        # Precio real desde OSM / fallback por categoría (siempre consistente con HOTEL_LEVEL_PRICES)
+        precio_str, precio_max_num = extraer_precio_real(raw, acc, categoria, p.get("categories", []), nombre=nombre)
+
 
         # ── Popularidad: Foursquare (real) con fallback inteligente por categoría ────────
         # Foursquare Places API v3 /search está deprecado (devuelve 410 Gone).
@@ -592,9 +755,16 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         categoria_filtro = obtener_categoria_filtro(p.get("categories", []))
 
         # ── Filtros post-fetch ─────────────────────────────
-        # Subcategoría: descartar si el lugar no pertenece a ninguna de las seleccionadas
-        if subcategorias and categoria_filtro not in subcategorias:
-            continue
+        # Subcategoría: para hoteles se filtra por nivel (hotel_lujo/alto/medio/bajo/muy_bajo)
+        # inferido por palabras clave del nombre, ya que OSM raramente provee `stars`.
+        # Para atracciones y gastronomía se usa categoria_filtro derivada de Geoapify.
+        if categoria == "hoteles":
+            nivel_hotel = inferir_nivel_hotel(nombre, precio_max_num)
+            if subcategorias and nivel_hotel not in subcategorias:
+                continue
+        else:
+            if subcategorias and categoria_filtro not in subcategorias:
+                continue
 
         # Precio: aplicar filtro de rango (precio_min y precio_max)
         if precio_max_num < precio_min or precio_max_num > precio_max:
@@ -603,12 +773,9 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
         # Popularidad: filtrar si se seleccionó al menos una opción
         if popularidades and label not in popularidades:
             continue
-            
+
         # Filtros exclusivos de Hoteles
         if categoria == "hoteles":
-            # Filtrar por estrellas
-            if estrellas and int(rating or 3) not in estrellas:
-                continue
             
             # Filtrar por servicios
             if servicios:
@@ -653,6 +820,22 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
                     continue
         # ───────────────────────────────────────────────────
 
+        # ── Detectar servicios (usa OSM + inferencia por nombre/nivel) ──────────
+        nivel_hotel_calc = inferir_nivel_hotel(nombre, precio_max_num) if categoria == "hoteles" else None
+        servicios_flags  = inferir_servicios_hotel(nombre, nivel_hotel_calc or "", raw, p) if categoria == "hoteles" else {}
+
+        # Lista de servicios disponibles (para mostrar en tarjeta/detalle)
+        SERVICIO_LABEL = {
+            "tiene_wifi":            "Wi-Fi",
+            "tiene_alberca":         "Alberca",
+            "tiene_estacionamiento": "Estacionamiento",
+            "tiene_mascotas":        "Mascotas",
+            "tiene_accesibilidad":   "Accesibilidad",
+        }
+        servicios_disponibles = [
+            SERVICIO_LABEL[k] for k, v in servicios_flags.items() if v
+        ]
+
         lugares.append({
             "nombre":      nombre,
             "ciudad":      ciudad,
@@ -668,9 +851,14 @@ def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 1
             "descripcion": p.get("description") or raw.get("description", ""),
             "lat":         p.get("lat"),
             "lon":         p.get("lon"),
-            "precio_max_num": precio_max_num,
-            "categoria_filtro": categoria_filtro,
+            "precio_max_num":        precio_max_num,
+            "categoria_filtro":      categoria_filtro,
+            "nivel_hotel":           nivel_hotel_calc,
+            "servicios_disponibles": servicios_disponibles,
+            # Flags individuales — usados por _filtrar_lugares en views.py
+            **servicios_flags,
         })
+
 
     return lugares
 
@@ -765,19 +953,41 @@ def obtener_detalle_lugar(nombre: str, ciudad: str, categoria: str):
     # 2. Galería: 5 fotos de Pexels
     fotos = obtener_fotos_lugar(nombre, ciudad, cantidad=5)
 
-    # 3. Precio estimado según categoría
-    precio_map = {
-        'atracciones': '$200 - $1,500 MXN por persona',
-        'gastronomia':  '$150 - $500 MXN por persona',
-        'hoteles':      '$2,000 - $4,000 MXN/noche',
-    }
-    precio = precio_map.get(categoria, 'Precio no disponible')
+    # 3. Precio estimado según categoría y nombre del lugar
+    if categoria == 'hoteles':
+        # Usar la misma lógica que buscar_lugares para consistencia
+        nivel = inferir_nivel_hotel(nombre)
+        _, _, precio, _ = HOTEL_LEVEL_PRICES[nivel]
+    elif categoria == 'gastronomia':
+        nombre_lower = nombre.lower()
+        if any(k in nombre_lower for k in GASTRO_MUY_BAJO):
+            precio = '$50 - $150 MXN por persona'
+        elif any(k in nombre_lower for k in GASTRO_BAJO):
+            precio = '$150 - $350 MXN por persona'
+        elif any(k in nombre_lower for k in GASTRO_ALTO):
+            precio = '$700 - $2,000 MXN por persona'
+        elif any(k in nombre_lower for k in GASTRO_MEDIO):
+            precio = '$350 - $700 MXN por persona'
+        else:
+            precio = '$150 - $500 MXN por persona'
+    else:  # atracciones
+        nombre_lower = nombre.lower()
+        if any(k in nombre_lower for k in ATRACCIONES_GRATIS):
+            precio = 'Gratis'
+        elif any(k in nombre_lower for k in ATRACCIONES_BAJO):
+            precio = '$50 - $150 MXN por persona'
+        elif any(k in nombre_lower for k in ATRACCIONES_MEDIO):
+            precio = '$150 - $500 MXN por persona'
+        elif any(k in nombre_lower for k in ATRACCIONES_ALTO):
+            precio = '$400 - $1,500 MXN por persona'
+        else:
+            precio = '$300 - $1,000 MXN por persona'
 
     # 4. Popularidad (inferida de categoría)
     if categoria == 'atracciones':
         popularidad = 'Lugar con popularidad alta'
     elif categoria == 'gastronomia':
-        popularidad = 'Ambiente Vivo'
+        popularidad = 'Popular'
     else:
         popularidad = 'Disponible'
 
