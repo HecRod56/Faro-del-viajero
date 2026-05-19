@@ -425,11 +425,11 @@ def obtener_popularidad_lugar_foursquare(lat: float, lon: float, nombre: str) ->
         pop = min(checkins / 10_000, 1.0)
 
     if pop >= 0.70:
-        return "En Tendencia", "#0E9E8E"
+        return "Muy popular", "#0E9E8E"
     elif pop >= 0.35:
-        return "Ambiente Vivo", "#F59E0B"
+        return "Popular", "#F59E0B"
     else:
-        return "Sin filas", "#6B7280"
+        return "Poco concurrido", "#6B7280"
 
 
 def _popularidad_fallback(categorias: list) -> tuple:
@@ -437,15 +437,15 @@ def _popularidad_fallback(categorias: list) -> tuple:
     Estima el nivel de afluencia esperado basándose en las categorías de Geoapify.
     Usado cuando Foursquare no devuelve dato para ese lugar.
 
-    En Tendencia  → entretenimiento de pago, parques temáticos, estadios,
+    Muy popular  → entretenimiento de pago, parques temáticos, estadios,
                     zoológicos, cines, teatros, discotecas, casinos.
-    Ambiente Vivo → museos, sitios históricos, restaurantes, bares,
+    Popular → museos, sitios históricos, restaurantes, bares,
                     deportes, atracciones turísticas generales.
-    Sin filas     → parques, jardines, naturaleza, monumentos, miradores.
+    Poco concurrido     → parques, jardines, naturaleza, monumentos, miradores.
     """
     cats = " ".join(categorias).lower()
 
-    EN_TENDENCIA = (
+    MUY_POPULAR = (
         "entertainment",   # cubre entertainment.cinema, .theatre, .nightclub, etc.
         "theme_park",
         "water_park",
@@ -457,7 +457,7 @@ def _popularidad_fallback(categorias: list) -> tuple:
         "leisure.ski",
         "bar", "pub", "fast_food", "food_court",  # <--- Bares y comida rápida suelen estar llenos
     )
-    AMBIENTE_VIVO = (
+    POPULAR = (
         "museum", "historic", "castle", "archaeological",
         "sights", "attraction",
         "restaurant", "cafe",  # <--- Restaurantes formales y cafés
@@ -465,13 +465,13 @@ def _popularidad_fallback(categorias: list) -> tuple:
         "tourism",
     )
 
-    for kw in EN_TENDENCIA:
+    for kw in MUY_POPULAR:
         if kw in cats:
-            return "En Tendencia", "#0E9E8E"
-    for kw in AMBIENTE_VIVO:
+            return "Muy popular", "#0E9E8E"
+    for kw in POPULAR:
         if kw in cats:
-            return "Ambiente Vivo", "#F59E0B"
-    return "Sin filas", "#6B7280"
+            return "Popular", "#F59E0B"
+    return "Poco concurrido", "#6B7280"
 
 
 # ─── Rangos estimados por categoría (fallback) ───────────────────────────────
@@ -549,18 +549,19 @@ def extraer_precio_real(raw: dict, acc: dict, categoria: str, categorias_geo: li
             return "$500 - $4,000 MXN/noche", 4000
 
     # 5. Atracciones
-    if categoria == "atracciones":
+    if categoria == 'atracciones':
         nombre_lower = str(raw.get("name", "")).lower()
-        if any(k in nombre_lower for k in ATRACCIONES_ALTO):
-            return "$400 - $1,500 MXN por persona", 1500
-        elif any(k in nombre_lower for k in ATRACCIONES_MEDIO):
-            return "$150 - $500 MXN por persona", 500
+        if any(k in nombre_lower for k in ATRACCIONES_GRATIS) or any(k in cats_str for k in ["monument","artwork","viewpoint","historic","memorial","park","garden","beach"]):
+            return "Gratis", 0
         elif any(k in nombre_lower for k in ATRACCIONES_BAJO):
             return "$50 - $150 MXN por persona", 150
-        elif any(k in nombre_lower for k in ATRACCIONES_GRATIS) or any(k in cats_str for k in ["monument","artwork","viewpoint","historic","memorial","park","garden","beach"]):
-            return "Gratis", 0
+        elif any(k in nombre_lower for k in ATRACCIONES_MEDIO):
+            return "$150 - $500 MXN por persona", 500
+        elif any(k in nombre_lower for k in ATRACCIONES_ALTO):
+            return "$400 - $1,500 MXN por persona", 1500
         else:
-         return "$300 - $1000 MXN por persona", 500  # ← fallback genérico, no gratis
+            return "$300 - $1,000 MXN por persona", 500
+    return "$0 - $500 MXN", 500
 
 def buscar_lugares(destino: str, categoria: str = "atracciones", limite: int = 12,
                    precio_min: int = 0, precio_max: int = 10000, subcategorias: list = None, 
@@ -840,7 +841,7 @@ def obtener_detalle_lugar(nombre: str, ciudad: str, categoria: str):
     if categoria == 'atracciones':
         popularidad = 'Lugar con popularidad alta'
     elif categoria == 'gastronomia':
-        popularidad = 'Ambiente Vivo'
+        popularidad = 'Popular'
     else:
         popularidad = 'Disponible'
 
