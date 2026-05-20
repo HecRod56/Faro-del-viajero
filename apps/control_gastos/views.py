@@ -18,6 +18,9 @@ from apps.control_gastos.services import (
     marcar_liquidacion_pagada,
 )
 
+from django.db import transaction
+from apps.control_gastos.models import Gasto
+from apps.control_gastos.services import crear_gasto
 
 # ─── Helper: verificar que el usuario es integrante del viaje (RNF-23) ────────
 
@@ -329,3 +332,99 @@ def marcar_pagada_view(request, viaje_id, liquidacion_id):
         messages.error(request, str(e))
 
     return redirect('gastos:resumen', viaje_id=viaje_id)
+
+# ─── Enviar gasto de transporte a control de gastos ───────────────────────────────────
+
+@login_required
+@transaction.atomic
+def enviar_gasto_transporte(request, viaje_id):
+    """
+    Recibe el costo total de transporte calculado en la vista de transporte
+    y lo registra como un Gasto en control_gastos.
+ 
+    Configuración por defecto (RF-48):
+      - Categoría:        transporte
+      - Pagado por:       el usuario actual
+      - División:         equitativa entre todos los integrantes del viaje
+      - Método:           equitativo
+ 
+    POST params:
+      - monto_raw     (str)  → número crudo, ej: "1250.50"
+      - concepto      (str)  → descripción legible del viaje
+      - fecha         (str)  → YYYY-MM-DD
+    """
+    if request.method != 'POST':
+        return redirect('transporte:principal', viaje_id=viaje_id)
+ 
+    viaje = get_object_or_404(Viaje, id=viaje_id)
+ 
+    # Verificar que el usuario es integrante (RNF-23)
+    try:
+        pagado_por = Participante.objects.get(viaje=viaje, usuario=request.user)
+    except Participante.DoesNotExist:
+        messages.error(request, "No tienes acceso a este viaje.")
+        return redirect('transporte:principal', viaje_id=viaje_id)
+ 
+    # Validar monto (RNF-17)
+    monto_raw = request.POST.get('monto_raw', '').strip()
+    try:
+        monto = Decimal(monto_raw)
+        if monto <= 0:
+            raise ValueError("El monto debe ser mayor a cero.")
+    except (InvalidOperation, ValueError):
+        messages.error(
+            request,
+            "El costo de transporte no es válido o es igual a cero. "
+            "Registra al menos un trayecto antes de enviar a gastos."
+        )
+        return redirect('transporte:principal', viaje_id=viaje_id)
+ 
+    concepto = request.POST.get('concepto', 'Transporte del viaje').strip()
+    fecha    = request.POST.get('fecha', '').strip()
+    if not fecha:
+        from django.utils import timezone
+        fecha = timezone.now().date()
+ 
+    # Todos los participantes activos del viaje para dividir equitativamente
+    participantes = list(
+        Participante.objects.filter(viaje=viaje).select_related('usuario')
+    )
+    if not participantes:
+        messages.error(request, "No hay integrantes en el viaje para dividir el gasto.")
+        return redirect('transporte:principal', viaje_id=viaje_id)
+ 
+    try:
+        gasto = Gasto(
+            viaje=viaje,
+            pagado_por=pagado_por,
+            concepto=concepto,
+            monto=monto,
+            categoria='transporte',
+            fecha=fecha,
+            metodo_division='equitativo',
+            creado_por=request.user,
+            modificado_por=request.user,
+        )
+        gasto.save()
+ 
+        crear_gasto(
+            gasto=gasto,
+            participantes=participantes,
+            usuario=request.user,
+            datos_division={},   # equitativo no necesita datos extra
+        )
+ 
+        n = len(participantes)
+        messages.success(
+            request,
+            f"✅ Gasto de transporte (${monto:,.2f}) registrado y dividido "
+            f"equitativamente entre {n} integrante{'s' if n != 1 else ''}. "
+            f"Puedes verlo en el módulo de Gastos."
+        )
+ 
+    except ValueError as e:
+        messages.error(request, f"Error al registrar el gasto: {e}")
+    except Exception as e:
+        messages.error(request, f"Error inesperado: {e}")
+ 
+    return redirect('transporte:principal', viaje_id=viaje_id)
