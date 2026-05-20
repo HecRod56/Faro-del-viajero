@@ -288,7 +288,14 @@ def informacion_integrante(request, id_viaje, id_usuario):
     usuario     = get_object_or_404(CustomUser, id=id_usuario)
     participante = get_object_or_404(Participante, viaje=viaje, usuario=usuario)
 
-    viajes_usuario = Participante.objects.filter(usuario=usuario).select_related('viaje')
+    viajes_compartidos_ids = Participante.objects.filter(
+        usuario=request.user
+    ).values_list('viaje_id', flat=True)
+
+    viajes_usuario = Participante.objects.filter(
+        usuario=usuario,
+        viaje_id__in=viajes_compartidos_ids,
+    ).select_related('viaje')
 
     return render(request, 'integrantes/visualizar_perfil.html', {
         'usuario':       usuario,
