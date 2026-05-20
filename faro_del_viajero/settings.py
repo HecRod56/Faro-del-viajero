@@ -233,3 +233,4 @@ DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None
 
 GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY", default="")
 PEXELS_API_KEY = config("PEXELS_API_KEY", default="")
+

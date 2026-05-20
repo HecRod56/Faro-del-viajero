@@ -3,11 +3,27 @@
 
 {% block content %}
 <style>
+    /* Definimos las variables de color por si no vienen de tu base.css */
+    :root {
+        --turquesa: #0E9E8E;
+        --turquesa-oscuro: #0a7367;
+        --dorado: #F5C518;
+        --borde-gris: #e5e7eb;
+        --fondo-gris: #f3f4f6;
+        --texto-oscuro: #1f2937;
+    }
+
     .profile-card {
         background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         border: 1px solid var(--borde-gris); overflow: hidden; padding: 40px;
+        color: var(--texto-oscuro); /* Forzamos el texto oscuro por defecto */
     }
     
+    /* Títulos dentro de la tarjeta */
+    .profile-card h3, .profile-card h4, .profile-card h6 {
+        color: var(--texto-oscuro);
+    }
+
     .avatar-wrapper {
         width: 100px; height: 100px; border-radius: 50%; background-color: var(--turquesa);
         display: flex; align-items: center; justify-content: center; color: white;
@@ -22,7 +38,9 @@
     }
     .btn-edit-photo:hover { transform: scale(1.1); }
 
-    .info-label { font-size: 13px; font-weight: 700; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-label, .form-label { 
+        font-size: 13px; font-weight: 700; color: #6b7280; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; 
+    }
     .info-value { font-size: 16px; font-weight: 600; color: var(--texto-oscuro); margin-bottom: 20px; }
 
     .info-value.email-fix { 
@@ -34,22 +52,22 @@
 
     .form-control, .form-select {
         border: 1.5px solid var(--borde-gris); border-radius: 14px; padding: 14px 20px; font-size: 15px;
-        color: var(--texto-oscuro); font-weight: 600;
+        color: var(--texto-oscuro); font-weight: 600; background-color: white;
     }
     .form-control:focus, .form-select:focus { border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(14, 158, 142, 0.1); }
-    .form-control:disabled { background-color: var(--fondo-gris); color: #888; }
+    .form-control:disabled { background-color: var(--fondo-gris); color: #6b7280; }
 
     .btn-primary-custom {
         background: var(--turquesa); color: white; border: none; border-radius: 28px;
         padding: 14px 24px; font-size: 15px; font-weight: 700; width: 100%; transition: all 0.2s;
     }
-    .btn-primary-custom:hover { background: var(--turquesa-oscuro); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14, 158, 142, 0.2); }
+    .btn-primary-custom:hover { background: var(--turquesa-oscuro); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14, 158, 142, 0.2); color: white; }
     
     .btn-outline-custom {
-        background: transparent; color: #555; border: 2px solid var(--borde-gris); border-radius: 28px;
+        background: transparent; color: #4b5563; border: 2px solid var(--borde-gris); border-radius: 28px;
         padding: 12px 24px; font-size: 15px; font-weight: 700; width: 100%; transition: all 0.2s;
     }
-    .btn-outline-custom:hover { background: #e2e8f0; color: var(--texto-oscuro); }
+    .btn-outline-custom:hover { background: var(--fondo-gris); color: var(--texto-oscuro); }
 
     .btn-danger-link { color: #dc3545; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px; }
     .btn-danger-link:hover { text-decoration: underline; color: #bd2130; }
@@ -83,7 +101,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="info-label">Fecha de Nacimiento</div>
-                            <p class="text-muted mb-0">
+                            <p class="info-value mb-0">
                                 {{ user.dob|date:"d/m/Y"|default:"Fecha no registrada" }}
                             </p>
                         </div>
@@ -100,7 +118,7 @@
                         <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="trip-mini-card">
                             <div class="trip-icon">{% if viaje.icono %}{{ viaje.icono }}{% else %}🌎{% endif %}</div>
                             <div>
-                                <h6 class="fw-bold mb-0 text-oscuro">{{ viaje.nombre }}</h6>
+                                <h6 class="fw-bold mb-0">{{ viaje.nombre }}</h6>
                                 <small class="text-muted">{{ viaje.fecha_inicio|date:"d M" }} - {{ viaje.fecha_fin|date:"d M" }}</small>
                             </div>
                             <div class="ms-auto"><svg width="20" height="20" fill="none" stroke="#ccc" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
@@ -133,7 +151,9 @@
                             </form>
                         </div>
                     </div>
-                </div> <div id="editMode" class="d-none">
+                </div> 
+
+                <div id="editMode" class="d-none">
                     <form method="POST" id="profileForm">
                         {% csrf_token %}
                         <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
