@@ -85,17 +85,6 @@
 
         <!-- ── Botones de acción ────────────────────────── -->
         <div class="d-flex align-items-center gap-2">
-
-          <!-- Ver perfil (visible para todos) -->
-          <a
-            href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
-            class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
-            style="width: 36px; height: 36px"
-            title="Ver perfil de {{ user.nombre }}"
-          >
-            <i class="bi bi-person"></i>
-          </a>
-
           {% if not user.es_organizador %}
 
             {% if es_organizador_actual %}
@@ -130,6 +119,17 @@
             {% endif %}
 
           {% endif %}
+
+          <!-- Ver perfil (visible para todos) -->
+          <a
+            href={% url 'integrantes:informacion_integrante' viaje.id user.id %}
+            class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
+            style="width: 36px; height: 36px"
+            title="Ver perfil de {{ user.nombre }}"
+          >
+            <i class="bi bi-person"></i>
+          </a>
+
         </div>
       </div>
       {% endfor %}
