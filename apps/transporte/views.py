@@ -82,15 +82,29 @@ def transporte_principal(request, viaje_id):
     trayectos_regreso.sort(key=lambda x: x.fecha_salida)
 
     costo_total_formateado = formatear_precio(costo_total, moneda_usuario)
-
+ 
+    # Construir concepto legible para el gasto
+    origenes  = [t.origen_codigo  for t in trayectos_ida[:1]]
+    destinos  = [t.destino_codigo for t in trayectos_ida[:1]]
+    concepto_transporte = (
+        f"Transporte — {origenes[0]} → {destinos[0]}"
+        if origenes and destinos
+        else "Transporte del viaje"
+    )
+ 
+    from django.utils import timezone
     context = {
         'viaje': viaje,
         'trayectos_ida': trayectos_ida,
         'trayectos_regreso': trayectos_regreso,
         'tiene_trayectos': len(trayectos_ida) + len(trayectos_regreso) > 0,
         'costo_total': costo_total_formateado,
+        'costo_total_raw': round(costo_total, 2),        # ← número crudo para el form
+        'concepto_transporte': concepto_transporte,       # ← descripción para el gasto
+        'fecha_hoy': timezone.now().date().isoformat(),   # ← fecha por defecto
         'moneda_usuario': moneda_usuario,
     }
+    
     return render(request, 'transporte/transporte_principal.html', context)
 
 
