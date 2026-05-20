@@ -6,10 +6,11 @@
   <link rel="stylesheet" href="{% static 'galeria/css/galeria.css' %}" />
 {% endblock %}
 
-{% block content %}
+{% block subnav %}
+  {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+{% endblock %}
 
-<!-- Sub-Navbar de secciones -->
-{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+{% block content %}
 
 <div class="container mt-4">
 

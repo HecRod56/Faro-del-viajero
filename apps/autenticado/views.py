@@ -32,8 +32,8 @@ def register(request):
             login(request, user)
             messages.success(request, "¡Cuenta creada con éxito! Bienvenido.")
             
-            # NUEVO: Redirigimos al perfil
-            return redirect('profile') 
+            # NUEVO: Redirigimos al viajes del usuario después de registrarse
+            return redirect('/viajes/ver_mis_viajes/') 
     
     return render(request, 'autenticado/register.html')
 
@@ -51,8 +51,8 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
-                # NUEVO: Redirigimos al perfil en lugar del home
-                return redirect('profile') 
+                # NUEVO: Redirigimos a los vijaes del usuario después de iniciar sesión
+                return redirect('/viajes/ver_mis_viajes/') 
             else:
                 messages.error(request, "Contraseña incorrecta. Inténtalo de nuevo.")
             

@@ -150,7 +150,7 @@ DATABASES = {
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
         'OPTIONS': {
-            'sslmode': 'require',
+            'sslmode': config('DB_SSLMODE', default='disable'),
         },
     }
 }
@@ -233,3 +233,4 @@ DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None
 
 GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY", default="")
 PEXELS_API_KEY = config("PEXELS_API_KEY", default="")
+

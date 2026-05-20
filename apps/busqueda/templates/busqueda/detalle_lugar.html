@@ -20,29 +20,28 @@
     <div class="galeria-grid">
 
         {% if lugar.fotos %}
-            {% if lugar.fotos.0 %}
-                <img src="{{ lugar.fotos.0 }}" alt="{{ lugar.nombre }}" class="foto-principal"
-                     onerror="this.style.display='none'">
-            {% else %}
-                <div class="foto-principal galeria-placeholder">🏖️</div>
-            {% endif %}
+        {% if lugar.fotos.0 %}
+        <img src="{{ lugar.fotos.0 }}" alt="{{ lugar.nombre }}" class="foto-principal"
+            onerror="this.style.display='none'">
+        {% else %}
+        <div class="foto-principal galeria-placeholder">🏖️</div>
+        {% endif %}
 
-            {% for foto in lugar.fotos|slice:"1:5" %}
-                <img src="{{ foto }}" alt="{{ lugar.nombre }}" class="foto-sec"
-                     onerror="this.style.display='none'">
-            {% empty %}
-                <div class="foto-sec galeria-placeholder">📷</div>
-                <div class="foto-sec galeria-placeholder">📷</div>
-                <div class="foto-sec galeria-placeholder">📷</div>
-                <div class="foto-sec galeria-placeholder">📷</div>
-            {% endfor %}
+        {% for foto in lugar.fotos|slice:"1:5" %}
+        <img src="{{ foto }}" alt="{{ lugar.nombre }}" class="foto-sec" onerror="this.style.display='none'">
+        {% empty %}
+        <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
+        {% endfor %}
 
         {% else %}
-            <div class="foto-principal galeria-placeholder">🏖️</div>
-            <div class="foto-sec galeria-placeholder">📷</div>
-            <div class="foto-sec galeria-placeholder">📷</div>
-            <div class="foto-sec galeria-placeholder">📷</div>
-            <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-principal galeria-placeholder">🏖️</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
+        <div class="foto-sec galeria-placeholder">📷</div>
         {% endif %}
 
     </div>
@@ -58,14 +57,16 @@
                     <div>
                         <h1 class="detalle-nombre">{{ lugar.nombre }}</h1>
                         <p class="detalle-ciudad">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+                                <circle cx="12" cy="10" r="3" />
                             </svg>
                             {{ lugar.ciudad }}{% if lugar.direccion %}, {{ lugar.direccion }}{% endif %}
                         </p>
                     </div>
                     {% if lugar.categorias %}
-                        <span class="badge-categoria">{{ lugar.categorias.0 }}</span>
+                    <span class="badge-categoria">{{ lugar.categorias.0 }}</span>
                     {% endif %}
                 </div>
 
@@ -74,11 +75,6 @@
                 {% endif %}
 
                 <!-- Descripción -->
-<<<<<<< HEAD
-
-                <p class="seccion-titulo">DESCRIPCIÓN</p>
-                <p class="detalle-descripcion">{{ lugar.descripcion }}</p>
-=======
                 {% if lugar.descripcion %}
                 <p class="seccion-titulo">DESCRIPCIÓN</p>
                 <div class="description-container">
@@ -87,14 +83,13 @@
                     </p>
                 </div>
                 {% endif %}
->>>>>>> develop
 
                 <!-- Lo incluye (opcional: viene del servicio o se omite) -->
                 {% if lugar.lo_incluye %}
                 <p class="seccion-titulo mt-3">LO INCLUYE</p>
                 <div class="lo-incluye-lista">
                     {% for item in lugar.lo_incluye %}
-                        <span>{{ item }}</span>
+                    <span>{{ item }}</span>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -103,12 +98,14 @@
                 {% if lugar.telefono or lugar.website %}
                 <div class="d-flex gap-3 mt-4 flex-wrap">
                     {% if lugar.telefono %}
-                    <a href="tel:{{ lugar.telefono }}" class="text-decoration-none" style="font-size:13px;color:#64748B;">
+                    <a href="tel:{{ lugar.telefono }}" class="text-decoration-none"
+                        style="font-size:13px;color:#64748B;">
                         📞 {{ lugar.telefono }}
                     </a>
                     {% endif %}
                     {% if lugar.website %}
-                    <a href="{{ lugar.website }}" target="_blank" style="font-size:13px;color:var(--turquesa);font-weight:600;text-decoration:none;">
+                    <a href="{{ lugar.website }}" target="_blank"
+                        style="font-size:13px;color:var(--turquesa);font-weight:600;text-decoration:none;">
                         🌐 Sitio web oficial
                     </a>
                     {% endif %}
@@ -122,18 +119,27 @@
         <div class="col-lg-4">
             <div class="panel-precio">
 
-                <p class="precio-label">Precio por persona</p>
+                {% if categoria == 'hoteles' %}
+                <p class="precio-label">Precio estimado por noche</p>
                 <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
-                <p class="precio-usd">~ precio estimado</p>
+                <p class="precio-usd">~ rango estimado MXN/noche</p>
+                {% elif categoria == 'gastronomia' %}
+                <p class="precio-label">Precio estimado por persona</p>
+                <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
+                <p class="precio-usd">~ precio promedio por visita</p>
+                {% else %}
+                <p class="precio-label">Precio de entrada</p>
+                <p class="precio-monto">{{ lugar.precio|default:"Consultar" }}</p>
+                <p class="precio-usd">~ precio estimado por persona</p>
+                {% endif %}
 
                 <!-- Agregar como actividad -->
-                <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}"
-                      onsubmit="showToast()">
+                <form method="POST" action="{% url 'busqueda:agregar_actividad' viaje.id %}" onsubmit="showToast()">
                     {% csrf_token %}
-                    <input type="hidden" name="nombre"    value="{{ lugar.nombre }}">
+                    <input type="hidden" name="nombre" value="{{ lugar.nombre }}">
                     <input type="hidden" name="direccion" value="{{ lugar.direccion }}">
-                    <input type="hidden" name="precio"    value="{{ lugar.precio }}">
-                    <input type="hidden" name="website"   value="{{ lugar.website }}">
+                    <input type="hidden" name="precio" value="{{ lugar.precio }}">
+                    <input type="hidden" name="website" value="{{ lugar.website }}">
                     <button type="submit" class="btn-agregar-detalle">
                         + Agregar como actividad
                     </button>
@@ -157,11 +163,11 @@
 </div>
 
 <script>
-function showToast() {
-    const t = document.getElementById('toastFaro');
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 3000);
-}
+    function showToast() {
+        const t = document.getElementById('toastFaro');
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
 </script>
 
 {% endblock %}

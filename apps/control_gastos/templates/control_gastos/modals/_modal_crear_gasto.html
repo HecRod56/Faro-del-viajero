@@ -1,0 +1,81 @@
+<div id="modal-nuevo" class="cg-modal-backdrop">
+  <div class="cg-modal">
+    <div class="cg-modal-header">
+      <h3><i class="bi bi-plus-circle me-2" style="color:var(--cg-primario);"></i>Añadir gasto</h3>
+      <button class="cg-modal-close" onclick="cerrarModal('modal-nuevo')">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'gastos:crear' viaje.id %}">
+      {% csrf_token %}
+      <div class="cg-modal-body">
+        <div class="cg-form-grid">
+          <div class="cg-form-group full">
+            <label>Descripción *</label>
+            <input type="text" name="concepto" placeholder="Ej: Cena en el restaurante" required>
+          </div>
+          <div class="cg-form-group">
+            <label>Monto *</label>
+            <input type="number" name="monto" step="0.01" min="0.01" placeholder="0.00" required>
+          </div>
+          <div class="cg-form-group">
+            <label>Fecha *</label>
+            <input type="date" name="fecha" required>
+          </div>
+          <div class="cg-form-group">
+            <label>Categoría *</label>
+            <select name="categoria" required>
+              <option value="">Selecciona…</option>
+              {% for val, etiqueta in categorias %}
+              <option value="{{ val }}">{{ etiqueta }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="cg-form-group">
+            <label>Quién pagó *</label>
+            <select name="pagado_por_id" required>
+              <option value="">Selecciona…</option>
+              {% for p in participantes_viaje %}
+              <option value="{{ p.id }}">
+                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {% if p.usuario == request.user %}(Tú){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="cg-form-group">
+            <label>Método de división</label>
+            <select name="metodo_division" id="nuevo-metodo">
+              {% for val, etiqueta in metodos_division %}
+              <option value="{{ val }}">{{ etiqueta }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="cg-form-group full">
+            <label>Dividir entre *</label>
+            <div>
+              {% for p in participantes_viaje %}
+              <label class="cg-check-row">
+                <input type="checkbox" name="participantes_ids" value="{{ p.id }}" checked
+                       class="nuevo-check" data-pid="{{ p.id }}">
+                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {% if p.usuario == request.user %}<span class="tu-badge">Tú</span>{% endif %}
+                <input type="number" name="porcentaje_{{ p.id }}"
+                       class="nuevo-porcentaje" style="display:none; width:90px;"
+                       min="0" max="100" step="0.01" placeholder="% ej: 33">
+                <input type="number" name="monto_fijo_{{ p.id }}"
+                       class="nuevo-monto-fijo" style="display:none; width:90px;"
+                       min="0" step="0.01" placeholder="$ monto">
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cg-modal-footer">
+        <button type="button" class="cg-btn cg-btn-outline" onclick="cerrarModal('modal-nuevo')">Cancelar</button>
+        <button type="submit" class="cg-btn cg-btn-primario">
+          <i class="bi bi-floppy"></i> Guardar gasto
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
