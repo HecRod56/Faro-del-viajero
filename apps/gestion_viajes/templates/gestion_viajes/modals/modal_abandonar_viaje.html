@@ -15,6 +15,7 @@
                 Cancelar
             </button>
             <button id="btn-confirmar-eliminar-viaje"
+                data-url="{% url 'gestion_viajes:p_eliminar_viaje_ajax' viaje.id %}"
                 class="btn rounded-pill px-4" style="background: #EF4444; color: white; font-weight: 700;">
                 Sí, eliminar
             </button>

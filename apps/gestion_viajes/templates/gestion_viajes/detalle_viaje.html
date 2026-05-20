@@ -554,6 +554,7 @@
     const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar-viaje');
     if (btnConfirmarEliminar) {
         btnConfirmarEliminar.addEventListener('click', function () {
+            const url = this.dataset.url;  // ← leer del atributo
             document.getElementById('modalEliminarViaje').classList.add('d-none');
             btnConfirmarEliminar.disabled = true;
             btnConfirmarEliminar.textContent = 'Eliminando...';
