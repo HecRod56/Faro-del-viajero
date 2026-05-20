@@ -4,10 +4,43 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'actividades/css/actividades-shared.css' %}">
 <link rel="stylesheet" href="{% static 'actividades/css/actividades-lista.css' %}">
+
+<style>
+    /* 1. Oculta TODAS las alertas de la página por defecto */
+    .alert {
+        display: none !important;
+    }
+    
+    /* 2. Vuelve a encender SOLO las alertas de tu sección local */
+    #alertas-locales .alert {
+        display: block !important;
+    }
+    /* 3. Cambia el color del botón Proponer a Turquesa */
+    .btn-proponer {
+        background-color: #00a896 !important; /* Verde Turquesa */
+        color: white !important;
+        border: none !important;
+    }
+    .btn-proponer:hover {
+        background-color: #008f7f !important; /* Un turquesa un poco más oscuro al pasar el mouse */
+    }
+</style>
+
 {% endblock %}
 
 {% block content %}
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+{% if messages %}
+<div class="container mt-3" id="alertas-locales">
+    {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show shadow-sm" role="alert" style="border-left: 5px solid {% if message.tags == 'error' %}#dc3545{% else %}#198754{% endif %};">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">

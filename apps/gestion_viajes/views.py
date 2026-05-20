@@ -100,6 +100,9 @@ def pagina_viajes_planeados(request):
 
 # 5. Vista para mostrar el detalle de un viaje específico
 def pagina_detalle_viaje(request, viaje_id):
+    from apps.control_gastos.models import Gasto as GastoControl
+
+    # 1. Obtenemos el viaje o lanzamos 404
     viaje = get_object_or_404(Viaje, id=viaje_id)
 
     # ← Actualizar estado antes de cualquier lógica
@@ -146,7 +149,7 @@ def pagina_detalle_viaje(request, viaje_id):
         gasto.puede_eliminar = (request.user == gasto.pagado_por.usuario) or (rol_usuario == 'organizador')
         gastos_list.append(gasto)
 
-    return render(request, 'gestion_viajes/detalle_viaje.html', {
+    context = {
         'viaje': viaje,
         'participantes': participantes_list,
         'organizador': organizador,
@@ -159,9 +162,20 @@ def pagina_detalle_viaje(request, viaje_id):
         'razon_no_puede_registrar': razon_no_puede_registrar,
         'rol_usuario': rol_usuario,
         'gastos': gastos_list
+    }
+
+    context.update({
+        # Reemplaza 'gastos' (del modelo antiguo) por los de control_gastos
+        'gastos':             GastoControl.objects.filter(viaje=viaje),
+        'categorias':         GastoControl.CATEGORIAS,
+        'metodos_division':   GastoControl.METODOS_DIVISION,
+        'participantes_viaje': Participante.objects.filter(viaje=viaje).select_related('usuario'),
     })
 
-# 5.1 Cálculo de la duración de un viaje
+    # 7. RENDERIZADO FINAL
+    return render(request, 'gestion_viajes/detalle_viaje.html', context=context)
+
+#5.1 Calculo de la duracion de un viaje 
 def duracion_viaje(dias):
     def plural(valor, singular, plural):
         return f"{valor} {singular if valor == 1 else plural}"
