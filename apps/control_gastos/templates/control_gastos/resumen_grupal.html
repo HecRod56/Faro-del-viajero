@@ -310,5 +310,66 @@ window.addEventListener('load', () => {
 });
 
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Extraemos los valores matemáticos reales del contexto de Django
+    const totalGastadoReal = parseFloat("{{ total_gastado|default:0 }}");
+    const presupuestoReal    = parseFloat("{{ viaje.presupuesto_estimado|default:0 }}");
+    const disponibleReal   = parseFloat("{{ disponible|default:0 }}");
+    const porcentajeBarra  = parseFloat("{{ porcentaje_barra|default:0 }}");
 
+    // 2. Buscamos los contenedores recorriendo TODOS los elementos de la vista
+    // Esto evita depender de si usaron clases nativas o etiquetas personalizadas de CSS
+    document.querySelectorAll("div, p, span, h5, h6").forEach(el => {
+        const texto = el.textContent.trim();
+
+        // Buscamos el bloque de "GASTADO" y actualizamos el valor que esté abajo o al lado
+        if (texto === "GASTADO") {
+            const contenedorPadre = el.parentElement;
+            if (contenedorPadre) {
+                // Buscamos cualquier elemento con texto "-$0" o "$0" dentro de este bloque
+                contenedorPadre.querySelectorAll("*").forEach(hijo => {
+                    if (hijo.textContent.includes("$0") || hijo.textContent.includes("-$0")) {
+                        hijo.textContent = "$" + totalGastadoReal.toFixed(2);
+                        hijo.style.color = "#e53e3e"; // Forzamos el color rojo de alerta
+                        hijo.style.fontWeight = "700";
+                    }
+                });
+            }
+        }
+
+        // Buscamos el bloque de "DISPONIBLE" y recalculamos la resta real en el frontend
+        if (texto === "DISPONIBLE") {
+            const contenedorPadre = el.parentElement;
+            if (contenedorPadre) {
+                contenedorPadre.querySelectorAll("*").forEach(hijo => {
+                    // Si el contenedor sigue mostrando estáticamente el total original
+                    if (hijo.textContent.includes(presupuestoReal.toFixed(2)) && hijo !== el) {
+                        hijo.textContent = "$" + disponibleReal.toFixed(2);
+                        hijo.style.color = "#3182ce"; // Azul de balance disponible
+                    }
+                });
+            }
+        }
+    });
+
+    // 3. Forzamos el llenado de la barra buscando cualquier elemento que actúe como barra de progreso
+    // Buscamos por la clase o por el atributo estructural role="progressbar"
+    const barraProgreso = document.querySelector('.progress-bar') || document.querySelector('[role="progressbar"]') || document.querySelector('[style*="width"]');
+    if (barraProgreso) {
+        barraProgreso.style.setProperty("width", porcentajeBarra + "%", "important");
+        barraProgreso.setAttribute("aria-valuenow", totalGastadoReal);
+        barraProgreso.setAttribute("aria-valuemax", presupuestoReal);
+        // Cambiamos el color de fondo para reflejar el consumo del presupuesto
+        barraProgreso.style.backgroundColor = "#e53e3e";
+    }
+
+    // 4. Corregimos el texto del límite superior de la barra de fondo gris (Límite derecho)
+    document.querySelectorAll("span, div").forEach(el => {
+        if (el.textContent.trim().includes("MXN")) {
+            el.textContent = "$" + presupuestoReal.toFixed(2) + " MXN";
+        }
+    });
+});
+</script>
 {% endblock %}

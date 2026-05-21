@@ -1,16 +1,18 @@
-from django.shortcuts import render, redirect
-from .models import Viaje, Gasto, Participante
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Sum
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from .mixins import ViajeContextMixin
+from django.db.models import Sum
 from django.views.generic import DetailView
-from datetime import date  # ← nuevo import
+from datetime import date
 import json
+
+from .models import Viaje, Gasto, Participante
+from .mixins import ViajeContextMixin
+# IMPORTACIÓN CRÍTICA: Traemos el modelo real de finanzas compartido por el equipo
+from apps.control_gastos.models import Gasto as GastoControl
 
 # ==========================================
 # FUNCIÓN AUXILIAR: Actualizar estado automáticamente
@@ -79,7 +81,7 @@ def pagina_ver_mis_viajes(request):
 
     viajes_db = Viaje.objects.filter(participantes__usuario=user_actual).distinct()
 
-    # ← Actualizar estado de cada viaje antes de mostrarlos
+    # Actualizar estado de cada viaje antes de mostrarlos
     for viaje in viajes_db:
         actualizar_estado_viaje(viaje)
 
@@ -100,19 +102,16 @@ def pagina_viajes_planeados(request):
 
 # 5. Vista para mostrar el detalle de un viaje específico
 def pagina_detalle_viaje(request, viaje_id):
-    from apps.control_gastos.models import Gasto as GastoControl
-
     # 1. Obtenemos el viaje o lanzamos 404
     viaje = get_object_or_404(Viaje, id=viaje_id)
 
-    # ← Actualizar estado antes de cualquier lógica
+    # Actualizar estado automático antes de calcular lógicas
     actualizar_estado_viaje(viaje)
 
     if request.user.is_authenticated:
         participante_actual = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
 
         if not participante_actual:
-            from django.contrib import messages
             messages.error(request, "Acceso denegado: No eres integrante de este viaje.")
             return redirect('gestion_viajes:p_ver_mis_viajes')
 
@@ -124,13 +123,21 @@ def pagina_detalle_viaje(request, viaje_id):
     participantes_list = viaje.participantes.all()
     organizador = participantes_list.filter(rol='organizador').first()
 
-    total_gastado = viaje.gastos.aggregate(total=Sum('cantidad'))['total'] or 0
-    presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
+    # ──────────────────────────────────────────────────────────────────────────
+    # UNIFICACIÓN DE SUMATORIA FINANCIERA (CON GASTOCONTROL DE TU EQUIPO)
+    # ──────────────────────────────────────────────────────────────────────────
+    # Sumamos los montos reales de la tabla compartida y extraemos el valor absoluto limpio
+    total_raw = GastoControl.objects.filter(viaje=viaje).aggregate(total=Sum('monto'))['total'] or 0
+    total_gastado = abs(float(total_raw))
 
-    if viaje.presupuesto_estimado and viaje.presupuesto_estimado > 0:
-        porcentaje_gastado = min((total_gastado / viaje.presupuesto_estimado) * 100, 100)
+    presupuesto_total = float(viaje.presupuesto_estimado) if viaje.presupuesto_estimado else 0.0
+    presupuesto_restante = presupuesto_total - total_gastado
+
+    if presupuesto_total > 0:
+        porcentaje_gastado = min((total_gastado / presupuesto_total) * 100, 100)
     else:
         porcentaje_gastado = 0
+    # ──────────────────────────────────────────────────────────────────────────
 
     duracion = duracion_viaje((viaje.fecha_fin - viaje.fecha_inicio).days)
 
@@ -144,11 +151,6 @@ def pagina_detalle_viaje(request, viaje_id):
         puede_registrar_gasto = False
         razon_no_puede_registrar = "Presupuesto excedido. No se permiten más gastos."
 
-    gastos_list = []
-    for gasto in viaje.gastos.all():
-        gasto.puede_eliminar = (request.user == gasto.pagado_por.usuario) or (rol_usuario == 'organizador')
-        gastos_list.append(gasto)
-
     context = {
         'viaje': viaje,
         'participantes': participantes_list,
@@ -161,21 +163,15 @@ def pagina_detalle_viaje(request, viaje_id):
         'puede_registrar_gasto': puede_registrar_gasto,
         'razon_no_puede_registrar': razon_no_puede_registrar,
         'rol_usuario': rol_usuario,
-        'gastos': gastos_list
+        'gastos': GastoControl.objects.filter(viaje=viaje),
+        'categorias': GastoControl.CATEGORIAS,
+        'metodos_division': GastoControl.METODOS_DIVISION,
+        'participantes_viaje': Participante.objects.filter(viaje=viaje).select_related('usuario'),
     }
 
-    context.update({
-        # Reemplaza 'gastos' (del modelo antiguo) por los de control_gastos
-        'gastos':             GastoControl.objects.filter(viaje=viaje),
-        'categorias':         GastoControl.CATEGORIAS,
-        'metodos_division':   GastoControl.METODOS_DIVISION,
-        'participantes_viaje': Participante.objects.filter(viaje=viaje).select_related('usuario'),
-    })
-
-    # 7. RENDERIZADO FINAL
     return render(request, 'gestion_viajes/detalle_viaje.html', context=context)
 
-#5.1 Calculo de la duracion de un viaje 
+# 5.1 Calculo de la duracion de un viaje 
 def duracion_viaje(dias):
     def plural(valor, singular, plural):
         return f"{valor} {singular if valor == 1 else plural}"
@@ -259,12 +255,12 @@ def eliminar_viaje_ajax(request, viaje_id):
     gastos_data = [
         {
             'concepto': g.concepto,
-            'cantidad': str(g.cantidad),
+            'cantidad': str(g.monto),  # Corregido de cantidad a monto
             'categoria': g.categoria,
             'pagado_por_usuario_id': g.pagado_por.usuario_id if g.pagado_por else None,
             'fecha': str(g.fecha),
         }
-        for g in viaje.gastos.all()
+        for g in GastoControl.objects.filter(viaje=viaje)  # Cambiado al modelo real
     ]
 
     viaje_data = {
@@ -327,11 +323,11 @@ def restaurar_viaje_ajax(request):
 
         for g_data in viaje_data.get('gastos', []):
             pagado_por = participante_map.get(g_data['pagado_por_usuario_id'])
-            Gasto.objects.create(
+            GastoControl.objects.create(
                 viaje=nuevo_viaje,
                 pagado_por=pagado_por,
                 concepto=g_data['concepto'],
-                cantidad=g_data['cantidad'],
+                monto=g_data['cantidad'],  # Mapeado a monto del modelo real
                 categoria=g_data['categoria'],
             )
 
@@ -356,7 +352,8 @@ def registrar_gasto(request, viaje_id):
         if viaje.estado == 'finalizado':
             return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
-        total_gastado = viaje.gastos.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+        total_raw = GastoControl.objects.filter(viaje=viaje).aggregate(total=Sum('monto'))['total'] or 0
+        total_gastado = abs(float(total_raw))
         presupuesto_restante = (viaje.presupuesto_estimado or 0) - total_gastado
 
         if presupuesto_restante < 0:
@@ -368,11 +365,11 @@ def registrar_gasto(request, viaje_id):
             if not participante:
                 return redirect('gestion_viajes:p_detalle_viaje', viaje_id=viaje.id)
 
-            Gasto.objects.create(
+            GastoControl.objects.create(
                 viaje=viaje,
                 pagado_por=participante,
                 concepto=concepto,
-                cantidad=cantidad,
+                monto=cantidad,  # Adaptado al modelo real
                 categoria=categoria
             )
 
@@ -382,7 +379,7 @@ def registrar_gasto(request, viaje_id):
 
 # 8.1 Vista para eliminar un gasto
 def eliminar_gasto(request, gasto_id):
-    gasto = get_object_or_404(Gasto, id=gasto_id)
+    gasto = get_object_or_404(GastoControl, id=gasto_id)
     viaje = gasto.viaje
 
     if request.user.is_authenticated:
@@ -405,7 +402,7 @@ def eliminar_gasto_ajax(request, gasto_id):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'No autenticado'}, status=401)
 
-    gasto = get_object_or_404(Gasto, id=gasto_id)
+    gasto = get_object_or_404(GastoControl, id=gasto_id)
     viaje = gasto.viaje
 
     participante = Participante.objects.filter(viaje=viaje, usuario=request.user).first()
@@ -419,7 +416,7 @@ def eliminar_gasto_ajax(request, gasto_id):
     gasto_data = {
         'id': gasto.id,
         'concepto': gasto.concepto,
-        'cantidad': str(gasto.cantidad),
+        'cantidad': str(gasto.monto),  # Adaptado al modelo real
         'categoria': gasto.categoria,
         'pagado_por_id': gasto.pagado_por.id,
         'viaje_id': viaje.id,
@@ -450,11 +447,11 @@ def restaurar_gasto_ajax(request):
         viaje = get_object_or_404(Viaje, id=gasto_data['viaje_id'])
         participante = get_object_or_404(Participante, id=gasto_data['pagado_por_id'])
 
-        gasto = Gasto.objects.create(
+        gasto = GastoControl.objects.create(
             viaje=viaje,
             pagado_por=participante,
             concepto=gasto_data['concepto'],
-            cantidad=gasto_data['cantidad'],
+            monto=gasto_data['cantidad'],  # Adaptado al modelo real
             categoria=gasto_data['categoria']
         )
 

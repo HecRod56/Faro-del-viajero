@@ -37,8 +37,6 @@ def _get_viaje_y_participante(request, viaje_id):
     return viaje, participante
 
 
-# ─── Vista principal: Resumen Grupal (RF-42) ──────────────────────────────────
-
 @login_required
 def resumen_grupal(request, viaje_id):
     """
@@ -56,6 +54,25 @@ def resumen_grupal(request, viaje_id):
 
     resumen       = calcular_resumen_grupal(viaje)
     mi_billetera  = calcular_mi_billetera(viaje, participante)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # EXTRAER LOGICA DINÁMICA PARA LA BARRA DE PRESUPUESTO (FIX)
+    # ──────────────────────────────────────────────────────────────────────────
+    # Extraemos el total gastado que calcula tu función auxiliar y nos aseguramos de que sea un valor ABSOLUTO (positivo)
+    monto_total_raw = resumen.get('total_gastado', 0) if isinstance(resumen, dict) else getattr(resumen, 'total_gastado', 0)
+    total_gastado = abs(float(monto_total_raw))
+
+    # CORRECCIÓN: Usamos 'presupuesto_estimado' que es el campo real del modelo Viaje
+    presupuesto = float(viaje.presupuesto_estimado) if hasattr(viaje, 'presupuesto_estimado') and viaje.presupuesto_estimado else 0.0
+    
+    # El dinero disponible será el presupuesto menos lo que ya se gastó
+    disponible = presupuesto - total_gastado
+
+    # Calculamos el porcentaje exacto de llenado de la barra sin que desborde el 100%
+    porcentaje_barra = 0
+    if presupuesto > 0:
+        porcentaje_barra = min((total_gastado / presupuesto) * 100, 100)
+    # ──────────────────────────────────────────────────────────────────────────
 
     # Lista de gastos activos para el log (tabla derecha)
     gastos = (
@@ -79,7 +96,6 @@ def resumen_grupal(request, viaje_id):
     ids_gastos = GastoModel.todos.filter(viaje=viaje).values_list('id', flat=True)
 
     historial = AuditoriaGasto.objects.filter(
-        #gasto_id__in=gastos.values_list('id', flat=True)
         gasto_id__in=ids_gastos
     ).select_related('realizado_por')[:50]
 
@@ -94,6 +110,11 @@ def resumen_grupal(request, viaje_id):
         'participantes_viaje': participantes_viaje,
         'historial':           historial,
         'es_organizador':      participante.rol == 'organizador',
+        
+        # PASAMOS LAS NUEVAS VARIABLES MATEMÁTICAS DINÁMICAS AL HTML
+        'total_gastado':       total_gastado,
+        'disponible':          disponible,
+        'porcentaje_barra':    porcentaje_barra,
     }
     return render(request, 'control_gastos/resumen_grupal.html', context)
 
