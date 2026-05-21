@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'autenticado/css/auth-shared.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="card shadow-sm border-0 p-5 text-center" style="max-width: 500px; border-radius: 16px;">
+        <div class="mb-4">
+            <span style="font-size: 60px;">📩</span>
+        </div>
+        <h2 class="fw-bold text-dark mb-3">¡Registro casi listo!</h2>
+        <p class="text-secondary mb-4" style="font-size: 15px; line-height: 1.6;">
+            Hemos enviado un enlace de confirmación a la dirección:<br>
+            <strong class="text-dark">{{ email }}</strong>
+        </p>
+        <div class="alert alert-light border text-start mb-4" style="font-size: 14px; border-radius: 8px;">
+            📌 <strong>¿No encuentras el correo?</strong><br>
+            Revisa tu bandeja de <strong>Correo no deseado (Spam)</strong> o espera un par de minutos a que Brevo termine el envío.
+        </div>
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary w-100 fw-bold" style="border-radius: 8px; padding: 10px;">
+            Volver al Inicio de Sesión
+        </a>
+    </div>
+</div>
+{% endblock %}

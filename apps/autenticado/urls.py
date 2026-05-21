@@ -28,4 +28,5 @@ urlpatterns = [
     ), name='password_reset_confirm'),
     # Añadimos la ruta de logout
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('activar/<uidb64>/<token>/', views.activar_cuenta, name='activar_cuenta'),
 ]

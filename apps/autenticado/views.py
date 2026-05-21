@@ -1,4 +1,10 @@
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, get_user_model, update_session_auth_hash
 from django.contrib import messages
@@ -6,6 +12,7 @@ from django.http import JsonResponse
 from apps.gestion_viajes.models import Viaje
 from datetime import datetime
 from .forms import CustomPasswordChangeForm
+from .tokens import token_activacion
 
 
 User = get_user_model()
@@ -26,16 +33,56 @@ def register(request):
             user = User.objects.create_user(username=email, email=email, password=password, first_name=full_name)
             user.phone = phone 
             user.dob = dob
+            
+            # Bloqueamos la cuenta temporalmente hasta que use el link del correo
+            user.is_active = False 
             user.save()
             
-            # NUEVO: Iniciamos sesión automáticamente después de registrarse
-            login(request, user)
-            messages.success(request, "¡Cuenta creada con éxito! Bienvenido.")
+            # Generamos el token seguro usando tu archivo tokens.py
+            dominio = get_current_site(request).domain
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_activacion.make_token(user)
             
-            # NUEVO: Redirigimos al perfil
-            return redirect('profile') 
+            # Armamos el enlace de verificación
+            link_verificacion = f"http://{dominio}/activar/{uid}/{token}/"
+            
+            # Armamos el correo en HTML
+            asunto = 'Confirma tu cuenta - Faro del Viajero'
+            contexto = {
+                'user': user,
+                'link': link_verificacion
+            }
+            mensaje_html = render_to_string('autenticado/correo_verificacion.html', contexto)
+            
+            # Enviamos por Brevo usando tu configuración de SMTP
+            send_mail(
+                subject=asunto,
+                message='', # Vacío porque es HTML
+                from_email=None, # Django jala el DEFAULT_FROM_EMAIL de tu settings
+                recipient_list=[user.email],
+                html_message=mensaje_html,
+                fail_silently=False,
+            )
+            
+            # En lugar de redirigir a viajes, lo mandamos a avisarle que cheque su bandeja
+            return render(request, 'autenticado/revisa_correo.html', {'email': user.email})
     
     return render(request, 'autenticado/register.html')
+
+def activar_cuenta(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and token_activacion.check_token(user, token):
+        user.is_active = True  # ¡Ya es un usuario oficial!
+        user.save()
+        messages.success(request, "¡Tu cuenta ha sido verificada! Ya puedes iniciar sesión.")
+        return render(request, 'autenticado/activacion_exitosa.html')
+    else:
+        return render(request, 'autenticado/activacion_fallida.html')
 
 def login_view(request):
     if request.method == 'POST':
@@ -51,8 +98,8 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
-                # NUEVO: Redirigimos al perfil en lugar del home
-                return redirect('profile') 
+                # NUEVO: Redirigimos a los vijaes del usuario después de iniciar sesión
+                return redirect('/viajes/ver_mis_viajes/') 
             else:
                 messages.error(request, "Contraseña incorrecta. Inténtalo de nuevo.")
             

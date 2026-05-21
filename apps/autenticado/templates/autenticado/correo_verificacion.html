@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8f9fa; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="550" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eef0f2;">
+                    <tr>
+                        <td align="center" style="padding: 30px 0 10px 0;">
+                            <h1 style="margin: 0; color: #1a2530; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Faro del Viajero 🧭</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; text-align: center;">
+                            <p style="font-size: 18px; color: #333333; margin-bottom: 10px; font-weight: 600;">¡Hola, {{ user.first_name }}!</p>
+                            <p style="font-size: 15px; color: #666666; line-height: 1.6; margin: 0 0 25px 0;">
+                                Gracias por unirte a nuestro equipo de aventura. Para poder activar tu cuenta y empezar a planificar tus rutas, necesitamos confirmar que este es tu correo electrónico.
+                            </p>
+                            
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td align="center" style="border-radius: 6px;" bgcolor="#20c997">
+                                        <a href="{{ link }}" target="_blank" style="font-size: 15px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; border: 1px solid #20c997; display: inline-block;">
+                                            Verificar mi cuenta
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="font-size: 13px; color: #999999; margin-top: 30px; line-height: 1.5;">
+                                Si el botón de arriba no funciona, copia y pega el siguiente enlace en tu navegador web:
+                            </p>
+                            <p style="font-size: 12px; color: #20c997; word-break: break-all; margin: 5px 0 0 0;">
+                                {{ link }}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 40px; background-color: #fafbfc; text-align: center; border-top: 1px solid #eeeeee;">
+                            <p style="font-size: 12px; color: #aaaaaa; margin: 0;">
+                                Este es un correo automático, por favor no respondas a este mensaje.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

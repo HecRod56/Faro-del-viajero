@@ -202,3 +202,7 @@ ANYMAIL = {
     "BREVO_API_KEY": config("BREVO_API_KEY"),
 }
 DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE')}>"
+
+GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY", default="")
+PEXELS_API_KEY = config("PEXELS_API_KEY", default="")
+
