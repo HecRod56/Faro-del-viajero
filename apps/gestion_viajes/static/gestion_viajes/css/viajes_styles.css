@@ -1,32 +1,20 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ==========================================
+   viajes_styles.css
+   Estilos compartidos entre todas las pantallas
+   de la app gestion_viajes.
+   Variables y estilos base vienen de styles.css (core).
+   ========================================== */
 
-:root {
-    --teal: #2baa8c;
-    --teal-light: #e6f7f3;
-    --teal-dark: #1e8a70;
-    --white: #ffffff;
-    --gray-50: #f7f8fa;
-    --gray-100: #f0f1f3;
-    --gray-300: #d1d5db;
-    --gray-500: #6b7280;
-    --gray-700: #374151;
-    --gray-900: #111827;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-    --radius: 12px;
+/* ==========================================
+   Layout base de contenido
+   ========================================== */
+.gestion-viajes-content {
+    padding-bottom: 32px;
 }
 
-body {
-font-family: 'Inter', sans-serif;
-background: var(--gray-50);
-color: var(--gray-900);
-min-height: 100vh;
-/* Respetamos el espacio de arriba, y dejamos 32px abajo */
-padding-top: 80px; 
-padding-bottom: 32px;
-}
-
-/* Hero Banner */
+/* ==========================================
+   Hero Banner
+   ========================================== */
 .welcome-banner {
     position: relative;
     width: 100%;
@@ -42,14 +30,10 @@ padding-bottom: 32px;
 .welcome-banner__bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(20, 155, 126, 0.7), rgba(0, 0, 0, 0.5)),
+    background: linear-gradient(rgba(14, 158, 142, 0.7), rgba(0, 0, 0, 0.5)),
                 url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1353&q=80');
     background-size: cover;
     background-position: center;
-}
-
-.welcome-banner__overlay {
-    display: none;
 }
 
 .welcome-banner__content {
@@ -60,21 +44,20 @@ padding-bottom: 32px;
 }
 
 .welcome-banner__content h1 {
-    font-family: 'Sora', sans-serif;
     font-size: clamp(2.4rem, 6vw, 4rem);
-    font-weight: 800;
-    color: #fff;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-white);
     letter-spacing: -0.02em;
     margin-bottom: 14px;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
 }
 
 .welcome-banner__content p {
     font-size: 1.05rem;
-    color: rgba(255,255,255,0.88);
+    color: rgba(255, 255, 255, 0.88);
     font-style: italic;
     margin-bottom: 32px;
-    text-shadow: 0 1px 8px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
 }
 
 .welcome-banner__actions {
@@ -84,43 +67,34 @@ padding-bottom: 32px;
     flex-wrap: wrap;
 }
 
-.btn {
+/* Botón outline exclusivo del banner (sobre fondo oscuro) */
+.btn-outline-banner {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 13px 28px;
-    border-radius: 50px;
+    border-radius: var(--btn-radius);
     font-size: 0.9375rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
     text-decoration: none;
     white-space: nowrap;
-}
-
-.btn-primary {
-    background: var(--teal);
-    color: var(--white);
-}
-.btn-primary:hover {
-    background: var(--teal-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(43,170,140,0.45);
-}
-
-.btn-outline {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    border: 2px solid rgba(255,255,255,0.7);
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--color-white);
+    border: 2px solid rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(6px);
-}
-.btn-outline:hover {
-    background: rgba(255,255,255,0.28);
-    border-color: #fff;
+    transition: var(--transition);
 }
 
-/* Section */
+.btn-outline-banner:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: var(--color-white);
+    color: var(--color-white);
+}
+
+/* ==========================================
+   Section header
+   ========================================== */
 .section-header {
     margin-bottom: 8px;
     padding: 0 24px;
@@ -129,47 +103,47 @@ padding-bottom: 32px;
 }
 
 .section-header h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--gray-900);
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
     margin-bottom: 6px;
 }
 
 .section-header p {
-    font-size: 0.95rem;
-    color: var(--gray-500);
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
     font-style: italic;
     margin-bottom: 32px;
 }
 
-/* Cards grid */
+/* ==========================================
+   Cards grid
+   ========================================== */
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
     padding: 0 24px;
-    max-width: 1000px;
+    max-width: 100%;
     margin: 0 auto;
     animation: fadeUp 0.4s 0.2s ease both;
 }
 
 .feature-card {
-    background: var(--white);
+    background: var(--color-white);
     border-radius: 16px;
     padding: 28px 24px 24px;
-    border: 1px solid var(--gray-100);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid #f0f1f3;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     cursor: pointer;
-    transition: all 0.22s ease;
+    transition: var(--transition);
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0;
 }
 
 .feature-card:hover {
-    box-shadow: 0 8px 28px rgba(0,0,0,0.11);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.11);
     transform: translateY(-3px);
 }
 
@@ -204,32 +178,32 @@ padding-bottom: 32px;
 .icon-amber  { background: #fef3c7; }
 .icon-amber svg { color: #d97706; }
 
+/* Badge */
 .badge {
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.07em;
     text-transform: uppercase;
 }
 
-.badge-green  { color: #059669; background: transparent; }
-.badge-pink   { color: #db2777; background: transparent; }
-.badge-amber  { color: #d97706; background: transparent; }
+.badge-green { color: #059669; }
+.badge-pink  { color: #db2777; }
+.badge-amber { color: #d97706; }
 
 .feature-card__title {
-    font-family: 'Sora', sans-serif;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--gray-900);
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
     margin-bottom: 10px;
 }
 
 .feature-card__desc {
-    font-size: 0.875rem;
-    color: var(--gray-500);
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
     line-height: 1.65;
     margin-bottom: 24px;
     flex: 1;
@@ -239,8 +213,8 @@ padding-bottom: 32px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
     text-decoration: none;
     cursor: pointer;
     transition: gap 0.18s ease;
@@ -251,21 +225,22 @@ padding-bottom: 32px;
 
 .feature-card__link:hover { gap: 10px; }
 
-.link-green  { color: #059669; }
-.link-pink   { color: #db2777; }
-.link-amber  { color: #d97706; }
+.link-green { color: #059669; }
+.link-pink  { color: #db2777; }
+.link-amber { color: #d97706; }
 
-/* Animations */
+/* ==========================================
+   Animaciones
+   ========================================== */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Highlight pulse on CTA button */
 @keyframes pulse-glow {
-    0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.9), 0 6px 20px rgba(43,170,140,0.45); }
-    50%  { box-shadow: 0 0 0 16px rgba(255,255,255,0), 0 6px 20px rgba(43,170,140,0.45); }
-    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0), 0 6px 20px rgba(43,170,140,0.45); }
+    0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9), 0 6px 20px rgba(14, 158, 142, 0.45); }
+    50%  { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0), 0 6px 20px rgba(14, 158, 142, 0.45); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0), 0 6px 20px rgba(14, 158, 142, 0.45); }
 }
 
 .btn-primary.highlight {
@@ -273,9 +248,11 @@ padding-bottom: 32px;
     transform: translateY(-2px);
 }
 
+/* ==========================================
+   Responsive
+   ========================================== */
 @media (max-width: 640px) {
     .welcome-banner__content h1 { font-size: 2.2rem; }
     .welcome-banner__actions { flex-direction: column; align-items: center; }
-    .btn { width: 100%; justify-content: center; max-width: 280px; }
     .cards-grid { grid-template-columns: 1fr; }
 }

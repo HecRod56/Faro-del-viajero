@@ -1,0 +1,72 @@
+<!-- NIVEL DEL HOTEL -->
+<!-- Las estrellas de OSM raramente están disponibles en Geoapify.
+     Se usa el nivel estimado basado en palabras clave del nombre (misma lógica que extraer_precio_real).
+     El filtro de "nivel" se mapea a rangos de precio_max_num en el backend. -->
+<p class="filtro-label">Nivel del Hotel</p>
+<div class="d-flex flex-column gap-1 mb-3">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="subcategoria" value="hotel_lujo" id="hotel_lujo" {% if 'hotel_lujo' in subcategorias %}checked{% endif %}>
+        <label class="form-check-label" for="hotel_lujo" style="font-size:13px;color:#374151;">
+            💎 Lujo <span style="color:#94A3B8;font-size:11px;">($6,000+ MXN/noche)</span>
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="subcategoria" value="hotel_alto" id="hotel_alto" {% if 'hotel_alto' in subcategorias %}checked{% endif %}>
+        <label class="form-check-label" for="hotel_alto" style="font-size:13px;color:#374151;">
+            ⭐ Premium <span style="color:#94A3B8;font-size:11px;">($3,000–$6,000 MXN/noche)</span>
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="subcategoria" value="hotel_medio" id="hotel_medio" {% if 'hotel_medio' in subcategorias %}checked{% endif %}>
+        <label class="form-check-label" for="hotel_medio" style="font-size:13px;color:#374151;">
+            🏨 Estándar <span style="color:#94A3B8;font-size:11px;">($1,500–$3,000 MXN/noche)</span>
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="subcategoria" value="hotel_bajo" id="hotel_bajo" {% if 'hotel_bajo' in subcategorias %}checked{% endif %}>
+        <label class="form-check-label" for="hotel_bajo" style="font-size:13px;color:#374151;">
+            🏩 Económico <span style="color:#94A3B8;font-size:11px;">($700–$1,500 MXN/noche)</span>
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="subcategoria" value="hotel_muy_bajo" id="hotel_muy_bajo" {% if 'hotel_muy_bajo' in subcategorias %}checked{% endif %}>
+        <label class="form-check-label" for="hotel_muy_bajo" style="font-size:13px;color:#374151;">
+            🎒 Hostal <span style="color:#94A3B8;font-size:11px;">($300–$700 MXN/noche)</span>
+        </label>
+    </div>
+</div>
+
+<!-- SERVICIOS -->
+<p class="filtro-label mt-3">Servicios</p>
+<div class="d-flex flex-column gap-1 mb-3">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="servicios" value="alberca" id="serv_alberca" {% if 'alberca' in servicios %}checked{% endif %}>
+        <label class="form-check-label" for="serv_alberca" style="font-size:12px;color:#374151;">
+            🏊 Alberca
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="servicios" value="mascotas" id="serv_mascotas" {% if 'mascotas' in servicios %}checked{% endif %}>
+        <label class="form-check-label" for="serv_mascotas" style="font-size:12px;color:#374151;">
+            🐕 Mascotas
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="servicios" value="wifi" id="serv_wifi" {% if 'wifi' in servicios %}checked{% endif %}>
+        <label class="form-check-label" for="serv_wifi" style="font-size:12px;color:#374151;">
+            🛜 Wi-Fi
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="servicios" value="estacionamiento" id="serv_estacionamiento" {% if 'estacionamiento' in servicios %}checked{% endif %}>
+        <label class="form-check-label" for="serv_estacionamiento" style="font-size:12px;color:#374151;">
+            🚗 Estacionamiento
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="servicios" value="accesibilidad" id="serv_accesibilidad" {% if 'accesibilidad' in servicios %}checked{% endif %}>
+        <label class="form-check-label" for="serv_accesibilidad" style="font-size:12px;color:#374151;">
+            ♿ Accesibilidad
+        </label>
+    </div>
+</div>

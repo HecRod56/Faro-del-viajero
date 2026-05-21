@@ -1,90 +1,233 @@
 {% extends "core/base.html" %}
-{% block subnav %}
 {% load static %}
 
-{% block extra_head %}
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'gestion_viajes/css/common_viajes.css' %}">
     <link rel="stylesheet" href="{% static 'gestion_viajes/css/ver_mis_viajes.css' %}">
 {% endblock %}
 
-<div class="container py-4 px-3">
-    {% if messages %}
-  {% for message in messages %}
-    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" 
-         style="padding: 15px; background-color: #f44336; color: white; margin-bottom: 20px; border-radius: 8px;">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
+{% block content %}
+<div class="container-fluid py-4 px-3">
 
+    <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold mb-0" style="font-size: 2.25rem; color: #374151;">Mis viajes</h1>
-        <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear nuevo viaje</a>
+        <h1 class="mb-0">Mis viajes</h1>
+        <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn-teal text-decoration-none">
+            + Crear nuevo viaje
+        </a>
     </div>
 
+    <!-- Filtros -->
     <div class="d-flex gap-2 mb-5 overflow-auto pb-2 flex-nowrap">
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="filter-btn text-decoration-none {% if not filtro_actual %}active{% endif %}">Todos</a>
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=planeado" class="filter-btn text-decoration-none {% if filtro_actual == 'planeado' %}active{% endif %}">Planeados</a>
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=en curso" class="filter-btn text-decoration-none {% if filtro_actual == 'en curso' %}active{% endif %}">En curso</a>
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=finalizado" class="filter-btn text-decoration-none {% if filtro_actual == 'finalizado' %}active{% endif %}">Finalizados</a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}"
+           class="filter-btn text-decoration-none {% if not filtro_actual %}active{% endif %}">
+            Todos
+        </a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=planeado"
+           class="filter-btn text-decoration-none {% if filtro_actual == 'planeado' %}active{% endif %}">
+            Planeados
+        </a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=en curso"
+           class="filter-btn text-decoration-none {% if filtro_actual == 'en curso' %}active{% endif %}">
+            En curso
+        </a>
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}?estado=finalizado"
+           class="filter-btn text-decoration-none {% if filtro_actual == 'finalizado' %}active{% endif %}">
+            Finalizados
+        </a>
     </div>
 
+    <!-- Grid de tarjetas -->
     <div class="row g-4">
         {% for viaje in viajes %}
             <div class="col-12 col-md-6 col-lg-4">
                 <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="text-decoration-none">
-                    <div class="trip-card {% if viaje.estado == 'en curso' %}en-curso{% elif viaje.estado == 'finalizado' %}finalizado{% endif %}">
-                        
-                        <div class="card-header-band {% if viaje.estado == 'en curso' %}card-gradient-2{% elif viaje.estado == 'finalizado' %}card-gradient-3{% else %}card-gradient-1{% endif %}">
+                    <div class="trip-card">
+
+                        <!-- Cabecera con gradiente según estado -->
+                        <div class="card-header-band
+                            {% if viaje.estado == 'en curso' %}card-gradient-2
+                            {% elif viaje.estado == 'finalizado' %}card-gradient-3
+                            {% else %}card-gradient-1{% endif %}">
+
                             <span class="badge-status">
                                 {% if viaje.estado == 'planeado' %}
                                     <span class="text-yellow-600">● Planeado</span>
                                 {% elif viaje.estado == 'en curso' %}
                                     <span class="text-green-600">● En curso</span>
                                 {% else %}
-                                    <span class="text-muted">● Finalizado</span>
+                                    <span class="text-secondary-custom">● Finalizado</span>
                                 {% endif %}
                             </span>
+
                             <h2>{{ viaje.destino }}</h2>
                         </div>
 
+                        <!-- Cuerpo de la tarjeta -->
                         <div class="p-4">
-                            <h3 class="fw-bold text-blue-900 mb-1" style="font-size: 1.1rem;">{{ viaje.nombre }}</h3>
-                            <p class="text-muted mb-3" style="font-size: 0.875rem;">
-                                📅 {{ viaje.fecha_inicio|date:"d M" }} - {{ viaje.fecha_fin|date:"d M Y" }}
+                            <h3 class="mb-1">{{ viaje.nombre }}</h3>
+                            <p class="text-secondary-custom mb-3">
+                                📅 {{ viaje.fecha_inicio|date:"d M" }} – {{ viaje.fecha_fin|date:"d M Y" }}
                             </p>
                             <hr class="mb-3">
-                            
+
                             <div class="d-flex align-items-center">
                                 <div class="avatar-stack">
-                                    <div class="avatar" style="background:#149B7E;">{{ viaje.nombre|slice:":1" }}</div>
-                                    <div class="avatar" style="background:#f97316;">+</div>
+                                    <div class="avatar" style="background: var(--color-primary);">
+                                        {{ viaje.nombre|slice:":1" }}
+                                    </div>
+                                    <div class="avatar" style="background: #f97316;">+</div>
                                 </div>
-                                <span class="fw-bold text-blue-900 ms-2 me-auto" style="font-size: 0.75rem;">
+                                <span class="text-blue-900 fw-bold ms-2 me-auto" style="font-size: var(--font-size-small);">
                                     Máx: {{ viaje.capacidad_max }} pers.
                                 </span>
-                                
-                                <span class="fw-bold 
+                                <span class="fw-bold
                                     {% if viaje.estado == 'planeado' %}text-yellow-600
                                     {% elif viaje.estado == 'en curso' %}text-green-600
-                                    {% else %}text-muted{% endif %}" 
-                                    style="font-size: 0.75rem; text-transform: capitalize;">
+                                    {% else %}text-secondary-custom{% endif %}"
+                                    style="font-size: var(--font-size-small); text-transform: capitalize;">
                                     {{ viaje.estado }}
                                 </span>
                             </div>
                         </div>
+
                     </div>
                 </a>
             </div>
+
         {% empty %}
             <div class="col-12 text-center py-5">
                 <div class="bg-white p-5 rounded-4 shadow-sm">
-                    <h3 class="fw-bold text-muted">Aún no tienes viajes registrados</h3>
-                    <p class="text-muted mb-4">Comienza a planear tu próxima aventura ahora mismo.</p>
-                    <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn-teal text-decoration-none">+ Crear mi primer viaje</a>
+                    <h3 class="mb-2">Aún no tienes viajes registrados</h3>
+                    <p class="text-secondary-custom mb-4">
+                        Comienza a planear tu próxima aventura ahora mismo.
+                    </p>
+                    <a href="{% url 'gestion_viajes:p_crear_viaje' %}" class="btn-teal text-decoration-none">
+                        + Crear mi primer viaje
+                    </a>
                 </div>
             </div>
         {% endfor %}
     </div>
+
+    <!-- ══ TOAST DESHACER ELIMINACIÓN DE VIAJE ══ -->
+    <div id="undo-viaje-toast" style="
+        position: fixed; bottom: 20px; left: 20px;
+        background: var(--color-white);
+        font-family: var(--font-family-base);
+        color: var(--color-text);
+        padding: 16px 24px;
+        border-radius: 4px;
+        font-size: var(--font-size-body);
+        box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
+        display: none; z-index: 1000;
+        align-items: center; gap: 16px;
+        max-width: 400px;
+        animation: slideInLeft 0.3s ease-out;
+    ">
+        <div style="flex: 1;">
+            <div id="viaje-toast-message">Viaje eliminado</div>
+            <div style="height: 2px; background: rgba(0,0,0,0.1); border-radius: 1px; margin-top: 8px; overflow: hidden;">
+                <div id="viaje-timer-progress" style="height: 100%; background: var(--color-primary); border-radius: 1px; width: 100%; transition: width 0.1s linear;"></div>
+            </div>
+        </div>
+        <button id="undo-viaje-btn" class="btn-primary" style="white-space: nowrap;">
+            Deshacer
+        </button>
+    </div>
+
 </div>
+
+<style>
+    @keyframes slideInLeft {
+        from { transform: translateX(-110%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+    }
+    .toast-exit {
+        animation: slideOutLeft 0.3s ease-in forwards;
+    }
+    @keyframes slideOutLeft {
+        from { transform: translateX(0);    opacity: 1; }
+        to   { transform: translateX(-110%); opacity: 0; }
+    }
+</style>
+
+<script>
+    (function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('deleted') !== '1') return;
+
+        const nombre           = decodeURIComponent(params.get('nombre') || 'El viaje');
+        const toast            = document.getElementById('undo-viaje-toast');
+        const toastMsg         = document.getElementById('viaje-toast-message');
+        const timerBar         = document.getElementById('viaje-timer-progress');
+        const undoBtn          = document.getElementById('undo-viaje-btn');
+        const UNDO_DELAY       = 5000;
+
+        // Limpiar la URL para que no reaparezca al recargar
+        history.replaceState({}, '', window.location.pathname);
+
+        toastMsg.textContent = `"${nombre}" eliminado`;
+        toast.style.display = 'flex';
+        timerBar.style.width = '100%';
+
+        let timeRemaining = UNDO_DELAY;
+        const interval = setInterval(() => {
+            timeRemaining -= 100;
+            timerBar.style.width = ((timeRemaining / UNDO_DELAY) * 100) + '%';
+            if (timeRemaining <= 0) clearInterval(interval);
+        }, 100);
+
+        const timeout = setTimeout(() => {
+            clearInterval(interval);
+            ocultarToast();
+        }, UNDO_DELAY);
+
+        undoBtn.addEventListener('click', () => {
+            clearTimeout(timeout);
+            clearInterval(interval);
+            undoBtn.disabled = true;
+            undoBtn.textContent = 'Restaurando...';
+
+            fetch('{% url "gestion_viajes:p_restaurar_viaje_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    ocultarToast();
+                    window.location.href = '{% url "gestion_viajes:p_detalle_viaje" 0 %}'.replace('/0/', '/' + data.viaje_id + '/');
+                } else {
+                    alert('Error al restaurar el viaje: ' + (data.error || 'Error desconocido'));
+                    undoBtn.disabled = false;
+                    undoBtn.textContent = 'Deshacer';
+                }
+            })
+            .catch(() => {
+                alert('Error al conectar con el servidor');
+                undoBtn.disabled = false;
+                undoBtn.textContent = 'Deshacer';
+            });
+        });
+
+        function ocultarToast() {
+            toast.classList.add('toast-exit');
+            setTimeout(() => {
+                toast.style.display = 'none';
+                toast.classList.remove('toast-exit');
+            }, 300);
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    })();
+</script>
+
 {% endblock %}

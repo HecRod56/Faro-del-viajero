@@ -1,0 +1,314 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ viaje.nombre }} — Gastos | Faro del Viajero{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="{% static 'control_gastos/css/resumen_grupal.css' %}" />
+{% endblock %}
+
+{% block subnav %}
+  {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-3">
+
+  <!-- ── Loader overlay ─────────────────────────────── -->
+  <div id="page-loader">
+    <div class="loader-spinner"></div>
+    <p>Cargando gastos del viaje…</p>
+  </div>
+
+  <!-- ── Banner ─────────────────────────────────────── -->
+  <div class="cg-banner">
+    {% if viaje.imagen_destino %}
+      <img src="{{ viaje.imagen_destino.url }}" alt="{{ viaje.destino }}">
+    {% else %}
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80" alt="Viaje">
+    {% endif %}
+    <div class="cg-banner-overlay"></div>
+    <span class="cg-banner-badge">{{ viaje.get_estado_display }}</span>
+  </div>
+
+  <!-- ── Pestañas ───────────────────────────────────── -->
+  <div class="cg-tabs-wrap">
+    <ul class="cg-tabs">
+      <li><a href="#" class="activa tab-link" data-tab="resumen">Resumen grupal</a></li>
+      <li><a href="#" class="tab-link" data-tab="billetera">Mi Billetera</a></li>
+      <li><a href="#" class="tab-link" data-tab="liquidacion">Liquidación</a></li>
+      <li><a href="#" class="tab-link" data-tab="historial">Historial</a></li>
+    </ul>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+       PESTAÑA 1: RESUMEN GRUPAL
+  ════════════════════════════════════════════ -->
+  
+  {% include "control_gastos/partials/_tab_resumen.html" %}
+
+  <!-- ════════════════════════════════════════════
+       PESTAÑA 2: MI BILLETERA
+  ════════════════════════════════════════════ -->
+  
+  {% include "control_gastos/partials/_tab_billetera.html" %}
+
+  <!-- ════════════════════════════════════════════
+       PESTAÑA 3: LIQUIDACIÓN
+  ════════════════════════════════════════════ -->
+  
+  {% include "control_gastos/partials/_tab_liquidacion.html" %}
+
+  <!-- ════════════════════════════════════════════
+       PESTAÑA 4: HISTORIAL
+  ════════════════════════════════════════════ -->
+  
+  {% include "control_gastos/partials/_tab_historial.html" %}
+
+</div><!-- /container -->
+
+
+<!-- ════════════════════════════════════════════
+     MODAL: NUEVO GASTO
+════════════════════════════════════════════ -->
+
+  {% include "control_gastos/modals/_modal_crear_gasto.html" %}
+
+<!-- ════════════════════════════════════════════
+     MODAL: EDITAR GASTO
+════════════════════════════════════════════ -->
+<div id="modal-editar" class="cg-modal-backdrop">
+  <div class="cg-modal">
+    <div class="cg-modal-header">
+      <h3><i class="bi bi-pencil-square me-2" style="color:var(--cg-primario);"></i>Editar gasto</h3>
+      <button class="cg-modal-close" onclick="cerrarModal('modal-editar')">&times;</button>
+    </div>
+    <form method="POST" id="form-editar" action="">
+      {% csrf_token %}
+      <div class="cg-modal-body">
+        <div class="cg-form-grid">
+          <div class="cg-form-group full">
+            <label>Descripción *</label>
+            <input type="text" name="concepto" id="edit-concepto" required>
+          </div>
+          <div class="cg-form-group">
+            <label>Monto *</label>
+            <input type="number" name="monto" id="edit-monto" step="0.01" min="0.01" required>
+          </div>
+          <div class="cg-form-group">
+            <label>Fecha *</label>
+            <input type="date" name="fecha" id="edit-fecha" required>
+          </div>
+          <div class="cg-form-group">
+            <label>Categoría *</label>
+            <select name="categoria" id="edit-categoria" required>
+              {% for val, etiqueta in categorias %}
+              <option value="{{ val }}">{{ etiqueta }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="cg-form-group">
+            <label>Quién pagó *</label>
+            <select name="pagado_por_id" id="edit-pagador" required>
+              {% for p in participantes_viaje %}
+              <option value="{{ p.id }}">
+                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {% if p.usuario == request.user %}(Tú){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="cg-form-group">
+            <label>Método de división</label>
+            <select name="metodo_division" id="edit-metodo">
+              {% for val, etiqueta in metodos_division %}
+              <option value="{{ val }}">{{ etiqueta }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="cg-form-group full">
+            <label>Dividir entre *</label>
+            <div>
+              {% for p in participantes_viaje %}
+              <label class="cg-check-row">
+                <input type="checkbox" name="participantes_ids" value="{{ p.id }}" checked
+                       class="edit-check" data-pid="{{ p.id }}">
+                {{ p.usuario.get_full_name|default:p.usuario.username }}
+                {% if p.usuario == request.user %}<span class="tu-badge">Tú</span>{% endif %}
+                <input type="number" name="porcentaje_{{ p.id }}"
+                       class="edit-porcentaje" style="display:none; width:90px;"
+                       min="0" max="100" step="0.01" placeholder="% ej: 33">
+                <input type="number" name="monto_fijo_{{ p.id }}"
+                       class="edit-monto-fijo" style="display:none; width:90px;"
+                       min="0" step="0.01" placeholder="$ monto">
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cg-modal-footer">
+        <button type="button" class="cg-btn cg-btn-outline" onclick="cerrarModal('modal-editar')">Cancelar</button>
+        <button type="submit" class="cg-btn cg-btn-primario">
+          <i class="bi bi-floppy"></i> Guardar cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     MODAL: CONFIRMAR ELIMINACIÓN
+════════════════════════════════════════════ -->
+<div id="modal-eliminar" class="cg-modal-backdrop">
+  <div class="cg-modal" style="width:400px;">
+    <div class="cg-modal-header">
+      <h3><i class="bi bi-exclamation-triangle me-2" style="color:var(--cg-rojo);"></i>Eliminar gasto</h3>
+      <button class="cg-modal-close" onclick="cerrarModal('modal-eliminar')">&times;</button>
+    </div>
+    <div class="cg-modal-body">
+      <p style="color:var(--cg-texto-2); font-size:14px; line-height:1.6; font-family:'Montserrat',sans-serif;">
+        ¿Estás seguro de que quieres eliminar el gasto
+        <strong id="nombre-gasto-eliminar" style="color:var(--cg-texto);"></strong>?
+        Los saldos se recalcularán automáticamente.
+      </p>
+    </div>
+    <form method="POST" id="form-eliminar" action="">
+      {% csrf_token %}
+      <div class="cg-modal-footer">
+        <button type="button" class="cg-btn cg-btn-outline" onclick="cerrarModal('modal-eliminar')">Cancelar</button>
+        <button type="submit" class="cg-btn cg-btn-peligro">
+          <i class="bi bi-trash3"></i> Sí, eliminar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+// ── Pestañas ─────────────────────────────────────────────────
+document.querySelectorAll('.tab-link').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const tab = link.dataset.tab;
+    document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('activa'));
+    document.querySelectorAll('.cg-tab-content').forEach(c => c.classList.remove('activa'));
+    link.classList.add('activa');
+    document.getElementById('tab-' + tab).classList.add('activa');
+  });
+});
+
+// ── Modales ──────────────────────────────────────────────────
+function cerrarModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.cg-modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) cerrarModal(m.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape')
+    document.querySelectorAll('.cg-modal-backdrop.open').forEach(m => cerrarModal(m.id));
+});
+
+function abrirModalNuevo() {
+  document.getElementById('modal-nuevo').classList.add('open');
+}
+
+function abrirModalEditar(id, concepto, monto, categoria, fecha, metodo, pagadorId) {
+  const url = "{% url 'gastos:modificar' viaje.id 0 %}".replace('/0/', '/' + id + '/');
+  document.getElementById('form-editar').action   = url;
+  document.getElementById('edit-concepto').value  = concepto;
+  document.getElementById('edit-monto').value     = monto;
+  document.getElementById('edit-fecha').value     = fecha;
+  document.getElementById('edit-categoria').value = categoria;
+  document.getElementById('edit-metodo').value    = metodo;
+  document.getElementById('edit-metodo').dispatchEvent(new Event('change'));
+  document.getElementById('edit-pagador').value   = pagadorId;
+  document.getElementById('modal-editar').classList.add('open');
+}
+
+function confirmarEliminar(id, concepto) {
+  const url = "{% url 'gastos:eliminar' viaje.id 0 %}".replace('/0/', '/' + id + '/');
+  document.getElementById('form-eliminar').action = url;
+  document.getElementById('nombre-gasto-eliminar').textContent = '"' + concepto + '"';
+  document.getElementById('modal-eliminar').classList.add('open');
+}
+
+// ── Campos dinámicos de división ─────────────────────────────
+function actualizarCamposDivision(selectEl, scope) {
+  const metodo = selectEl.value;
+  document.querySelectorAll('.' + scope + '-porcentaje').forEach(el => {
+    el.style.display = metodo === 'porcentaje' ? 'inline-block' : 'none';
+    el.required = metodo === 'porcentaje';
+    if (metodo !== 'porcentaje') el.value = '';
+  });
+  document.querySelectorAll('.' + scope + '-monto-fijo').forEach(el => {
+    el.style.display = metodo === 'monto_fijo' ? 'inline-block' : 'none';
+    el.required = metodo === 'monto_fijo';
+    if (metodo !== 'monto_fijo') el.value = '';
+  });
+}
+document.getElementById('nuevo-metodo').addEventListener('change', function () {
+  actualizarCamposDivision(this, 'nuevo');
+});
+document.getElementById('edit-metodo').addEventListener('change', function () {
+  actualizarCamposDivision(this, 'edit');
+});
+
+// ── Donut Chart ──────────────────────────────────────────────
+const aportaciones = [
+  {% for ap in resumen.aportaciones %}
+  { nombre: "{{ ap.participante|truncatechars:12 }}", monto: {{ ap.total_pagado|default:0 }} },
+  {% endfor %}
+];
+
+if (aportaciones.length > 0 && aportaciones.some(a => a.monto > 0)) {
+  const colores = ['#0E9E8E', '#378ADD', '#EF9F27', '#D4537E', '#7F77DD', '#5DCAA5'];
+  const ctx = document.getElementById('donut-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: aportaciones.map(a => a.nombre),
+      datasets: [{
+        data: aportaciones.map(a => a.monto),
+        backgroundColor: colores.slice(0, aportaciones.length),
+        borderWidth: 2, borderColor: '#fff', hoverOffset: 5,
+      }]
+    },
+    options: {
+      cutout: '62%',
+      plugins: {
+        legend: {
+          display: true, position: 'bottom',
+          labels: { font: { family: 'Montserrat', size: 10 }, boxWidth: 10, padding: 8 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct   = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+              return ` $${ctx.parsed.toLocaleString('es-MX')} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Ocultar loader cuando todo esté listo ────────────
+window.addEventListener('load', () => {
+  document.getElementById('page-loader').style.display = 'none';
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+<!-- CATEGORÍA -->
+                    <p class="filtro-label">Tipo de Atracción</p>
+                    <div class="d-flex flex-column gap-1 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="cultura"
+                                id="sub_cultura" {% if 'cultura' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_cultura" style="font-size:13px;color:#374151;">🏛️
+                                Cultura</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="naturaleza"
+                                id="sub_naturaleza" {% if 'naturaleza' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_naturaleza"
+                                style="font-size:13px;color:#374151;">🌿 Naturaleza</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="aventura"
+                                id="sub_aventura" {% if 'aventura' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_aventura" style="font-size:13px;color:#374151;">🏃
+                                Aventura</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="subcategoria" value="entretenimiento"
+                                id="sub_entretenimiento" {% if 'entretenimiento' in subcategorias %}checked{% endif %}>
+                            <label class="form-check-label" for="sub_entretenimiento"
+                                style="font-size:13px;color:#374151;">🎭 Entretenimiento</label>
+                        </div>
+                    </div>
+
+<!-- PRECIO ESTIMADO — bandas fijas de destinos_service.py -->
+<p class="filtro-label">Precio estimado</p>
+
+<input type="hidden" name="precio_min" id="at_precio_min" value="{{ precio_min }}">
+<input type="hidden" name="precio_max" id="at_precio_max" value="{{ precio_max }}">
+
+<div class="d-flex flex-column gap-1 mb-3">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p_todos" value="0,10000" {% if precio_min == 0 and precio_max == 10000 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p_todos" style="font-size:13px;color:#374151;">Todos los precios</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p0" value="0,0" {% if precio_min == 0 and precio_max == 0 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p0" style="font-size:13px;color:#374151;">🎟️ Gratis</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p1" value="0,150" {% if precio_min == 0 and precio_max == 150 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p1" style="font-size:13px;color:#374151;">💚 Económico <span style="color:#94A3B8;font-size:11px;">($50–$150)</span></label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p2" value="150,500" {% if precio_min == 150 and precio_max == 500 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p2" style="font-size:13px;color:#374151;">💛 Moderado <span style="color:#94A3B8;font-size:11px;">($150–$500)</span></label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="_rango_precio_at" id="at_p3" value="400,1500" {% if precio_min == 400 and precio_max == 1500 %}checked{% endif %}>
+        <label class="form-check-label" for="at_p3" style="font-size:13px;color:#374151;">🔴 Premium <span style="color:#94A3B8;font-size:11px;">($400–$1,500)</span></label>
+    </div>
+</div>
+
+<script>
+(function() {
+    document.querySelectorAll('input[name="_rango_precio_at"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const parts = this.value.split(',');
+            document.getElementById('at_precio_min').value = parts[0];
+            document.getElementById('at_precio_max').value = parts[1];
+        });
+    });
+})();
+</script>
+
+
+
+
+
+<!-- POPULARIDAD (badges toggle multi-select) -->
+<p class="filtro-label">Popularidad</p>
+<div class="d-flex flex-column gap-2 mb-3">
+
+    <label style="cursor:pointer;margin:0;">
+        <input type="checkbox" name="popularidad" value="Muy popular" class="pop-chk"
+               {% if 'Muy popular' in popularidades %}checked{% endif %} style="display:none;">
+        <span class="pop-pill" data-on="#0E9E8E" data-off="#0E9E8E20" data-text-on="#fff"
+              data-text-off="#0E9E8E"
+              style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                     font-size:12px;font-weight:600;border:1px solid #0E9E8E40;
+                     background:{% if 'Muy popular' in popularidades %}#0E9E8E{% else %}#0E9E8E20{% endif %};
+                     color:{% if 'Muy popular' in popularidades %}#fff{% else %}#0E9E8E{% endif %};">
+            ⭐ Muy popular
+        </span>
+    </label>
+
+    <label style="cursor:pointer;margin:0;">
+        <input type="checkbox" name="popularidad" value="Popular" class="pop-chk"
+               {% if 'Popular' in popularidades %}checked{% endif %} style="display:none;">
+        <span class="pop-pill" data-on="#F59E0B" data-off="#F59E0B20" data-text-on="#fff"
+              data-text-off="#F59E0B"
+              style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                     font-size:12px;font-weight:600;border:1px solid #F59E0B40;
+                     background:{% if 'Popular' in popularidades %}#F59E0B{% else %}#F59E0B20{% endif %};
+                     color:{% if 'Popular' in popularidades %}#fff{% else %}#F59E0B{% endif %};">
+            👍 Popular
+        </span>
+    </label>
+
+                        <label style="cursor:pointer;margin:0;">
+                            <input type="checkbox" name="popularidad" value="Sin filas" class="pop-chk"
+                                   {% if 'Sin filas' in popularidades %}checked{% endif %} style="display:none;">
+                            <span class="pop-pill" data-on="#6B7280" data-off="#6B728020" data-text-on="#fff"
+                                data-text-off="#6B7280" style="display:block;width:100%;text-align:center;padding:5px 10px;border-radius:20px;
+                                         font-size:12px;font-weight:600;border:1px solid #6B728040;
+                                         background:{% if 'Sin filas' in popularidades %}#6B7280{% else %}#6B728020{% endif %};
+                                         color:{% if 'Sin filas' in popularidades %}#fff{% else %}#6B7280{% endif %};">
+                                Sin filas 🤙
+                            </span>
+                        </label>
+                    </div>
+                    {# CUPOS eliminado: no aplica para atracciones (no hay sistema de reserva de cupos) #}

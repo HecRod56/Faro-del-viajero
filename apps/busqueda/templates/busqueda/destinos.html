@@ -1,0 +1,315 @@
+<!--destinos.html-->
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'busqueda/css/destinos.css' %}">
+<style>
+    .spinner-overlay {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        gap: 1rem;
+    }
+    .spinner-ring {
+        width: 52px; height: 52px;
+        border: 4px solid #E2E8F0;
+        border-top-color: #0E9E8E;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-texto {
+        font-size: 13px;
+        font-family: 'Montserrat', sans-serif;
+        color: #94A3B8;
+        font-weight: 600;
+    }
+    .spinner-subtexto {
+        font-size: 11px;
+        font-family: 'Montserrat', sans-serif;
+        color: #CBD5E1;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
+
+<!-- Toast de confirmación -->
+<div class="toast-faro" id="toastFaro">Actividad agregada</div>
+
+{% if messages %}
+<div class="container-fluid px-4 pt-2">
+    {% for msg in messages %}
+    <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible"
+        role="alert" style="border-radius:12px;font-size:13px;font-family:'Montserrat',sans-serif;">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main class="container-fluid px-4 py-3">
+
+    <!-- Hero -->
+    <div class="destinos-hero"
+        style="background-image: url('{% if foto_hero %}{{ foto_hero }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=60{% endif %}');">
+        <div class="destinos-hero-content">
+            <p class="text-white mb-1" style="font-size:13px;opacity:0.85;">Sugerencias en</p>
+            <h1 class="text-white fw-bold mb-0" style="font-size:1.8rem;">{{ viaje.destino }}</h1>
+        </div>
+    </div>
+
+    <!-- Tabs de categoría -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="?categoria=atracciones" class="categoria-btn {% if categoria == 'atracciones' %}active{% endif %}">
+            🏖️ Destinos y Atracciones
+        </a>
+        <a href="?categoria=gastronomia" class="categoria-btn {% if categoria == 'gastronomia' %}active{% endif %}">
+            🍽️ Gastronomía
+        </a>
+        <a href="?categoria=hoteles" class="categoria-btn {% if categoria == 'hoteles' %}active{% endif %}">
+            🏨 Hoteles
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Panel de Filtros -->
+        <div class="col-lg-2 col-md-3">
+            <div class="filtros-panel">
+                <form method="GET" id="form-filtros">
+                    <input type="hidden" name="categoria" value="{{ categoria }}">
+                    {% if busqueda %}<input type="hidden" name="q" value="{{ busqueda }}">{% endif %}
+
+                    <h6 style="font-weight:600;font-size:15px;color:#1A2E35;margin-bottom:1rem;">Filtros</h6>
+
+                    {% if categoria == 'atracciones' %}
+                        {% include "busqueda/partials/filtros_atracciones.html" %}
+                    {% elif categoria == 'gastronomia' %}
+                        {% include "busqueda/partials/filtros_gastronomia.html" %}
+                    {% elif categoria == 'hoteles' %}
+                        {% include "busqueda/partials/filtros_hoteles.html" %}
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-sm w-100 mb-2"
+                        style="background:#0E9E8E;color:white;font-size:13px;border-radius:8px;padding:7px 0;">
+                        Aplicar filtros
+                    </button>
+                    <a href="?categoria={{ categoria }}"
+                        style="display:block;width:100%;text-align:center;padding:6px 0;font-size:13px;
+                              border:1px solid #D1D5DB;border-radius:8px;color:#374151;background:white;text-decoration:none;">
+                        Limpiar Filtro(s)
+                    </a>
+                </form>
+
+                <style>
+                    .filtro-label {
+                        font-size: 11px; font-weight: 600; color: #64748B;
+                        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+                    }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Manejador de filtros de popularidad
+                        document.querySelectorAll('.pop-chk').forEach(function (chk) {
+                            chk.addEventListener('change', function () {
+                                var pill = this.nextElementSibling;
+                                pill.style.background = this.checked ? pill.getAttribute('data-on') : pill.getAttribute('data-off');
+                                pill.style.color = this.checked ? pill.getAttribute('data-text-on') : pill.getAttribute('data-text-off');
+                            });
+                        });
+
+                        // ── Navegación con teclado ← → entre categorías ──────────────
+                        const CATS = ['atracciones', 'gastronomia', 'hoteles'];
+                        const categoriaActual = "{{ categoria }}";
+                        const idxActual = CATS.indexOf(categoriaActual);
+
+                        document.addEventListener('keydown', function(e) {
+                            // No interferir con inputs, textareas ni selects
+                            const tag = document.activeElement.tagName;
+                            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+                            let siguienteIdx = -1;
+                            if (e.key === 'ArrowRight') {
+                                siguienteIdx = (idxActual + 1) % CATS.length;
+                            } else if (e.key === 'ArrowLeft') {
+                                siguienteIdx = (idxActual - 1 + CATS.length) % CATS.length;
+                            }
+
+                            if (siguienteIdx !== -1) {
+                                e.preventDefault();
+                                window.location.href = '?categoria=' + CATS[siguienteIdx];
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+
+        <!-- Grid de lugares -->
+        <div class="col-lg-10 col-md-9" id="grid-container">
+
+            <!-- Spinner (se muestra mientras carga) -->
+            <div id="spinner-box" class="spinner-overlay">
+                <div class="spinner-ring"></div>
+                <p class="spinner-texto">Buscando lugares en {{ viaje.destino }}...</p>
+                {% if not tiene_cache %}
+                <p class="spinner-subtexto">Primera búsqueda — consultando APIs externas.<br>Las siguientes cargas serán instantáneas ⚡</p>
+                {% endif %}
+            </div>
+
+            <!-- Contenido (se llena con AJAX) -->
+            <div id="lugares-box" style="display:none;"></div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+function showToast() {
+    const t = document.getElementById('toastFaro');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+function getBadgeCategoria(cat) {
+    const map = {
+        naturaleza:      '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8F5E9;color:#2E7D32;">🌿 Naturaleza</span>',
+        cultura:         '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#E8EAF6;color:#283593;">🏛️ Cultura</span>',
+        aventura:        '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#FFF3E0;color:#E65100;">🏃 Aventura</span>',
+        entretenimiento: '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:#F3E5F5;color:#6A1B9A;">🎭 Entretenimiento</span>',
+    };
+    return map[cat] || '';
+}
+
+function getPrecioHtml(precio) {
+    if (!precio) return '<span style="font-size:12px;color:#94A3B8;">Precio variable</span>';
+    if (precio === 'Gratis') return '<span style="font-size:12px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:8px;">🎟️ Gratis</span>';
+    return `<span class="lugar-precio">${precio}</span>`;
+}
+
+function getPlaceholder(categoria) {
+    if (categoria === 'gastronomia') return '🍽️';
+    if (categoria === 'hoteles') return '🏨';
+    return '🏖️';
+}
+
+function renderCard(lugar, viaje_id, categoria, csrf) {
+    const detUrl = `/busqueda/viaje/${viaje_id}/destino/detalle/?nombre=${encodeURIComponent(lugar.nombre)}&ciudad=${encodeURIComponent(lugar.ciudad)}&categoria=${categoria}`;
+    const imgHtml = lugar.foto
+        ? `<img src="${lugar.foto}" alt="${lugar.nombre}" class="lugar-card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+           <div class="lugar-card-img-placeholder" style="display:none;">${getPlaceholder(categoria)}</div>`
+        : `<div class="lugar-card-img-placeholder">${getPlaceholder(categoria)}</div>`;
+
+    const descHtml = lugar.descripcion
+        ? `<p style="font-size:12px;color:#64748B;margin-bottom:8px;line-height:1.4;">${lugar.descripcion.substring(0,80)}${lugar.descripcion.length>80?'...':''}</p>`
+        : '';
+
+    const ratingHtml = lugar.rating
+        ? `<span class="rating-stars">★ <span style="font-weight:700;color:#1A2E35;">${lugar.rating}</span></span>`
+        : '';
+
+    return `
+    <div class="col">
+        <div class="lugar-card">
+            <a href="${detUrl}" style="text-decoration:none;">
+                <div class="img-wrapper">
+                    ${imgHtml}
+                    <span class="badge-ciudad">${lugar.ciudad}</span>
+                    ${categoria !== 'hoteles' ? `<span class="badge-pop" style="background:${lugar.pop_color};">${lugar.popularidad}</span>` : ''}
+                </div>
+            </a>
+            <div class="lugar-card-body">
+                <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+                    ${getBadgeCategoria(lugar.categoria_filtro)}
+                </div>
+                <p class="lugar-nombre">${lugar.nombre}</p>
+                ${lugar.categorias && lugar.categorias.length ? `<p class="lugar-cat">${lugar.categorias.join(', ')}</p>` : ''}
+                ${descHtml}
+                <div class="d-flex align-items-center justify-content-between mt-auto pt-1">
+                    ${getPrecioHtml(lugar.precio)}
+                    ${ratingHtml}
+                </div>
+                ${categoria === 'hoteles' && lugar.servicios_disponibles && lugar.servicios_disponibles.length ? `
+                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                    ${lugar.servicios_disponibles.map(s => {
+                        const iconos = {'Wi-Fi':'🛜','Alberca':'🏊','Estacionamiento':'🚗','Mascotas':'🐕','Accesibilidad':'♿'};
+                        return `<span style="font-size:10px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;
+                                             border-radius:20px;padding:2px 7px;font-weight:600;">
+                                    ${iconos[s] || ''} ${s}
+                                </span>`;
+                    }).join('')}
+                </div>` : ''}
+                <div class="mt-2">
+                    <form method="POST" action="/busqueda/viaje/${viaje_id}/agregar-actividad/" onsubmit="showToast()">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+                        <input type="hidden" name="nombre" value="${lugar.nombre}">
+                        <input type="hidden" name="direccion" value="${lugar.direccion || ''}">
+                        <input type="hidden" name="precio" value="${lugar.precio || ''}">
+                        <input type="hidden" name="website" value="${lugar.website || ''}">
+                        <button type="submit" class="btn-agregar">+ Agregar a Actividades</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const viajeId   = "{{ viaje.id }}";
+    const categoria = "{{ categoria }}";
+    const csrf      = "{{ csrf_token }}";
+    const destino   = "{{ viaje.destino }}";
+
+    const params = new URLSearchParams(window.location.search);
+    params.set('categoria', categoria);
+    const url = `/busqueda/viaje/${viajeId}/destinos/lugares/?${params.toString()}`;
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            const spinner = document.getElementById('spinner-box');
+            const box     = document.getElementById('lugares-box');
+
+            spinner.style.display = 'none';
+            box.style.display = 'block';
+
+            if (!data.lugares || data.lugares.length === 0) {
+                box.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <h5 style="color:#1A2E35;font-weight:700;">Sin resultados</h5>
+                        <p style="font-size:14px;">No encontramos lugares para <strong>${destino}</strong>.</p>
+                        <a href="?categoria=${categoria}" class="categoria-btn active mt-2">Ver todos</a>
+                    </div>`;
+                return;
+            }
+
+            let html = `<p style="font-size:13px;color:#94A3B8;margin-bottom:1rem;">${data.total} resultado(s) en <strong>${destino}</strong></p>`;
+            html += '<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">';
+            data.lugares.forEach(lugar => {
+                html += renderCard(lugar, viajeId, categoria, csrf);
+            });
+            html += '</div>';
+            box.innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById('spinner-box').innerHTML = `
+                <div class="empty-state">
+                    <p style="color:#EF4444;font-size:14px;">❌ Error al cargar los lugares. Recarga la página.</p>
+                </div>`;
+            console.error(err);
+        });
+});
+</script>
+{% endblock %}

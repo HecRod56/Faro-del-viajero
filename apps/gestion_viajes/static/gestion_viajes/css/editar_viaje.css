@@ -1,118 +1,78 @@
-        :root {
-            --teal: #149B7E;
-            --teal-light: #EBFBFA;
-            --teal-border: #b2e8e0;
-        }
+/* ==========================================
+   editar_viaje.css
+   Solo estilos exclusivos de esta pantalla.
+   Variables y estilos base vienen de styles.css (core).
+   ========================================== */
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #F3F4F6;
-            color: #1e293b;
-            padding-top: 80px;
-        }
-        
-        /* ======Breadcrumb====== */
-        .breadcrumb-sticky-container {
-            background-color: white;
-            border-bottom: 1px solid #E5E7EB;
-            padding: 1rem 1.5rem;
-            position: -webkit-sticky; /* Soporte para Safari */
-            position: sticky;
-            top: 80px;
-            z-index: 1020; /* Por debajo del navbar principal pero sobre el contenido */
-        }
+/* ======  Breadcrumb  ====== */
+.breadcrumb-sticky-container {
+    background-color: var(--color-white);
+    border-bottom: 1px solid #E5E7EB;
+    padding: 1rem 1.5rem;
+    position: sticky;
+    top: 80px;          /* altura del navbar */
+    z-index: 1020;
+}
 
-        .breadcrumb-nav {
-            font-size: 0.75rem;
-            color: #9CA3AF;
-            display: flex;
-            align-items: center;
-        }
+.breadcrumb-nav {
+    font-size: var(--font-size-small);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+}
 
-        .breadcrumb-nav a {
-            color: #1e293b;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
+.breadcrumb-nav a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: var(--font-weight-semibold);
+    transition: var(--transition);
+}
 
-        .breadcrumb-nav a:hover { 
-            color: var(--teal); 
-            text-decoration: underline; 
-        }
+.breadcrumb-nav a:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+}
 
-        .breadcrumb-nav span.current {
-            color: #9CA3AF;
-            font-weight: 700;
-        }
-        /* ======Breadcrumb====== */
+.breadcrumb-nav span.current {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
 
-        .input-field {
-            border-radius: 0.75rem;
-            border: 1px solid #D1D5DB;
-            transition: border-color 0.2s;
-        }
+/* ======  Tarjeta de sección  ====== */
+.section-card {
+    background-color: var(--color-white);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 1.5rem;
+}
 
-        .input-field:focus {
-            border-color: var(--teal);
-            box-shadow: 0 0 0 3px rgba(20, 155, 126, 0.12);
-        }
+.section-label {
+    font-size: 0.65rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+}
 
-        .section-card {
-            background-color: #fff;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            border: 1px solid #E5E7EB;
-            margin-bottom: 1.5rem;
-        }
+/* ======  Campos de formulario  ====== */
+.input-field {
+    border-radius: 0.75rem;
+    border: 1px solid #D1D5DB;
+    transition: border-color 0.2s;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+}
 
-        .section-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--teal);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            margin-bottom: 1rem;
-        }
+.input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(14, 158, 142, 0.12);
+    outline: none;
+}
 
-        .btn-cancel {
-            border: 2px solid #D1D5DB;
-            border-radius: 999px;
-            color: #4B5563;
-            font-weight: 700;
-            padding: 0.4rem 2rem;
-            background: transparent;
-            transition: background 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .btn-cancel:hover {
-            background-color: #f3f4f6;
-        }
-
-        .btn-save {
-            background-color: var(--teal);
-            color: white;
-            border-radius: 999px;
-            font-weight: 700;
-            padding: 0.4rem 2rem;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-save:hover {
-            opacity: 0.9;
-        }
-
-        .breadcrumb-link {
-            color: var(--teal);
-            text-decoration: underline;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .teal-text { color: var(--teal); }
-        label.fw-bold { font-size: 0.875rem; }
+label.fw-bold {
+    font-size: var(--font-size-small);
+    color: var(--color-heading);
+}

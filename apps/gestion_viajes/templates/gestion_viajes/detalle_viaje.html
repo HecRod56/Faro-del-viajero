@@ -1,45 +1,58 @@
 {% extends "core/base.html" %}
 {% load static %}
-{% block title %}Detalle del Viaje - {{ viaje.nombre }}{% endblock %}
+
+{% block title %}{{ viaje.nombre }} — Faro del Viajero{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'gestion_viajes/css/common_viajes.css' %}">
+    <link rel="stylesheet" href="{% static 'gestion_viajes/css/detalle_viaje.css' %}?v=2">
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'gestion_viajes/css/detalle_viaje.css' %}">
 
-<!-- Sub-Navbar de secciones -->
 {% include "gestion_viajes/partials/sub_navbar_viaje.html" %}
 
-<!-- Hero full-width -->
-<div class="hero-wrapper">
-    <img src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=1400&q=80" alt="Destino">
-    <div class="status-pill">
-        <span class="status-dot"></span>
-        {% if viaje.estado == 'planeado' %}Planeado{% else %}{{ viaje.estado|capfirst }}{% endif %}
-    </div>
-</div>
+<!-- Main wrapper para alineación -->
+<div class="detalle-container" style="width: 90%;">
 
-<!-- Contenido en dos columnas -->
-<div class="page-content">
+    <!-- Contenido en dos columnas -->
+    <div class="page-content">
+
+    <!-- Hero full-width -->
+    <div class="hero-wrapper full-width">
+        <img 
+            src="{% if viaje.imagen_fondo %}{{ viaje.imagen_fondo.url }}{% else %}https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80{% endif %}" 
+            alt="{{ viaje.destino }}"
+        >
+
+        <div class="status-pill">
+            <span class="status-dot"></span>
+
+            {% if viaje.estado == 'planeado' %}
+                Planeado
+            {% else %}
+                {{ viaje.estado|capfirst }}
+            {% endif %}
+        </div>
+    </div>
 
     <!-- ══ COLUMNA IZQUIERDA ══ -->
     <div class="col-left">
 
         <!-- Info principal + acciones -->
-        <div class="section-card">
+        <div class="section-card" id="card-descripcion">
             <div class="card-body" style="padding-bottom: 0.75rem;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h1 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">{{ viaje.nombre }}</h1>
-                    <div style="display: flex; gap: 6px;">
-                        <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
-                    </div>
+                <div class="d-flex justify-content-between align-items-start">
+                    <h2 class="mb-0" style="font-size: var(--font-size-h2);">{{ viaje.nombre }}</h2>
+                    <a href="{% url 'gestion_viajes:p_editar_viaje' viaje.id %}" class="btn-outline-gray">✏️ Editar</a>
                 </div>
             </div>
 
             <hr class="card-divider">
-
             <div class="card-body">
-                <p class="section-label">Descripción y destino</p>
-                <h5 style="font-size: 0.92rem; font-weight: 700; margin: 0 0 0.5rem;">📍 {{ viaje.destino }}</h5>
-                <p class="txt-sm" style="color: #4B5563; line-height: 1.75; margin: 0;">
+                <p class="section-label" style="font-size: var(--font-size-body)" >Descripción y destino</p>
+                <h3 class="txt-bold txt-sm mb-2" style="font-size: var(--font-size-body);">📍 {{ viaje.destino }}</h3>
+                <p id="texto-descripcion" class="txt-sm mb-0" style="color: var(--color-text-secondary); line-height: 1.75; font-size: var(--font-size-body);">
                     {% if viaje.descripcion %}
                         {{ viaje.descripcion }}
                     {% else %}
@@ -50,83 +63,86 @@
         </div>
 
         <!-- Responsable + Integrantes -->
-        <div class="section-card">
+        <div class="section-card" id="card-responsable">
             <div style="display: grid; grid-template-columns: 1fr 1fr;">
+
+                <!-- Responsable -->
                 <div class="card-body" style="border-right: 1px solid #F3F4F6;">
-                    <p class="section-label">Responsable</p>
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                    <p class="section-label" style="font-size: var(--font-size-body)">Responsable</p>
+                    <div class="d-flex align-items-center gap-2">
                         <div class="resp-avatar">
                             {% if organizador %}
                                 {{ organizador.usuario.first_name|first }}{{ organizador.usuario.last_name|first }}
-                            {% else %}
-                                --
-                            {% endif %}
+                            {% else %}--{% endif %}
                         </div>
                         <div>
                             <div class="txt-bold txt-sm">
-                                {% if organizador %}
-                                    {{ organizador.usuario.get_full_name }}
-                                {% else %}
-                                    Sin organizador
-                                {% endif %}
+                                {% if organizador %}{{ organizador.usuario.get_full_name }}{% else %}Sin organizador{% endif %}
                             </div>
                             <div class="txt-muted">Organizador</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Integrantes -->
                 <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
-                        <p class="section-label" style="margin: 0;">Integrantes</p>
-                        
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="section-label mb-0" style="font-size: var(--font-size-body)">Integrantes</p>
                         {% if not es_participante %}
                             {% if participantes|length < viaje.capacidad_max %}
-                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal" style="font-size: 0.65rem; padding: 0.25rem 0.8rem;">
-                                    + Unirme
-                                </a>
+                                <a href="{% url 'gestion_viajes:p_unirse_viaje' viaje.id %}" class="btn-outline-teal"
+                                    style="font-size: var(--font-size-small); padding: 0.25rem 0.8rem;">+ Unirme</a>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger rounded-pill" style="font-size: 0.65rem;">⚠️ Viaje Lleno</span>
+                                <span class="badge bg-danger-subtle text-danger rounded-pill"
+                                    style="font-size: var(--font-size-small);">⚠️ Viaje Lleno</span>
                             {% endif %}
                         {% else %}
-                            <span class="badge bg-success-subtle text-success rounded-pill" style="font-size: 0.65rem;">Ya eres parte</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill"
+                                style="font-size: var(--font-size-small);">Ya eres parte</span>
                         {% endif %}
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
-                        <div style="display: flex; align-items: center;">
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                        <div class="d-flex align-items-center">
                             {% for p in participantes %}
-                                <div class="organizer-avatar" title="{{ p.usuario.username }}">
-                                    {{ p.usuario.username|first|upper }}
-                                </div>
+                            <div class="organizer-avatar" title="{{ p.usuario.username }}">
+                                {{ p.usuario.username|first|upper }}
+                            </div>
                             {% empty %}
-                                <span class="txt-muted">Sin integrantes</span>
+                            <span class="txt-muted">Sin integrantes</span>
                             {% endfor %}
                         </div>
                     </div>
-                    <div style="margin-top: 0.6rem; display: flex; justify-content: space-between;">
+
+                    <div class="d-flex justify-content-between mt-2">
                         <span class="txt-muted">Ocupación:</span>
-                        <span class="txt-muted" style="font-weight: 600;">{{ participantes|length }} / {{ viaje.capacidad_max }}</span>
+                        <span class="txt-muted" style="font-weight: var(--font-weight-semibold);">
+                            {{ participantes|length }} / {{ viaje.capacidad_max }}
+                        </span>
                     </div>
                 </div>
+
             </div>
         </div>
 
     </div>
 
     <!-- ══ COLUMNA DERECHA ══ -->
-    <div class="col-right">
+    <div class="col-right" id="col-right-container">
 
-        <!-- Fechas del viaje — rediseñado -->
-        <div class="section-card">
+        <!-- Fechas del viaje -->
+        <div class="section-card" id="card-fechas">
             <div class="card-body">
-                <p class="section-label">Fechas del viaje</p>
+                <p class="section-label" style="font-size: var(--font-size-body)">Fechas del viaje</p>
                 <div class="dates-grid">
                     <div class="date-box">
-                        <div class="date-box-label">Salida</div>
+                        <div class="date-box-label" style="font-size: var(--font-size-small)">Salida</div>
                         <div class="date-box-value">{{ viaje.fecha_inicio|date:"d M" }}</div>
                         <div class="date-box-year">{{ viaje.fecha_inicio|date:"Y" }}</div>
                     </div>
                     <div class="date-arrow">→</div>
                     <div class="date-box">
-                        <div class="date-box-label">Regreso</div>
+                        <div class="date-box-label" style="font-size: var(--font-size-small)">Regreso</div>
                         <div class="date-box-value">{{ viaje.fecha_fin|date:"d M" }}</div>
                         <div class="date-box-year">{{ viaje.fecha_fin|date:"Y" }}</div>
                     </div>
@@ -136,82 +152,94 @@
                 <span class="meta-icon">⏱</span>
                 <div>
                     <div class="meta-label">Duración</div>
-                    <div class="meta-value">{{ duracion_viaje_dias }}</div>
+                    <div class="meta-value" style="font-size: var(--font-size-body);">{{ duracion_viaje_dias }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Añadir gasto rápido -->
-        <div class="section-card">
+        <!-- Añadir gasto -->
+        <div class="section-card" id="card-gasto-rapido">
             <div class="card-body">
-                <p class="section-label">Añadir gasto rápido</p>
-                {% if puede_registrar_gasto %}
-                <form action="{% url 'gestion_viajes:p_registrar_gasto' viaje.id %}" method="POST">
-                    {% csrf_token %}
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;">
-                        <input type="text" name="concepto" class="input-field" placeholder="¿En qué gastaste?" required>
-                        <div style="display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 0.75rem; overflow: hidden;">
-                            <span style="padding: 0.45rem 0.5rem; background: #F9FAFB; color: #9CA3AF; font-size: 0.78rem; border-right: 1px solid #E5E7EB;">$</span>
-                            <input type="number" name="cantidad" step="0.01" style="border: none; outline: none; padding: 0.45rem 0.5rem; font-size: 0.78rem; width: 100%;" placeholder="0.00" required>
-                        </div>
-                        <select name="categoria" class="input-field">
-                            <option value="comida">🍕 Comida</option>
-                            <option value="transporte">🚗 Transporte</option>
-                            <option value="hospedaje">🏨 Hospedaje</option>
-                            <option value="entretenimiento">🎟️ Entretenimiento</option>
-                            <option value="otros">📦 Otros</option>
-                        </select>
-                        <button type="submit" class="btn-teal" style="padding: 0.45rem 1rem;">+</button>
-                    </div>
-                </form>
+                <p class="section-label" style="font-size: var(--font-size-body)">Gastos del viaje</p>
+                {% if es_participante %}
+                <button
+                    onclick="abrirModalNuevoGasto()"
+                    class="btn-primary"
+                    style="width: 100%; padding: 0.6rem 1rem; border-radius: 0.75rem;
+                           display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Añadir gasto
+                </button>
+                <p class="txt-muted mt-2 mb-0" style="font-size: var(--font-size-small); text-align: center;">
+                    Podrás dividirlo entre los integrantes que elijas.
+                </p>
                 {% else %}
-                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.75rem; color: #EF4444; font-size: 0.78rem; text-align: center;">
-                    <strong>⚠️ {{ razon_no_puede_registrar }}</strong>
+                <div style="padding: 0.75rem; background: #FEF2F2; border: 1px solid #FCA5A5;
+                            border-radius: 0.75rem; color: var(--color-danger);
+                            font-size: var(--font-size-small); text-align: center;">
+                    <strong>⚠️ Solo los integrantes pueden registrar gastos.</strong>
                 </div>
                 {% endif %}
+                <div class="mt-3">
+                    <a href="{% url 'gastos:resumen' viaje.id %}"
+                       style="display: block; text-align: center; font-size: var(--font-size-small);
+                              color: var(--color-primary); text-decoration: none; font-weight: 600;">
+                        Ver resumen completo →
+                    </a>
+                </div>
             </div>
         </div>
-
 
     </div>
 
     <!-- ══ GASTOS REGISTRADOS — ANCHO COMPLETO ══ -->
     <div class="section-card full-width">
-        <div class="card-body" style="padding-bottom: 0.75rem;">
-            <p class="section-label" style="margin: 0;">Gastos registrados</p>
+        <div class="card-body" style="padding-bottom: 0.75rem; display:flex; justify-content:space-between; align-items:center;">
+            <p class="section-label mb-0" style="font-size: var(--font-size-body)">Gastos registrados</p>
+            <a href="{% url 'gastos:resumen' viaje.id %}"
+               style="font-size: var(--font-size-small); color: var(--color-primary);
+                      text-decoration: none; font-weight: 600;">
+                Ver resumen completo →
+            </a>
         </div>
         <table class="gastos-table">
             <thead>
                 <tr>
-                    <th>Concepto</th>
-                    <th>Categoría</th>
-                    <th>Integrante</th>
-                    <th style="text-align: right;">Cantidad</th>
-                    <th style="text-align: center;">Acción</th>
+                    <th style="font-size: 12px; text-align: left;">Concepto</th>
+                    <th style="font-size: 12px">Categoría</th>
+                    <th style="font-size: 12px">Pagó</th>
+                    <th style="text-align: right; font-size: 12px">Monto</th>
+                    <th style="text-align: center; font-size: 12px">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                {% for gasto in viaje.gastos.all %}
-                <tr>
+                {% for gasto in gastos %}
+                <tr id="fila-gasto-{{ gasto.id }}">
                     <td>{{ gasto.concepto }}</td>
                     <td><span class="categoria-badge">{{ gasto.get_categoria_display }}</span></td>
-                    <td>{{ gasto.pagado_por.usuario.get_full_name }}</td>
-                    <td style="text-align: right; font-weight: 700; color: #EF4444;">-${{ gasto.cantidad }}</td>
+                    <td>{{ gasto.pagado_por.usuario.get_full_name|default:gasto.pagado_por.usuario.username }}</td>
+                    <td style="text-align: right; font-weight: var(--font-weight-bold); color: var(--color-danger);">
+                        -${{ gasto.monto }}
+                    </td>
                     <td style="text-align: center;">
-                        {% if request.user.is_authenticated and request.user == gasto.pagado_por.usuario or rol_usuario == 'organizador' %}
-                            <button type="button"
-                               class="delete-link delete-gasto-btn"
-                               data-gasto-id="{{ gasto.id }}"
-                               data-concepto="{{ gasto.concepto }}"
-                               style="font-size: 0.7rem; background: none; border: none; cursor: pointer; padding: 0;">
-                                🗑️ Eliminar
-                            </button>
+                        {% if es_participante %}
+                        <button type="button" class="delete-link delete-gasto-btn"
+                            data-gasto-id="{{ gasto.id }}"
+                            data-concepto="{{ gasto.concepto }}"
+                            style="background: none; border: none; cursor: pointer; padding: 0;">
+                            🗑️ Eliminar
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #9CA3AF; padding: 1.5rem 0;">Aún no hay gastos registrados.</td>
+                    <td colspan="5" class="txt-muted" style="text-align: center; padding: 1.5rem 0;">
+                        Aún no hay gastos registrados.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -222,17 +250,21 @@
     <div class="section-card full-width">
         <div class="budget-summary-grid">
             <div class="budget-summary-item">
-                <p class="section-label" style="margin-bottom: 0.3rem;">Presupuesto</p>
+                <p class="section-label mb-1" style="font-size: var(--font-size-body)">Presupuesto</p>
                 <div class="txt-bold" style="font-size: 1rem;">${{ viaje.presupuesto_estimado }}</div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label" style="margin-bottom: 0.3rem; color: #EF4444;">Gastado</p>
-                <div style="font-size: 1rem; font-weight: 700; color: #EF4444;">-${{ total_gastado }}</div>
+                <p class="section-label text-danger-custom mb-1" style="font-size: var(--font-size-body)">Gastado</p>
+                <div class="presupuesto-negativo" style="font-size: 1rem; font-weight: var(--font-weight-bold);">
+                    -${{ total_gastado }}
+                </div>
             </div>
             <div class="budget-summary-item">
-                <p class="section-label {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="margin-bottom: 0.3rem;">Disponible</p>
-                    
-                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}" style="font-size: 1rem; font-weight: 700;">
+                <p class="section-label mb-1 {% if presupuesto_restante < 0 %}text-danger-custom{% else %}text-success-custom{% endif %}" style="font-size: var(--font-size-body)">
+                    Disponible
+                </p>
+                <div class="{% if presupuesto_restante < 0 %}presupuesto-negativo{% else %}presupuesto-positivo{% endif %}"
+                     style="font-size: 1rem; font-weight: var(--font-weight-bold);">
                     ${{ presupuesto_restante }}
                 </div>
             </div>
@@ -241,305 +273,381 @@
         <hr class="card-divider">
 
         <div class="card-body" style="padding-top: 0.85rem; padding-bottom: 0.85rem;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+            <div class="d-flex justify-content-between align-items-baseline gap-2">
                 <span class="txt-bold" style="font-size: 0.85rem;">${{ viaje.presupuesto_estimado|default:"0" }} MXN</span>
-                <span class="txt-muted">presupuesto total</span>
+                <span class="txt-muted" style="font-size: var(--font-size-small)">presupuesto total</span>
             </div>
             <div class="budget-bar-bg">
                 <div id="progreso-viaje" class="budget-bar-fill" data-porcentaje="{{ porcentaje_gastado }}"></div>
-                <script>
-                    // Esto aplica el ancho después de que carga la página y no genera errores en el editor
-                    const bar = document.getElementById('progreso-viaje');
-                    bar.style.width = bar.dataset.porcentaje + '%';
-                </script>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span class="txt-muted">$0</span>
-                <span class="txt-muted">${{ viaje.presupuesto_estimado }}</span>
+            <div class="d-flex justify-content-between">
+                <span class="txt-muted" style="font-size: var(--font-size-small)">$0</span>
+                <span class="txt-muted" style="font-size: var(--font-size-small)">${{ viaje.presupuesto_estimado }}</span>
             </div>
         </div>
     </div>
 
-
     <!-- ══ ACCIONES FINALES — ANCHO COMPLETO ══ -->
-    <div class="full-width" style="display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding-bottom: 1rem;">
-        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">← Regresar a mis viajes</a>
-        <a href="{% url 'gestion_viajes:p_eliminar_viaje' viaje.id %}"
-           class="delete-link"
-           onclick="return confirm('¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.');">Eliminar viaje</a>
+    <div class="full-width d-flex flex-column align-items-center gap-2 pb-3">
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}" class="btn-outline-gray" style="padding: 0.45rem 2rem;">
+            ← Regresar a mis viajes
+        </a>
+        <button type="button" class="delete-link"
+            onclick="document.getElementById('modalEliminarViaje').classList.remove('d-none')"
+            style="border: none; background: none; padding: 0; cursor: pointer;">
+            Eliminar viaje
+        </button>
     </div>
 
-    <!-- ══ TOAST DE NOTIFICACIÓN (ESTILO GMAIL) ══ -->
+    {% include "gestion_viajes/modals/modal_abandonar_viaje.html" %}
+
+    <!-- Modal crear gasto (control_gastos) -->
+    {% include "control_gastos/modals/_modal_crear_gasto.html" %}
+
+    <!-- ══ TOAST DE DESHACER GASTO (estilo Gmail) ══ -->
     <div id="undo-toast" style="
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: #323232;
-        color: white;
+        position: fixed; bottom: 20px; left: 20px;
+        background: var(--color-white);
+        font-family: var(--font-family-base);
+        color: var(--color-text);
         padding: 16px 24px;
         border-radius: 4px;
-        font-size: 0.875rem;
+        font-size: var(--font-size-body);
         box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
-        display: none;
-        z-index: 1000;
-        align-items: center;
-        gap: 16px;
+        display: none; z-index: 1000;
+        align-items: center; gap: 16px;
         max-width: 400px;
         animation: slideInLeft 0.3s ease-out;
     ">
         <div style="flex: 1;">
             <div id="toast-message">Gasto eliminado</div>
-            <div id="timer-bar" style="
-                height: 2px;
-                background: rgba(255,255,255,0.3);
-                border-radius: 1px;
-                margin-top: 8px;
-                overflow: hidden;
-            ">
-                <div id="timer-progress" style="
-                    height: 100%;
-                    background: #4FC3F7;
-                    border-radius: 1px;
-                    width: 100%;
-                    transition: width 0.1s linear;
-                "></div>
+            <div id="timer-bar" style="height: 2px; background: rgba(0,0,0,0.1); border-radius: 1px; margin-top: 8px; overflow: hidden;">
+                <div id="timer-progress" style="height: 100%; background: var(--color-primary); border-radius: 1px; width: 100%; transition: width 0.1s linear;"></div>
             </div>
         </div>
-        <button id="undo-btn" style="
-            background: #4FC3F7;
-            color: #323232;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background 0.2s;
-            white-space: nowrap;
-        " onmouseover="this.style.background='#29B6F6'" onmouseout="this.style.background='#4FC3F7'">
-            Deshacer
-        </button>
+        <button id="undo-btn" class="btn-primary" style="white-space: nowrap;">Deshacer</button>
     </div>
 
-    <style>
-        @keyframes slideInLeft {
-            from {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
 
-        @keyframes slideOutLeft {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-        }
-
-        .toast-exit {
-            animation: slideOutLeft 0.3s ease-out forwards !important;
-        }
-    </style>
-
-    <script>
-        // Sistema de deshacer eliminación de gastos (estilo Gmail)
-        const undoToast = document.getElementById('undo-toast');
-        const toastMessage = document.getElementById('toast-message');
-        const undoBtn = document.getElementById('undo-btn');
-        const timerProgress = document.getElementById('timer-progress');
-        
-        let currentDeletedGasto = null;
-        let undoTimeout = null;
-        let timerInterval = null;
-        let isUndoing = false;
-        const UNDO_DELAY = 5000; // 5 segundos
-
-        // Agregar listeners a todos los botones de eliminar
-        document.querySelectorAll('.delete-gasto-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const gastoId = this.dataset.gastoId;
-                const concepto = this.dataset.concepto;
-                
-                // Iniciar la eliminación
-                eliminarGastoConUndo(gastoId, concepto, this);
-            });
-        });
-
-        function eliminarGastoConUndo(gastoId, concepto, button) {
-            // Desactivar el botón temporalmente
-            button.disabled = true;
-            const originalText = button.textContent;
-            button.innerHTML = '⏳ Eliminando...';
-
-            // Realizar la eliminación via AJAX
-            fetch('{% url "gestion_viajes:p_eliminar_gasto_ajax" 999 %}'.replace('999', gastoId), {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Guardar los datos para posible restauración
-                    currentDeletedGasto = data.gasto_data;
-                    
-                    // Eliminar la fila de la tabla
-                    const row = button.closest('tr');
-                    row.style.opacity = '0.5';
-                    row.style.textDecoration = 'line-through';
-                    
-                    // Mostrar el toast
-                    toastMessage.textContent = `"${concepto}" eliminado`;
-                    undoToast.style.display = 'flex';
-                    
-                    // Reiniciar la barra de progreso
-                    timerProgress.style.width = '100%';
-                    
-                    // Limpiar timeout e intervalo anterior si existe
-                    if (undoTimeout) {
-                        clearTimeout(undoTimeout);
-                    }
-                    if (timerInterval) {
-                        clearInterval(timerInterval);
-                    }
-                    
-                    // Iniciar el contador regresivo de la barra
-                    let timeRemaining = UNDO_DELAY;
-                    timerInterval = setInterval(() => {
-                        timeRemaining -= 100;
-                        const percentage = (timeRemaining / UNDO_DELAY) * 100;
-                        timerProgress.style.width = percentage + '%';
-                        
-                        if (timeRemaining <= 0) {
-                            clearInterval(timerInterval);
-                        }
-                    }, 100);
-                    
-                    // Auto-confirmar eliminación después de 5 segundos
-                    undoTimeout = setTimeout(() => {
-                        if (timerInterval) {
-                            clearInterval(timerInterval);
-                        }
-                        confirmarEliminacionPermanente(row);
-                    }, UNDO_DELAY);
-                    
-                    // Configurar evento para deshacer
-                    undoBtn.onclick = () => deshacerEliminacion(row);
-                } else {
-                    // Error en la eliminación
-                    alert('Error al eliminar el gasto: ' + (data.error || 'Error desconocido'));
-                    button.disabled = false;
-                    button.textContent = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
-                button.disabled = false;
-                button.textContent = originalText;
-            });
-        }
-
-        function deshacerEliminacion(row) {
-            if (!currentDeletedGasto || isUndoing) return;
-            
-            isUndoing = true;
-            undoBtn.disabled = true;
-            undoBtn.textContent = 'Restaurando...';
-            
-            // Limpiar timers
-            if (undoTimeout) {
-                clearTimeout(undoTimeout);
-            }
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-
-            // Restaurar via AJAX
-            fetch('{% url "gestion_viajes:p_restaurar_gasto_ajax" %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    gasto_data: currentDeletedGasto
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Restaurar la fila visualmente
-                    row.style.opacity = '1';
-                    row.style.textDecoration = 'none';
-                    
-                    // Ocultar el toast con animación
-                    undoToast.classList.add('toast-exit');
-                    
-                    setTimeout(() => {
-                        undoToast.style.display = 'none';
-                        undoToast.classList.remove('toast-exit');
-                        isUndoing = false;
-                    }, 300);
-                    
-                    currentDeletedGasto = null;
-                } else {
-                    alert('Error al restaurar el gasto: ' + (data.error || 'Error desconocido'));
-                    isUndoing = false;
-                    undoBtn.disabled = false;
-                    undoBtn.textContent = 'Deshacer';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
-                isUndoing = false;
-                undoBtn.disabled = false;
-                undoBtn.textContent = 'Deshacer';
-            });
-        }
-
-        function confirmarEliminacionPermanente(row) {
-            // Ocultar el toast
-            undoToast.classList.add('toast-exit');
-            
-            setTimeout(() => {
-                undoToast.style.display = 'none';
-                undoToast.classList.remove('toast-exit');
-            }, 300);
-            
-            // Recargar la página para sincronizar
-            location.reload();
-        }
-
-        // Función auxiliar para obtener el token CSRF
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    </script>
 
 </div>
+
+</div>
+
+<script>
+    // ── Barra de progreso de presupuesto ─────────────────────
+    const bar = document.getElementById('progreso-viaje');
+    if (bar) bar.style.width = bar.dataset.porcentaje + '%';
+
+    // ── CSS del modal de control_gastos ──────────────────────
+    // Se inyecta aquí para no depender de un archivo externo
+    const cgStyle = document.createElement('style');
+    cgStyle.textContent = `
+      .cg-modal-backdrop {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,.45); z-index: 1060;
+        align-items: center; justify-content: center;
+      }
+      .cg-modal-backdrop.open { display: flex; }
+      .cg-modal {
+        background: #fff; border-radius: 14px; width: 520px;
+        max-width: 95vw; max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 12px 40px rgba(0,0,0,.18);
+        animation: cgSlideUp .2s ease;
+        font-family: var(--font-family-base, 'Montserrat', sans-serif);
+      }
+      @keyframes cgSlideUp {
+        from { transform: translateY(18px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+      }
+      .cg-modal-header {
+        padding: 18px 20px 14px; border-bottom: 1px solid #e4e8ee;
+        display: flex; justify-content: space-between; align-items: center;
+      }
+      .cg-modal-header h3 { font-size: 15px; font-weight: 700; color: #1A2E35; margin: 0; }
+      .cg-modal-close {
+        background: none; border: none; cursor: pointer;
+        color: #5a6476; font-size: 20px; line-height: 1;
+        padding: 2px 6px; border-radius: 6px;
+      }
+      .cg-modal-close:hover { background: #f2f2f0; }
+      .cg-modal-body   { padding: 18px 20px; }
+      .cg-modal-footer {
+        padding: 13px 20px 18px; display: flex; gap: 10px;
+        justify-content: flex-end; border-top: 1px solid #e4e8ee;
+      }
+      .cg-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+      .cg-form-group { display: flex; flex-direction: column; gap: 4px; }
+      .cg-form-group.full { grid-column: 1 / -1; }
+      .cg-form-group label {
+        font-size: 11px; font-weight: 700; color: #5a6476;
+        text-transform: uppercase; letter-spacing: .04em;
+      }
+      .cg-form-group input, .cg-form-group select {
+        padding: 9px 11px; border: 1px solid #e4e8ee; border-radius: 8px;
+        font-family: inherit; font-size: 13px; color: #1A2E35;
+        background: #fff; outline: none; transition: border-color .15s;
+      }
+      .cg-form-group input:focus, .cg-form-group select:focus {
+        border-color: var(--color-primary, #0E9E8E);
+      }
+      .cg-check-row {
+        display: flex; align-items: center; gap: 8px;
+        padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;
+      }
+      .cg-check-row:hover { background: #f2f2f0; }
+      .cg-check-row input[type=checkbox] {
+        accent-color: var(--color-primary, #0E9E8E); width: 15px; height: 15px;
+      }
+      .cg-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 9px 18px; border-radius: 8px; border: none;
+        font-family: inherit; font-size: 13px; font-weight: 700;
+        cursor: pointer; transition: background .15s;
+      }
+      .cg-btn-primario { background: var(--color-primary, #0E9E8E); color: #fff; }
+      .cg-btn-primario:hover { background: #0b8a7c; }
+      .cg-btn-outline {
+        background: #fff; color: #5a6476; border: 1px solid #e4e8ee;
+      }
+      .cg-btn-outline:hover { border-color: #bcc4cf; color: #1A2E35; }
+      .tu-badge {
+        font-size: 11px; font-weight: 700;
+        color: var(--color-primary, #0E9E8E);
+        background: #e6f7f5; padding: 1px 6px;
+        border-radius: 4px; margin-left: 4px;
+      }
+    `;
+    document.head.appendChild(cgStyle);
+
+    // ── Modal crear gasto ────────────────────────────────────
+    function abrirModalNuevoGasto() {
+        document.getElementById('modal-nuevo').classList.add('open');
+    }
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape')
+            document.querySelectorAll('.cg-modal-backdrop.open')
+                    .forEach(m => m.classList.remove('open'));
+    });
+    document.querySelectorAll('.cg-modal-backdrop').forEach(m => {
+        m.addEventListener('click', e => { if (e.target === m) cerrarModal(m.id); });
+    });
+
+    // Campos dinámicos de división (equitativo / porcentaje / monto fijo)
+    const nuevoMetodo = document.getElementById('nuevo-metodo');
+    if (nuevoMetodo) {
+        nuevoMetodo.addEventListener('change', function () {
+            const metodo = this.value;
+            document.querySelectorAll('.nuevo-porcentaje').forEach(el => {
+                el.style.display = metodo === 'porcentaje' ? 'inline-block' : 'none';
+                el.required = metodo === 'porcentaje';
+                if (metodo !== 'porcentaje') el.value = '';
+            });
+            document.querySelectorAll('.nuevo-monto-fijo').forEach(el => {
+                el.style.display = metodo === 'monto_fijo' ? 'inline-block' : 'none';
+                el.required = metodo === 'monto_fijo';
+                if (metodo !== 'monto_fijo') el.value = '';
+            });
+        });
+    }
+
+    // ── Eliminar gasto con toast (control_gastos) ────────────
+    const undoToast     = document.getElementById('undo-toast');
+    const toastMessage  = document.getElementById('toast-message');
+    const undoBtn       = document.getElementById('undo-btn');
+    const timerProgress = document.getElementById('timer-progress');
+
+    let pendingDeleteId = null;
+    let undoTimeout     = null;
+    let timerInterval   = null;
+    let isUndoing       = false;
+    const UNDO_DELAY    = 5000;
+
+    document.querySelectorAll('.delete-gasto-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            iniciarEliminacion(this.dataset.gastoId, this.dataset.concepto, this);
+        });
+    });
+
+    function iniciarEliminacion(gastoId, concepto, button) {
+        // Confirmar eliminación previa pendiente si hay otra
+        if (pendingDeleteId && pendingDeleteId !== gastoId) {
+            confirmarEliminacion(pendingDeleteId);
+        }
+        pendingDeleteId = gastoId;
+
+        const fila = document.getElementById('fila-gasto-' + gastoId);
+        if (fila) { fila.style.opacity = '0.4'; fila.style.textDecoration = 'line-through'; }
+        button.disabled = true;
+
+        toastMessage.textContent = `"${concepto}" será eliminado`;
+        undoToast.style.display = 'flex';
+        timerProgress.style.width = '100%';
+
+        clearTimeout(undoTimeout);
+        clearInterval(timerInterval);
+
+        let timeRemaining = UNDO_DELAY;
+        timerInterval = setInterval(() => {
+            timeRemaining -= 100;
+            timerProgress.style.width = ((timeRemaining / UNDO_DELAY) * 100) + '%';
+            if (timeRemaining <= 0) clearInterval(timerInterval);
+        }, 100);
+
+        undoTimeout = setTimeout(() => {
+            clearInterval(timerInterval);
+            confirmarEliminacion(gastoId);
+        }, UNDO_DELAY);
+
+        undoBtn.onclick = () => deshacerEliminacion(gastoId);
+    }
+
+    function confirmarEliminacion(gastoId) {
+        const url = "{% url 'gastos:eliminar' viaje.id 0 %}".replace('/0/', '/' + gastoId + '/');
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+        })
+        .then(() => {
+            const fila = document.getElementById('fila-gasto-' + gastoId);
+            if (fila) fila.remove();
+            ocultarToast();
+            pendingDeleteId = null;
+        })
+        .catch(() => deshacerEliminacion(gastoId));
+    }
+
+    function deshacerEliminacion(gastoId) {
+        if (isUndoing) return;
+        isUndoing = true;
+        clearTimeout(undoTimeout);
+        clearInterval(timerInterval);
+
+        const fila = document.getElementById('fila-gasto-' + gastoId);
+        if (fila) { fila.style.opacity = '1'; fila.style.textDecoration = 'none'; }
+        const btn = document.querySelector(`.delete-gasto-btn[data-gasto-id="${gastoId}"]`);
+        if (btn) btn.disabled = false;
+
+        ocultarToast();
+        pendingDeleteId = null;
+        isUndoing = false;
+    }
+
+    function ocultarToast() {
+        undoToast.classList.add('toast-exit');
+        setTimeout(() => {
+            undoToast.style.display = 'none';
+            undoToast.classList.remove('toast-exit');
+        }, 300);
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // ── Eliminar viaje (sin cambios) ─────────────────────────
+    const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar-viaje');
+    if (btnConfirmarEliminar) {
+        btnConfirmarEliminar.addEventListener('click', function () {
+            const url = this.dataset.url;  // ← leer del atributo
+            document.getElementById('modalEliminarViaje').classList.add('d-none');
+            btnConfirmarEliminar.disabled = true;
+            btnConfirmarEliminar.textContent = 'Eliminando...';
+            fetch('{% url "gestion_viajes:p_eliminar_viaje_ajax" viaje.id %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const nombre = encodeURIComponent(data.viaje_nombre);
+                    window.location.href = '{% url "gestion_viajes:p_ver_mis_viajes" %}?deleted=1&nombre=' + nombre;
+                } else {
+                    alert('Error al eliminar el viaje: ' + (data.error || 'Error desconocido'));
+                    btnConfirmarEliminar.disabled = false;
+                    btnConfirmarEliminar.textContent = 'Sí, eliminar';
+                }
+            })
+            .catch(() => {
+                alert('Error al conectar con el servidor');
+                btnConfirmarEliminar.disabled = false;
+                btnConfirmarEliminar.textContent = 'Sí, eliminar';
+            });
+        });
+    }
+
+    function deshacerEliminacionViaje() {}
+    function ocultarViajeToast() {}
+
+    // ── Layout dinámico (sin cambios) ────────────────────────
+    (function () {
+        const TOLERANCE = 20;
+        const MOBILE_BREAKPOINT = 768;
+
+        const cardDescripcion = document.getElementById('card-descripcion');
+        const cardResponsable = document.getElementById('card-responsable');
+        const colLeft = cardDescripcion ? cardDescripcion.closest('.col-left') : null;
+        const colRight = document.getElementById('col-right-container');
+        const cardFechas = document.getElementById('card-fechas');
+        const cardGastoRapido = document.getElementById('card-gasto-rapido');
+        const textoDescripcion = document.getElementById('texto-descripcion');
+
+        if (!cardDescripcion || !cardResponsable || !colLeft || !colRight || !cardFechas || !cardGastoRapido || !textoDescripcion) return;
+
+        let responsableEnDerecha = false;
+
+        function aplicarScrollDescripcion() {
+            const alturaColRight = colRight.offsetHeight;
+            const alturaHeader = cardDescripcion.offsetHeight - textoDescripcion.offsetHeight;
+            const alturaDisponible = alturaColRight - alturaHeader;
+            textoDescripcion.style.maxHeight = Math.max(alturaDisponible, 60) + 'px';
+            textoDescripcion.style.overflowY = 'auto';
+            textoDescripcion.style.paddingRight = '4px';
+        }
+
+        function revertirScrollDescripcion() {
+            textoDescripcion.style.maxHeight = '';
+            textoDescripcion.style.overflowY = '';
+            textoDescripcion.style.paddingRight = '';
+        }
+
+        function evaluarLayout() {
+            if (window.innerWidth < MOBILE_BREAKPOINT) {
+                if (responsableEnDerecha) {
+                    colLeft.appendChild(cardResponsable);
+                    responsableEnDerecha = false;
+                }
+                revertirScrollDescripcion();
+                return;
+            }
+            const alturaDescripcion = cardDescripcion.offsetHeight;
+            const alturaDerechaBase = cardFechas.offsetHeight + cardGastoRapido.offsetHeight;
+            const debeEstarEnDerecha = alturaDescripcion >= (alturaDerechaBase - TOLERANCE);
+
+            if (debeEstarEnDerecha && !responsableEnDerecha) {
+                colRight.appendChild(cardResponsable);
+                responsableEnDerecha = true;
+                requestAnimationFrame(aplicarScrollDescripcion);
+            } else if (!debeEstarEnDerecha && responsableEnDerecha) {
+                colLeft.appendChild(cardResponsable);
+                responsableEnDerecha = false;
+                revertirScrollDescripcion();
+            } else if (debeEstarEnDerecha && responsableEnDerecha) {
+                requestAnimationFrame(aplicarScrollDescripcion);
+            }
+        }
+
+        window.addEventListener('load', evaluarLayout);
+        window.addEventListener('resize', evaluarLayout);
+        if (window.ResizeObserver) {
+            new ResizeObserver(evaluarLayout).observe(cardDescripcion);
+        }
+    })();
+</script>
+
 {% endblock %}

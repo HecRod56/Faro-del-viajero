@@ -14,6 +14,15 @@ from pathlib import Path
 import os
 import sys
 from decouple import config, Csv
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# ==========================================
+# API de Duffel (Búsqueda de vuelos)
+# ==========================================
+DUFFEL_ACCESS_TOKEN = os.getenv('DUFFEL_ACCESS_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,7 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
+  
     #CLOUDINARY
     'cloudinary_storage',
     'cloudinary',
@@ -56,10 +66,15 @@ INSTALLED_APPS = [
     'apps.actividades',
     'chat',
     'apps.galeria',
+    'apps.transporte',
+    'apps.control_gastos',
+    #ES LA DE APIS
+    'apps.busqueda',
     ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -94,10 +109,20 @@ WSGI_APPLICATION = 'faro_del_viajero.wsgi.application'
 
 #CRENDECIALES DE CLOUDINARY
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY':    config('CLOUDINARY_API_KEY'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY':    config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
 }
+
+
+import cloudinary
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=config('CLOUDINARY_API_KEY', default=''),
+    api_secret=config('CLOUDINARY_API_SECRET', default=''),
+)
+
+
 
 #USAR CLOUDINARY COMO ESTANDAR PARA BACKEND DE ARCHIVOS
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -124,6 +149,9 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': config('DB_SSLMODE', default='disable'),
+        },
     }
 }
 
@@ -169,13 +197,13 @@ DATE_INPUT_FORMATS = ['%d/%m/%Y']
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
-    os.path.join(BASE_DIR, 'apps'),
 ]
 
 # Le indicamos a Django que el CustomUser vive en la app "autenticado"
 AUTH_USER_MODEL = 'autenticado.CustomUser'
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 """
 Si tu API necesita credenciales, agrégalas al .env:
@@ -199,9 +227,13 @@ Luego, puedes usarlo en tus vistas o servicios:
 # CONFIGURACIÓN DE CORREO (con API BREVO)
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {
-    "BREVO_API_KEY": config("BREVO_API_KEY"),
+    "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
 }
+<<<<<<< HEAD
 DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE')}>"
+=======
+DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
+>>>>>>> 1bed35e78a62b45b89beb31c45320d629a446a99
 
 GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY", default="")
 PEXELS_API_KEY = config("PEXELS_API_KEY", default="")

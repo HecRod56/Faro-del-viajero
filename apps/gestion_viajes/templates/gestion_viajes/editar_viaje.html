@@ -2,138 +2,204 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'gestion_viajes/css/editar_viaje.css' %}">
-    
-    <div class="breadcrumb-sticky-container">
-        <nav class="breadcrumb-nav">
-            <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
-            <span class="mx-2">&gt;</span>
-            <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">Detalle</a>
-            <span class="mx-2">&gt;</span>
-            <span class="current">Editar viaje</span>
-        </nav>
+
+<div class="breadcrumb-sticky-container">
+    <nav class="breadcrumb-nav">
+        <a href="{% url 'gestion_viajes:p_ver_mis_viajes' %}">Mis viajes</a>
+        <span class="mx-2">&gt;</span>
+        <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}">Detalle</a>
+        <span class="mx-2">&gt;</span>
+        <span class="current">Editar viaje</span>
+    </nav>
+</div>
+
+<div class="container-fluid py-4 px-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Editar: {{ viaje.nombre }}</h1>
     </div>
 
-    <div class="container py-4 px-3">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold fs-3 mb-0" style="color:#0f172a;">Editar: {{ viaje.nombre }}</h1>
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="section-card">
+                <p class="section-label" style="font-size: var(--font-size-body)">Información General</p>
 
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-10">
-                <div class="section-card">
-                    <p class="section-label">Información General</p>
-                    
-                    <form method="POST">
-                        {% csrf_token %}
-                        
-                        <div class="row g-4">
-                            <div class="col-12 col-md-8">
-                                <label class="fw-bold mb-2">Nombre del Viaje</label>
-                                <input type="text" name="nombre" class="form-control input-field" 
-                                       value="{{ viaje.nombre }}" required>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row g-4">
+                        <div class="col-12 col-md-8">
+                            <label class="fw-bold mb-2">Nombre del Viaje</label>
+                            <input id="editar-nombre" type="text" name="nombre" class="form-control input-field"
+                                maxlength="100" value="{{ viaje.nombre }}" required>
+                            <small id="nombre-help" class="text-secondary-custom d-block mt-1">0/100 caracteres</small>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="fw-bold mb-2">Estado</label>
+                            <div class="input-field d-flex align-items-center px-3"
+                                style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.75rem; height: 42px;">
+                                <span>{{ viaje.get_estado_display }}</span>
                             </div>
+                            <small class="text-secondary-custom d-block mt-1">Se actualiza automáticamente según las fechas.</small>
+                        </div>
 
-                            <div class="col-12 col-md-4">
-                                <label class="fw-bold mb-2">Estado</label>
-                                <select name="estado" class="form-select input-field">
-                                    <option value="planeado" {% if viaje.estado == 'planeado' %}selected{% endif %}>Planeado</option>
-                                    <option value="en curso" {% if viaje.estado == 'en curso' %}selected{% endif %}>En curso</option>
-                                    <option value="finalizado" {% if viaje.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                        <div class="col-12">
+                            <label class="fw-bold mb-2">Destino</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
+                                <select id="destino" name="destino" class="form-select input-field" required>
+                                    <option value="" disabled>Selecciona el estado de destino</option>
+                                    <option value="Aguascalientes" {% if viaje.destino == "Aguascalientes" %}selected{% endif %}>Aguascalientes</option>
+                                    <option value="Baja California" {% if viaje.destino == "Baja California" %}selected{% endif %}>Baja California</option>
+                                    <option value="Baja California Sur" {% if viaje.destino == "Baja California Sur" %}selected{% endif %}>Baja California Sur</option>
+                                    <option value="Campeche" {% if viaje.destino == "Campeche" %}selected{% endif %}>Campeche</option>
+                                    <option value="Coahuila" {% if viaje.destino == "Coahuila" %}selected{% endif %}>Coahuila</option>
+                                    <option value="Colima" {% if viaje.destino == "Colima" %}selected{% endif %}>Colima</option>
+                                    <option value="Chiapas" {% if viaje.destino == "Chiapas" %}selected{% endif %}>Chiapas</option>
+                                    <option value="Chihuahua" {% if viaje.destino == "Chihuahua" %}selected{% endif %}>Chihuahua</option>
+                                    <option value="Ciudad de México" {% if viaje.destino == "Ciudad de México" %}selected{% endif %}>Ciudad de México</option>
+                                    <option value="Durango" {% if viaje.destino == "Durango" %}selected{% endif %}>Durango</option>
+                                    <option value="Guanajuato" {% if viaje.destino == "Guanajuato" %}selected{% endif %}>Guanajuato</option>
+                                    <option value="Guerrero" {% if viaje.destino == "Guerrero" %}selected{% endif %}>Guerrero</option>
+                                    <option value="Hidalgo" {% if viaje.destino == "Hidalgo" %}selected{% endif %}>Hidalgo</option>
+                                    <option value="Jalisco" {% if viaje.destino == "Jalisco" %}selected{% endif %}>Jalisco</option>
+                                    <option value="México" {% if viaje.destino == "México" %}selected{% endif %}>México</option>
+                                    <option value="Michoacán" {% if viaje.destino == "Michoacán" %}selected{% endif %}>Michoacán</option>
+                                    <option value="Morelos" {% if viaje.destino == "Morelos" %}selected{% endif %}>Morelos</option>
+                                    <option value="Nayarit" {% if viaje.destino == "Nayarit" %}selected{% endif %}>Nayarit</option>
+                                    <option value="Nuevo León" {% if viaje.destino == "Nuevo León" %}selected{% endif %}>Nuevo León</option>
+                                    <option value="Oaxaca" {% if viaje.destino == "Oaxaca" %}selected{% endif %}>Oaxaca</option>
+                                    <option value="Puebla" {% if viaje.destino == "Puebla" %}selected{% endif %}>Puebla</option>
+                                    <option value="Querétaro" {% if viaje.destino == "Querétaro" %}selected{% endif %}>Querétaro</option>
+                                    <option value="Quintana Roo" {% if viaje.destino == "Quintana Roo" %}selected{% endif %}>Quintana Roo</option>
+                                    <option value="San Luis Potosí" {% if viaje.destino == "San Luis Potosí" %}selected{% endif %}>San Luis Potosí</option>
+                                    <option value="Sinaloa" {% if viaje.destino == "Sinaloa" %}selected{% endif %}>Sinaloa</option>
+                                    <option value="Sonora" {% if viaje.destino == "Sonora" %}selected{% endif %}>Sonora</option>
+                                    <option value="Tabasco" {% if viaje.destino == "Tabasco" %}selected{% endif %}>Tabasco</option>
+                                    <option value="Tamaulipas" {% if viaje.destino == "Tamaulipas" %}selected{% endif %}>Tamaulipas</option>
+                                    <option value="Tlaxcala" {% if viaje.destino == "Tlaxcala" %}selected{% endif %}>Tlaxcala</option>
+                                    <option value="Veracruz" {% if viaje.destino == "Veracruz" %}selected{% endif %}>Veracruz</option>
+                                    <option value="Yucatán" {% if viaje.destino == "Yucatán" %}selected{% endif %}>Yucatán</option>
+                                    <option value="Zacatecas" {% if viaje.destino == "Zacatecas" %}selected{% endif %}>Zacatecas</option>
                                 </select>
                             </div>
+                        </div>
 
-                            <div class="col-12">
-                                <label class="fw-bold mb-2">Destino</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">📍</span>
-                                    <input type="text" name="destino" class="form-control input-field" 
-                                           style="border-radius: 0 0.75rem 0.75rem 0;"
-                                           value="{{ viaje.destino }}" required>
+                        <div class="col-12">
+                            <label class="fw-bold mb-2">Descripción</label>
+                            <textarea id="editar-descripcion" name="descripcion" class="form-control input-field"
+                                rows="4" maxlength="5000">{{ viaje.descripcion }}</textarea>
+                            <small id="descripcion-help" class="text-secondary-custom d-block mt-1">0/5000 caracteres</small>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label class="fw-bold mb-2">Imagen de Portada (Fondo)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">🖼️</span>
+                                <input type="file" name="imagen_fondo" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;" accept="image/*">
+                            </div>
+                            {% if viaje.imagen_fondo %}
+                                <div class="mt-2 d-flex align-items-center gap-2">
+                                    <small class="text-secondary-custom">Actual:</small>
+                                    <img src="{{ viaje.imagen_fondo.url }}" class="rounded shadow-sm" style="width: 80px; height: 50px; object-fit: cover;">
                                 </div>
-                            </div>
+                            {% endif %}
+                            <small class="text-secondary-custom d-block mt-1">Sube una foto personalizada para el encabezado de este viaje.</small>
+                        </div>
 
-                            <div class="col-12">
-                                <label class="fw-bold mb-2">Descripción</label>
-                                <textarea name="descripcion" class="form-control input-field" rows="4">{{ viaje.descripcion }}</textarea>
-                            </div>
+                        <p class="section-label mt-5" style="font-size: var(--font-size-body)">Logística y Presupuesto</p>
 
-                            <p class="section-label mt-5">Logística y Presupuesto</p>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Fecha de Inicio</label>
+                            <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control input-field" value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
+                        </div>
 
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Fecha de Inicio</label>
-                                <input type="date" name="fecha_inicio" class="form-control input-field" 
-                                       value="{{ viaje.fecha_inicio|date:'Y-m-d' }}" required>
-                            </div>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Fecha de Fin</label>
+                            <input type="date" name="fecha_fin" id="fecha_fin" class="form-control input-field" value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
+                        </div>
 
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Fecha de Fin</label>
-                                <input type="date" name="fecha_fin" class="form-control input-field" 
-                                       value="{{ viaje.fecha_fin|date:'Y-m-d' }}" required>
-                            </div>
-
-                            <div class="col-12">
-                                <div id="errores-fechas" class="d-none p-2 rounded-3"
-                                    style="background-color:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:0.75rem;">
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
-                                    <input type="number" name="presupuesto_estimado" step="0.01" class="form-control input-field" 
-                                           style="border-radius: 0 0.75rem 0.75rem 0;"
-                                           value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
-                                <input type="number" name="capacidad_max" class="form-control input-field" 
-                                       value="{{ viaje.capacidad_max }}">
-                            </div>
-
-                            <div class="col-12 d-flex justify-content-end gap-3 mt-4">
-                                <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-cancel">Cancelar</a>
-                                <button type="submit" class="btn-save">Guardar Cambios</button>
+                        <div class="col-12">
+                            <div id="errores-fechas" class="d-none p-2 rounded-3"
+                                style="background-color:#FEF2F2; border:1px solid #FECACA; color: var(--color-danger); font-size: var(--font-size-small);">
                             </div>
                         </div>
-                    </form>
-                </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Presupuesto Estimado (MXN)</label>
+                            <div id="presupuesto-container" class="input-group">
+                                <span id="presupuesto-simbolo" class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">$</span>
+                                <input id="editar-presupuesto" type="number" name="presupuesto_estimado" step="0.01"
+                                    max="100000000" class="form-control input-field" style="border-radius: 0 0.75rem 0.75rem 0;"
+                                    value="{{ viaje.presupuesto_estimado|stringformat:'.2f' }}">
+                            </div>
+                            <small id="presupuesto-help" class="text-secondary-custom d-block mt-1">Máx. un número de 8 dígitos</small>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold mb-2">Capacidad Máxima (Personas)</label>
+                            <input type="number" name="capacidad_max" class="form-control input-field" value="{{ viaje.capacidad_max }}">
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                            <a href="{% url 'gestion_viajes:p_detalle_viaje' viaje.id %}" class="btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
 <script>
+    // ==========================================
+    // Fechas
+    // ==========================================
     const hoy = new Date();
     const yyyy = hoy.getFullYear();
     const mm = String(hoy.getMonth() + 1).padStart(2, '0');
     const dd = String(hoy.getDate()).padStart(2, '0');
     const fechaHoy = `${yyyy}-${mm}-${dd}`;
+    const fechaMax = "2030-12-31";
 
-    const fechaInicio = document.querySelector('[name="fecha_inicio"]');
-    const fechaFin = document.querySelector('[name="fecha_fin"]');
+    const fechaInicio = document.getElementById("fecha_inicio");
+    const fechaFin    = document.getElementById("fecha_fin");
 
-    fechaInicio.min = fechaHoy;
-    fechaFin.min = fechaHoy;
+    // Guardamos las fechas originales del viaje para no bloquear fechas pasadas existentes
+    const fechaInicioOriginal = fechaInicio.value;
+    const fechaFinOriginal    = fechaFin.value;
+
+    // Solo ponemos el máximo; no ponemos .min para permitir fechas pasadas ya existentes
+    fechaInicio.max = fechaMax;
+    fechaFin.max    = fechaMax;
 
     function validarFechas() {
-        let errores = [];
+        const errores = [];
 
-        if (fechaInicio.value && fechaInicio.value < fechaHoy) {
+        // Fecha inicio: solo valida contra hoy si el usuario la cambió
+        if (fechaInicio.value && fechaInicio.value !== fechaInicioOriginal && fechaInicio.value < fechaHoy) {
             errores.push("• La fecha de inicio no puede ser menor a hoy.");
+            fechaInicio.classList.add("is-invalid");
+        } else if (fechaInicio.value && fechaInicio.value > fechaMax) {
+            errores.push("• La fecha de inicio no puede ser mayor a 2030.");
             fechaInicio.classList.add("is-invalid");
         } else {
             fechaInicio.classList.remove("is-invalid");
         }
 
-        if (fechaFin.value && fechaFin.value < fechaHoy) {
+        // Fecha fin: solo valida contra hoy si el usuario la cambió
+        if (fechaFin.value && fechaFin.value !== fechaFinOriginal && fechaFin.value < fechaHoy) {
             errores.push("• La fecha de fin no puede ser menor a hoy.");
+            fechaFin.classList.add("is-invalid");
+        } else if (fechaFin.value && fechaFin.value > fechaMax) {
+            errores.push("• La fecha de fin no puede ser mayor a 2030.");
             fechaFin.classList.add("is-invalid");
         } else {
             fechaFin.classList.remove("is-invalid");
         }
 
+        // Esta validación siempre aplica
         if (fechaInicio.value && fechaFin.value && fechaFin.value < fechaInicio.value) {
             errores.push("• La fecha de fin no puede ser menor a la fecha de inicio.");
             fechaFin.classList.add("is-invalid");
@@ -151,6 +217,122 @@
 
     fechaInicio.addEventListener("change", validarFechas);
     fechaFin.addEventListener("change", validarFechas);
+
+    // ==========================================
+    // Autodetección de destino por nombre
+    // ==========================================
+    const ciudadEstadoMap = {
+        "cancún": "Quintana Roo", "tulum": "Quintana Roo", "playa del carmen": "Quintana Roo",
+        "cdmx": "Ciudad de México", "ciudad de méxico": "Ciudad de México",
+        "guadalajara": "Jalisco", "puerto vallarta": "Jalisco",
+        "monterrey": "Nuevo León",
+        "oaxaca": "Oaxaca",
+        "puebla": "Puebla", "cholula": "Puebla",
+        "mérida": "Yucatán", "chichén itzá": "Yucatán",
+        "los cabos": "Baja California Sur", "la paz": "Baja California Sur",
+        "tijuana": "Baja California", "ensenada": "Baja California",
+        "veracruz": "Veracruz", "xalapa": "Veracruz",
+        "san miguel de allende": "Guanajuato", "guanajuato": "Guanajuato",
+        "acapulco": "Guerrero", "zihuatanejo": "Guerrero", "ixtapa": "Guerrero",
+        "mazatlán": "Sinaloa",
+        "huatulco": "Oaxaca", "puerto escondido": "Oaxaca",
+        "morelia": "Michoacán",
+        "querétaro": "Querétaro",
+        "taxco": "Guerrero",
+        "hermosillo": "Sonora", "puerto peñasco": "Sonora",
+        "chihuahua": "Chihuahua",
+        "manzanillo": "Colima",
+        "cuernavaca": "Morelos",
+        "villahermosa": "Tabasco",
+        "campeche": "Campeche",
+        "tuxtla gutiérrez": "Chiapas", "san cristóbal": "Chiapas",
+        "durango": "Durango",
+        "zacatecas": "Zacatecas",
+        "aguascalientes": "Aguascalientes",
+        "colima": "Colima",
+        "tepic": "Nayarit", "sayulita": "Nayarit",
+        "tampico": "Tamaulipas",
+        "saltillo": "Coahuila",
+        "san luis potosí": "San Luis Potosí",
+        "tlaxcala": "Tlaxcala",
+        "pachuca": "Hidalgo",
+        "toluca": "México", "teotihuacán": "México",
+    };
+
+    const nombreInput  = document.getElementById('editar-nombre');
+    const destinoSelect = document.getElementById('destino');
+
+    nombreInput.addEventListener('input', function () {
+        const texto = this.value.toLowerCase();
+        for (const [ciudad, estado] of Object.entries(ciudadEstadoMap)) {
+            if (texto.includes(ciudad)) {
+                destinoSelect.value = estado;
+                break;
+            }
+        }
+    });
+
+    // ==========================================
+    // Contador de caracteres — Nombre
+    // ==========================================
+    const nombreHelp = document.getElementById('nombre-help');
+    if (nombreInput && nombreHelp) {
+        nombreHelp.textContent = `${nombreInput.value.length}/100 caracteres`;
+        nombreInput.addEventListener('input', function () {
+            const length = this.value.length;
+            nombreHelp.textContent = `${length}/100 caracteres`;
+            if (length >= 100) {
+                nombreHelp.style.color = 'var(--color-danger)';
+                this.style.borderColor = 'var(--color-danger)';
+            } else {
+                nombreHelp.style.color = '';
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // ==========================================
+    // Contador de caracteres — Descripción
+    // ==========================================
+    const descripcionInput = document.getElementById('editar-descripcion');
+    const descripcionHelp  = document.getElementById('descripcion-help');
+    if (descripcionInput && descripcionHelp) {
+        descripcionHelp.textContent = `${descripcionInput.value.length}/5000 caracteres`;
+        descripcionInput.addEventListener('input', function () {
+            const length = this.value.length;
+            descripcionHelp.textContent = `${length}/5000 caracteres`;
+            if (length >= 5000) {
+                descripcionHelp.style.color = 'var(--color-danger)';
+                this.style.borderColor = 'var(--color-danger)';
+            } else {
+                descripcionHelp.style.color = '';
+                this.style.borderColor = '';
+            }
+        });
+    }
+
+    // ==========================================
+    // Presupuesto
+    // ==========================================
+    const presupuestoInput     = document.getElementById('editar-presupuesto');
+    const presupuestoHelp      = document.getElementById('presupuesto-help');
+    const presupuestoSimbolo   = document.getElementById('presupuesto-simbolo');
+    if (presupuestoInput && presupuestoHelp) {
+        presupuestoInput.addEventListener('input', function () {
+            const value = parseFloat(this.value) || 0;
+            if (value >= 100000000) {
+                presupuestoHelp.textContent = '¡Límite máximo alcanzado!';
+                presupuestoHelp.style.color = 'var(--color-danger)';
+                presupuestoSimbolo.style.color = 'var(--color-danger)';
+                presupuestoSimbolo.style.backgroundColor = '#FEF2F2';
+            } else {
+                presupuestoHelp.textContent = 'Máx. un número de 8 dígitos';
+                presupuestoHelp.style.color = '';
+                presupuestoSimbolo.style.color = '';
+                presupuestoSimbolo.style.backgroundColor = '';
+            }
+        });
+    }
 </script>
 
 {% endblock %}
