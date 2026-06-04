@@ -626,6 +626,69 @@ def puede_abandonar_viaje(participante) -> tuple[bool, str]:
     return True, ""
 
 @transaction.atomic
+def abandonar_participante(participante):
+    """
+    El usuario abandona el viaje.
+    Si su balance es cero, sus participaciones en gastos se eliminan y se
+    reasignan los pagos necesarios para permitir borrar el participante.
+    """
+    from apps.gestion_viajes.models import Participante as ParticipanteModel
+
+    viaje = participante.viaje
+    participantes_restantes = list(
+        ParticipanteModel.objects.filter(viaje=viaje)
+        .exclude(id=participante.id)
+    )
+
+    if not participantes_restantes:
+        raise ValueError("No puedes abandonar el último integrante del viaje.")
+
+    organizador = ParticipanteModel.objects.filter(
+        viaje=viaje, rol='organizador'
+    ).exclude(id=participante.id).first() or participantes_restantes[0]
+
+    gastos_afectados = GastoParticipante.objects.filter(
+        participante=participante,
+        gasto__eliminado=False,
+    ).select_related('gasto')
+
+    for gp in gastos_afectados:
+        gasto = gp.gasto
+        monto_a_repartir = gp.monto_deuda
+
+        if gasto.pagado_por == participante:
+            gasto.pagado_por = organizador
+            gasto.save(update_fields=['pagado_por'])
+
+        otros_gps = GastoParticipante.objects.filter(
+            gasto=gasto,
+            eliminado=False,
+        ).exclude(participante=participante)
+
+        if otros_gps.exists():
+            n = otros_gps.count()
+            parte = _redondear(monto_a_repartir / n)
+            residuo = monto_a_repartir - (parte * n)
+
+            for i, otro_gp in enumerate(otros_gps):
+                otro_gp.monto_deuda += parte + (residuo if i == 0 else Decimal('0'))
+                otro_gp.save(update_fields=['monto_deuda'])
+
+        gp.delete(usuario=participante.usuario)
+
+    GastoParticipante.todos.filter(participante=participante).delete()
+    _recalcular_liquidaciones(viaje)
+    _registrar_auditoria(
+        gasto_id=0,
+        accion='abandonado',
+        usuario=participante.usuario,
+        antes={'participante_abandonado': str(participante.usuario)},
+        despues={'participantes_restantes': [str(p.usuario) for p in participantes_restantes]},
+    )
+
+    participante.delete()
+
+@transaction.atomic
 def expulsar_participante(participante_a_expulsar, organizador, viaje):
     """
     El organizador elimina a un integrante del viaje.
