@@ -223,6 +223,7 @@ def registrar_trayecto(request, viaje_id):
                     destino_codigo=destino,
                     fecha_ida=fecha_ida,
                     pasajeros_num=pasajeros,
+                    moneda_usuario=request.user.currency,
                 )
 
             context = {
