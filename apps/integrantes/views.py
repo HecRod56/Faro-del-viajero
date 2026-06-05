@@ -9,6 +9,7 @@ from apps.control_gastos.services import (
     puede_abandonar_viaje,
     calcular_mi_billetera,
     expulsar_participante,
+    abandonar_participante,
 )
 from apps.control_gastos.models import GastoParticipante
 
@@ -225,9 +226,15 @@ def abandonar_viaje(request, id_viaje):
         messages.error(request, razon)
         return redirect('integrantes:lista', id_viaje=id_viaje)
 
-    participante.delete()
-    messages.success(request, f"Abandonaste el viaje '{viaje.nombre}' correctamente.")
-    return redirect('gestion_viajes:lista')
+    try:
+        abandonar_participante(participante)
+        messages.success(request, f"Abandonaste el viaje '{viaje.nombre}' correctamente.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    except Exception as e:
+        messages.error(request, f"Ocurrió un error al abandonar el viaje: {e}")
+
+    return redirect('gestion_viajes:p_ver_mis_viajes')
 
 
 @login_required
