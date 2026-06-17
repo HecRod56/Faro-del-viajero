@@ -229,7 +229,11 @@ EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {
     "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
 }
+<<<<<<< HEAD
+DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE')}>"
+=======
 DEFAULT_FROM_EMAIL = f"Faro del Viajero <{config('EMAIL_REMITENTE', default=None)}>"
+>>>>>>> 1bed35e78a62b45b89beb31c45320d629a446a99
 
 GEOAPIFY_API_KEY = config("GEOAPIFY_API_KEY", default="")
 PEXELS_API_KEY = config("PEXELS_API_KEY", default="")
